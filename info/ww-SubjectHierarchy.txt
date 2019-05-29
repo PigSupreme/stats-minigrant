@@ -1,0 +1,156 @@
+--- 
+Retrieved 05/29/2019 from http://webwork.maa.org/wiki/Problem_Levels
+
+## Level()
+1. problems with this rating should only require direct memory of a fact. Examples might be a specific value of a function, or the statement of a definition. Very few WeBWorK problems fall into this category.
+2. usually means students must demonstrate understanding of facts. This is more than regurgitating the fact. We use this category for simple and direct applications of algorithms the student has studied. There should be no judgement involved in choosing the method. This would include a simple application of a rule for differentiation (e.g., can combine rules for sums and constant multiples with one more advanced rule) or for integrals.
+3. we use this for carrying out more complicated algorithms, such as derivatives using both the product and chain rule or integrals which involve say both a substitution and parts.
+4. these problems require some application of algorithms, but do not rise to the level of a full word problem. For example, "Identify the local extrema for f(x) = ...". One has to apply algorithms and interpret results.
+5. word problems
+6. Applying definitions theoretically and proof writing 
+
+--- 
+Retrieved 05/29/2019 from https://hobbes.la.asu.edu/Holt/chaps-and-secs.html
+
+Probability (635)
+
+  Continuous distributions (165)
+       Application of a normal distribution (66)
+       Exponential (12)
+       Gaussian normal (42)
+       Other distribution (28)
+       Uniform (17)
+
+  Discrete distributions (70)
+       Bernoulli (1)
+       Binomial (42)
+       Geometric (3)
+       Hypergeometric (1)
+       Negative binomial (1)
+       Normal approximation to binomial (9)
+       Poisson (13)
+
+  Laws, theory (19)
+       Central limit theorem (9)
+       Chebychev's inequality (9)
+       Misc. (1)
+
+  Random variables (66)
+       Continuous: density function, cumulative distribution function (5)
+       Discrete: probability mass function (8)
+       Expectation (28)
+       Generating function (7)
+       Variance, standard deviation (18)
+
+  Sample Space (287)
+       Bayes theorem -- inverse probability (26)
+       Conditional probability -- direct (82)
+       Independence (8)
+       Odds (9)
+       Outcomes & events (45)
+       Probability: direct computation, inclusion/exclusion (117)
+
+  Several variables (26)
+       Covariance & correlation (11)
+       Joint distribution (9)
+       Marginal distributions (6)
+
+  Stochastic process (2)
+       Markov chain (2)
+
+
+Statistics (853)
+
+  Bayesian inference (4)
+       Credibility intervals (1)
+       Hypothesis tests (1)
+       Posterior distribution (2)
+
+  Confidence intervals (142)
+       Concepts (27)
+       Independent samples - t (3)
+       Independent samples - z (4)
+       One sample mean - t (15)
+       One sample mean - z (46)
+       One sample proportion (38)
+       Paired samples (1)
+       Two sample proportion (5)
+       Variance (3)
+
+  Experimental design (26)
+       Concepts (26)
+
+  Exploratory data analysis/descriptive statistics (200)
+       Classifying data (24)
+       Description of distributions (13)
+       Graphical representations (54)
+       Summarizing data in tables (16)
+       Summary statistics (93)
+
+  Generalized linear methods (1)
+       Logistic regression (1)
+
+  Hypothesis tests (229)
+       Chi-squared test for goodness of fit (8)
+       Chi-squared test for independence (11)
+       Concepts (33)
+       Independent samples - t (26)
+       Independent samples - z (2)
+       One sample mean - t (26)
+       One sample mean - z (32)
+       One sample proportion (19)
+       One sample variance (4)
+       One-way ANOVA (24)
+       Paired samples (11)
+       Two sample proportion (17)
+       Two sample variances (1)
+       Two-way ANOVA (1)
+       Type I/type II errors and power (14)
+
+  Multiple regression (25)
+       Hypothesis tests (10)
+       Model selection (1)
+       Nonlinear regression (1)
+       Parameter estimates (13)
+
+  Nonparametric methods (3)
+       Kruskal-Wallis test (1)
+       Rank sum test (1)
+       Signed rank test (1)
+
+  Point estimation (9)
+       Consistency (1)
+       Maximum likelihood estimation (8)
+
+  Sample survey methods (58)
+       Capture-recapture method (1)
+       Cluster sampling (3)
+       Concepts (41)
+       Ratio estimators (3)
+       Regression estimators (1)
+       Response bias (1)
+       Sampling bias (2)
+       Stratified sampling (6)
+
+  Sampling distributions (37)
+       General (4)
+       Sample mean (25)
+       Sample proportion (8)
+
+  Simple linear regression (101)
+       Confidence intervals (2)
+       Correlation (39)
+       Diagnostics (2)
+       Hypothesis tests (10)
+       Prediction (18)
+       Regression (22)
+       Residuals (8)
+
+  Time series (18)
+       ARIMA models (2)
+       Autocorrelation (8)
+       Descriptive methods (1)
+       Forecasting (2)
+       Frequency domain (3)
+       Runs test (1)
+       Seasonal variation (1)
