@@ -1,0 +1,128 @@
+#DESCRIPTION
+## P-value for Two-Sample T with fraction
+##
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection()
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics','hypothesis testing', 'p-value')
+## Date('4/4/2019');
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGnumericalmacros.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+);
+
+TEXT(&beginproblem);
+
+######################################
+#  Setup
+$abstol = 0.000051;
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
+
+#####
+
+# Use exact degrees of freedom (Aspin-Welch)
+$s1 = random(1.1,1.9,.01);
+$s2 = random(2.1,2.9,.01);
+$n1 = random(11,19);
+$n2 = random(21,29);
+
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$df_true = $vard**2 / ( ($s1**4)/($n1**2)/($n1-1) +  ($s2**4)/($n2**2)/($n2-1) );
+$df_true = random(21,39)+random(.31,.61,.02);
+$df = $df_true;
+
+# Test statistic
+$test = random(1001,1999,2)/1000;
+
+# First exponent for Beta integrands; for easy reading below
+$ae = ($df/2)-1;
+
+# Non-regularized incomplete Beta($xlim, $df/2, 1/2)
+$urref = sub {return ($_[0]**$ae)/sqrt(1-$_[0])};  #Integrand
+$xlim = $df/($df + $test**2); # Upper limit of integration
+$urint = simpson($urref,0,$xlim,steps=>30000); #Def. Integral
+
+# Beta($df/2, 1/2) is improper at x=1, so we comptue via
+# the identity Beta(a,1/2) = Beta(a,3/2)*(2a+1)
+$rgref = sub {return ($_[0]**$ae)*sqrt(1-$_[0])};
+$rgint = simpson($rgref,0,1,steps=>30000)*($df+1);
+
+# Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
+$pright = $urint/(2*$rgint);
+$pleft = 1 - $pright;
+$ptwo = 2*min($pleft,$pright);
+
+
+#####
+$pright_wdf = tprob(int($df_true), abs($test));
+$ptwo_wdf = 2*$pright_wdf;
+
+######################################
+#  Main text
+
+BEGIN_PGML
+A hypothesis test comparing two population means has a test statistic of t = [$test] with df = [$df_true].
+
+a. With a right-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
+
+a. With a two-sided alternative hypothesis, the _P_-Value for this sample is
+[_____] (round to at least four decimal places).
+
+END_PGML
+######################################
+#  Answers
+
+$ans_pright = Real($pright)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_pright->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - (1 - $correct)) <= $abstol);
+} => ["Check the direction of your P-Value."],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $pright_wdf) <= 10*$abstol) || (abs($student - $pright_wdf1) <= 10*$abstol);
+} => ["Are you using the correct df?"],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $correct) <= .01);
+} => ["Close! Check your computations/rounding."]
+)));
+
+
+$ans_ptwo = Real($ptwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
+ANS($ans_ptwo->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - (1 - $correct)) <= 2*$abstol);
+} => ["Check the direction of your P-Value."],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $ptwo_wdf) <= 20*$abstol) || (abs($student - $ptwo_wdf) <= 10*$abstol);
+} => ["Are you using the correct df?"],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $correct) <= .02);
+} => ["Close! Check your computations/rounding."]
+)));
+################################################
+### Solutions
+BEGIN_PGML_SOLUTION
+a. The right-sided P-Value is the proportion/area to the right of [`t = [$test]`]. Make sure you are using df = [$df]. If your technology is limited to whole number df's, speak with your instructor.
+
+a. Since the test statistic was positive, the two-sided P-value is twice the right-sided P-Value (found in part a). You can enter 2*[@ int(.5+$pright*10000)/10000 @] and let WebWorK do the arithmetic.
+END_PGML_SOLUTION
+
+COMMENT('Use a t distribution to get the exact P-Value');
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

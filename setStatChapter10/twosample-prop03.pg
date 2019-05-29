@@ -1,0 +1,173 @@
+##DESCRIPTION
+##  Hypothesis test for two proportions, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Two sample proportion)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "parserRadioButtons.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$n1 = random(500,1000,50);
+$x1 = random(int($n1 * 0.085 + 0.5), int($n1 * 0.095 + 0.5),1);
+$n2 = random(2000,3000,50);
+$x2 = random(6,15,1);
+
+$p1 = $x1/$n1;
+$q1 = 1-$p1;
+$p2 = $x2/$n2;
+$q2 = 1-$p2;
+$p = ($x1+$x2)/($n1+$n2);
+$q = 1-$p;
+$sd = sqrt($p*$q/$n1 + $p*$q/$n2);
+$stat = int(1000 * (.0005 + ($p1-$p2) / $sd)) / 1000;
+$phat = $p;
+
+@CIChoices = (90,95,99);
+$choose = random(0,2,1);
+$p = $CIChoices[$choose];
+$alpha = 100 - $p;
+$pval_right = int(10000 * (.00005 + uprob($stat)))/10000;
+$pval_left = 1 - $pval_right;
+$pval_two = 2*$pval_right;
+
+$alpha_over_2 = (100-$p)/200;
+$e = udistr($alpha_over_2) * $sd; 
+$min = $p1 - $p2 - $e;
+$max = $p1 - $p2 + $e;
+
+@lista = ( '\( p_1-p_2=0\)',
+ '\( p_1-p_2\neq 0\)',
+ '\( p_1-p_2>0\)',
+ '\( p_1-p_2<0\)'
+ );
+$rada = RadioButtons([@lista[NchooseK(4,4)]],
+  '\( p_1-p_2=0\)',
+  labels=>"ABC"
+  );
+
+@listb = ('\( p_1-p_2>0\)',
+  '\( p_1-p_2\neq 0\)',
+  '\( p_1-p_2=0\)',
+  '\( p_1-p_2<0\)'
+  );
+$radb= RadioButtons([@listb[NchooseK(4,4)]],
+  '\( p_1-p_2>0\)',
+  labels=>"ABC"
+);
+
+$rdcorrect = 'Yes, because the P-Value is smaller than the significance level.';
+$radd = RadioButtons([$rdcorrect,  
+  'Yes, because the P-Value is larger than the significance level.',
+  'No, because the P-Value is larger than the significance level.',
+  'No, because the P-Value is smaller than the significance level.'],
+  $rdcorrect, labels=>"ABC");
+
+######################################
+#  Main text
+
+BEGIN_PGML
+In a certain population, it is believed that the proportion of men having red/green color blindness is higher than the proportion of women having red/green color blindness. A hypothesis test can be used to test this claim.
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+BEGIN_PGML
+If [`p_1`] is the true proportion of men having red/green color blindness and [`p_2`] is the true proportion of women having red/green color blindness, state appropriate Null and Alternative Hypothesis for the test.
+
+The Null Hypothesis for this test is:  
+
+[__]{$rada}
+
+The Alternative Hypothesis for this test is:  
+
+[__]{$radb}
+
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Independent simple random samples of [$n1] men and [$n2] women are tested. Among the men in the sample, [$x1] have red/green color blindness. Among the women in the sample, [$x2] have red/green color blindness. 
+
+The value of the test statistic is [`z = `] [____________]{Compute($stat)->cmp(tolType => 'absolute',
+  tolerance => .001)} (round to at least three decimal places).
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Using a [$alpha]% significance level, does the sample data provide sufficient evidence to support the claim that men have a higher proportion of red/green color blindness than women? 
+
+[__]{$radd}
+
+END_PGML
+Section::End();
+
+Scaffold::End();
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+##############
+### Solutions
+
+$p1r = int(.5+100000*$p1)/100000;
+$p2r = int(.5+100000*$p2)/100000;
+$pdiffr = int(.5+($p1 - $p2)*100000)/100000;
+$phatr = int(.5+100000*$phat)/100000;
+$sdr = int(.5+1000000*$sd)/1000000;
+$pvalr = int(.5+$p_val*100000)/100000;
+$statr = int(.5+10000*$stat)/10000;
+
+BEGIN_PGML_SOLUTION
+It is assumed that you will be using technology to perform this computations. If not....
+
+The difference in sample proportions is:  
+[``\frac{[$x1]}{[$n1]} - \frac{[$x2]}{[$n2]} = [$p1r] - [$p2r] = [$pdiffr]``]
+
+The pooled sample proportion is:  
+[``\frac{[$x1]+[$x2]}{[$n1]+[$n2]} = [$phatr]``]
+
+Use this to compute the standard error (approximate standard deviation) of the difference in sample proportions:  
+[``\sqrt{[$phatr](1-[$phatr])\left(\frac{1}{[$n1]}+\frac{1}{[$n2]}\right)}=[$sdr]``]
+
+The test statistic is:  
+[``z = \frac{[$pdiffr]}{[$sdr]} = [$statr]...``]
+
+The one-sided P-value is the proportion of z-scores (in the Standard Normal Distribution) to the right of z = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
+
+The P-Value is [@ $p_val < $alpha/100 ? "less than $alpha%, so we" : "not less than $alpha%, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
