@@ -1,0 +1,91 @@
+##DESCRIPTION
+# It doesn't make a bit of difference...
+## 
+## DBsubject(Statistics)
+## DBchapter(Simple linear regression)
+## DBsection(Correlation)
+## Institution(The College of Idaho)
+## Author(R Cruz)
+## MLT(EstimateRFromPlot)
+## MLTleader(1)
+## Level(1)
+## TitleText1('The Basic Practice of Statistics')
+## AuthorText1('David Moore')
+## EditionText1('5e')
+## Section1('4')
+## Problem1('')
+## KEYWORDS('statistic', 'correlation', 'scatterplots')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGunion.pl",
+  "imageChoice.pl",
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$refreshCachedImages=1;
+
+# Put a little bit of randomization, for heaven's sake!
+@rraw = (-0.97,-0.74,-0.49,0.22,0.76,0.89);
+for (my $index = 0; $index<6; $index++) {
+  $rraw[$index]+=random(-0.0099,0.0099,0.0002)
+  }
+
+#Define the questions and answers
+@QA = (   
+"r = $rraw[0]", "rm97.gif",
+"r = $rraw[1]", "rm74.gif",
+"r = $rraw[2]", "rm49.gif",
+"r = $rraw[3]",  "r22.gif",
+"r = $rraw[4]",  "r76.gif",
+"r = $rraw[5]",  "r89.gif"
+);
+
+$ml = new_image_match_list(
+  link => 1,                #  do not link to separate image
+  size => [120,120],        #  image width, height in pixels
+  tex_size => 200,          #  tex size in percent times 10
+  columns => 3,             #  number of columns
+  separation => 10,         #  space between images
+);
+
+$ml->rf_print_q(~~&pop_up_list_print_q); # use pop-up-lists
+$ml -> ra_pop_up_list(
+[ No_answer=>"?", A=>"A", B=>"B", C=>"C", D=>"D", E=>"E", F=>"F" ] );
+
+$ml->qa(@QA);               #  set the questions and answers
+$ml->choose(6);             #  use them all
+
+######################################
+#  Main text	
+
+BEGIN_TEXT
+$BR
+\{ $ml -> print_a \}
+$PAR
+Match each of the following correlation coefficients with one of the scatterplots above.
+$BR
+\{ $ml -> print_q \}
+
+END_TEXT
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 0;
+
+ANS(str_cmp( $ml->ra_correct_ans )) ;
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
+
+## These tags keep this problem from being added to the NPL database
+## 
+DBsubject('ZZZ-Inserted Text')
+DBchapter('ZZZ-Inserted Text')
+DBsection('ZZZ-Inserted Text')
