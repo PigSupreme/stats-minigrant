@@ -1,0 +1,96 @@
+##DESCRIPTION
+##
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - z)
+## Date(11/08/2017)
+## Institution('Clayton State Univeristy')
+## Author('Michael J. Dancs')
+## Level()
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics','hypothesis testing')
+
+
+##ENDDESCRIPTION
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PG.pl",
+"PGbasicmacros.pl",
+"PGchoicemacros.pl",
+"PGanswermacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"MathObjects.pl",
+"PGML.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+
+$mu = 6;
+$mutot = $mu;
+$xbar = $mutot + random(0.11,0.99,0.02);
+### TODO: These are t-scores for this problem ###
+$sigma = random(0.25,$xbar-$mutot,.01);
+$n = random(31,47,2);
+$alpha = 0.05;
+$alphap = 100 * $alpha;
+$tstat = ($xbar-$mutot)/($sigma/sqrt($n));
+$tstatans = int(1000*$tstat)/1000;
+$zcrit = tdistr($n-1,$alpha);
+$pval = tprob($n-1,$tstat);
+$pvalans = int(10000*$pval)/10000;
+
+$mc0 = new_multiple_choice();
+$mc0->qa("If `\mu` is the actual mean hours of sleep per night (among all college students), state appropriate hypotheses for this test.","Null: `\mu=` $mutot; Alternative: `\mu>` $mutot");
+$mc0->extra("Null: `\mu>` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu=` $mutot; Alternative: `\mu <` $mutot",
+"Null: `\mu>` $mutot; Alternative: `\mu\leq` $mutot",
+"Null: `\mu<` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu\ne` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu\ne` $mutot; Alternative: `\mu<` $mutot",
+"Null: `\mu=` $mutot; Alternative: `\mu\ne` $mutot");
+
+$mc = new_multiple_choice();
+@ans = (
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is insufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is at least $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is exactly $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is not equal to $mu hours.",
+);
+$tag = ($pval < $alpha) ? 0 : 1;
+$mc -> qa("Based on this sample data and using a $alphap% significance level:", $ans[$tag]);
+$mc -> extra($ans[1-$tag],$ans[2],$ans[3],$ans[4]);
+
+#######################################################
+BEGIN_PGML
+A recent study claims that college students, on average, sleep an average of [$mu] hours or less per night. You suspect that the average is more than this, and plan to conduct a hypothesis test. 
+
+[@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+
+In a simple random sample of [$n] college students, the mean amount of sleep (hours per night) is [$xbar]. The standard deviation of the sample is [$sigma] (hours per night).
+
+The value of the test statistic for this sample (rounded to three decmal places) is [__________].
+
+The P-value for this sample (rounded to three decmal places) is [__________].
+
+[@ $mc ->print_q() @]*
+[@ $mc ->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc0->correct_ans));
+ANS(num_cmp($tstatans,tol=>0.001));
+ANS(num_cmp($pvalans,tol=>0.001));
+ANS(radio_cmp($mc->correct_ans));
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

@@ -1,0 +1,164 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - t)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-Value')
+
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+$abstol = .00051;
+Context("Numeric");
+
+$mu = random(4500,5500,100);
+$xbar = $mu+random(5,100,1);
+$samp = random(90,110,1);
+$df = $samp - 1;
+$sigma = random(300,500,10); # Actually, this is s
+
+$indx = random(0,4,1);
+$conf = 90 + 2*$indx;
+$alpha = 1-0.01*$conf;
+$alphap = 100 - $conf;
+
+$tstat = ($xbar-$mu)/($sigma/sqrt($samp));
+$pval=tprob($df, $tstat);
+$pvalperc = 100*$pval;
+$pvalrpound = int(.5+100*$pvalperc)/100;
+
+$mc00 = new_multiple_choice();
+$mc00->qa("An appropriate null hypothesis for this test would claim that:","The average lifetime of all CFL bulbs made by the Inconvenient Light Company is less than or equal to $mu hours."); $mc00->extra("The average lifetime of all CFL bulbs made by the Inconvenient Light Company is greater than $mu hours.", "Less than $alphap% of all CFL bulbs made by the Inconvenient Light Company have a lifespan of $mu hours or less.", "Less than $alphap% of the bulbs in the statistician's sample will have a lifespan of $mu hours or less.", "The average lifetime of the bulbs in the statistician's sample will be less than or equal to $mu hours.");
+
+$mc0 = new_multiple_choice();
+$mc0->qa("The alternative hypothesis for this test is:","Right-sided"); $mc0->extra("Left-sided"); $mc0->makeLast("Two-sided");
+
+$mc1 = new_multiple_choice();
+$mc1->qa("The distribution of the test statistic is:", "Student t, with df = $df");
+$mc1->extra("Student t, with df = $samp.","Standard Normal z.","Normal, with Mean = $mu and StdDev = $sigma.");
+$mc1->makeLast("None of the above.");
+
+$mc4 = new_multiple_choice();
+@ans =("Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct.", "Fail to Reject \(H_0\); there is insufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct."
+);
+
+if ($pvalrpound < 100*$alpha) {$tag = 0;} else {$tag = 1;}
+$mc4 -> qa("Using the P-Value of $pvalrpound% and \(\alpha\) = $alphap%, the statistician will:", $ans[$tag]);
+$mc4 -> extra($ans[1-$tag], "Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.","Accept \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.");
+
+######################################
+#  Main text
+
+Scaffold::Begin();
+Section::Begin("Part 1: Stating Hypotheses");
+##########################
+
+BEGIN_PGML
+The Inconvenient Light Company advertises that, on average, its CFL light bulb  lasts more than [$mu] hours.  To test this claim using a [$alphap]% significance level, a statistician plans to take a random sample of [$samp] bulbs and  measure the amount of time until each bulb fails.
+
+a. [@ $mc00 ->print_q() @]*
+[@ $mc00 ->print_a() @]*
+
+a. [@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc00->correct_ans));
+ANS(radio_cmp($mc0->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 2: Test Statistic");
+
+BEGIN_PGML
+a. The lifetimes of the [$samp] bulbs in the sample had a mean of [$xbar] hours and a standard deviation of [$sigma] hours. The value of the test statistic for this sample is [_______].
+
+a. [@$mc1->print_q() @]*
+[@$mc1->print_a() @]*
+
+END_PGML
+
+# Test statistic checker
+$ans_stat = Real($tstat)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_stat->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Close! Check your computations/rounding."],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student + $correct) <= .01;
+} => ["Have you switched the hypothesized value with the sample value?"]
+)));
+
+#MC checker
+ANS(radio_cmp($mc1->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 3: P-Value");
+
+BEGIN_PGML
+a. The P-value for this sample is [_______] (do not convert to percent).
+END_PGML
+
+# P-Value checker
+$ans_pval = Real($pval)->with(tolType=>'absolute', tolerance=>$abstol);
+sub mycheck {
+  my ($correct, $student, $ansHash) = @_;
+  Value->Error("Do not convert to percent!") if $student == $correct*100;
+  return ($student == $correct) || ($student = $pleft_r3);
+}
+
+# For catching various common errors
+ANS($ans_pval->cmp( checker=>~~&mycheck ) ->withPostFilter(AnswerHints(
+## Rounding errors
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Check your compuations/rounding, or try using $teststat_r3 for the test statistic."],
+## Wrong direction/alternaritve
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - (1-$correct)) <= .01) || (abs($student - 2*$correct) <=.01);
+} => ["Check that you are using the correct direction for the Alternative Hypothesis and the P-Value."],
+)));
+
+Section::End();
+##########################
+Section::Begin("Part 4: Final Conclusions");
+
+BEGIN_PGML
+a. [@ $mc4 ->print_q() @]*
+[@ $mc4 ->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc4->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

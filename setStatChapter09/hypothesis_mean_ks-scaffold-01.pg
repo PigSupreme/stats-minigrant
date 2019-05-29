@@ -1,0 +1,208 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - z)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-value')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "scaffold.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+$showPartialCorrectAnswers = 0;
+Context("Numeric");
+$abstol = 0.00051;
+$n = random(31, 40, 1);
+$mu = (12, 16, 24)[random(0,2,1)];
+$x = $mu - random(0.15, 0.23, 0.01);
+$sigma = random(0.09, 0.13, 0.01);
+
+$mc0 = new_multiple_choice();
+$mc0->qa("Which of the following are appropriate null and alternative hypotheses for this scenario?", "\(H_0: \mu=$mu\) versus \(H_A: \mu<$mu\)");
+$mc0->extra(
+    "\(H_0: \mu<$mu\) versus \(H_A: \mu=$mu\)",
+    "\(H_0: \mu=$mu\) versus \(H_A: \mu\leq $mu\)",
+    "\(H_0: \mu=$mu\) versus \(H_A: \mu>$mu\)",
+    "\(H_0: \mu\leq $mu\) versus \(H_A: \mu<$mu\)"
+    );
+
+$mc1 = new_multiple_choice();
+$mc1->qa("What type of test statistic must be used for this hypothesis test?", "A z-score");
+$mc1->extra("A t-score","An s-score","A q-score");
+$mc1->makeLast("none of the above");
+
+$teststat = ($x - $mu)/$sigma*sqrt($n);
+$sdp_round = int(.5+100000*$sigma/sqrt($n))/100000;
+$teststat_r1 = int(-.5+100000*($x-$mu)/$sdp_round)/100000;
+$teststat_r3 = int(-.5+100000*$teststat)/100000;
+$pleft = Real(1 - uprob($teststat));
+$pleft_r3 = Real(1 - uprob($teststat_r3));
+$pvalperc = 100 * $pleft_r3;
+
+# Set-up for final conclusion
+# Make the correct conclusion for this P-Value
+@yn = ("No, because the P-Value is not less than the significance level.","Yes, because the P-Value is less than the significance level.");
+if ($pleft<0.05) {$inda=1}
+
+# These are always wrong
+@wrong = ("Yes, because the P-Value is not less than the significance level.","No, because the P-Value is less than the significance level.");
+push(@wrong,$yn[1-$inda]);
+
+$mc4 = new_multiple_choice();
+$mc4->qa("Does this sample, with a P-value of $pvalperc%, provide sufficient evidence (at the 5% significance level) that the mean fluid volume for this production run is less than $mu fluid ounces?",$yn[$inda]);
+$mc4->extra(@wrong);
+
+######################################
+#  Main text
+BEGIN_PGML
+Canned beverages are sold by volume, so a "[$mu]-oz" can is expected to contain [$mu] fluid ounces of the beverage. In reality, not every can contains exactly this amount.
+
+Beverage companies might be subject to fines and/or lawsuits if their cans contain less beverage than advertised. Although it is impractical to test every can, a hypothesis test can used to determine if the mean volume of beverage is less than [$mu]-oz.
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin("Part 1: Stating Hypotheses");
+##########################
+BEGIN_PGML
+
+[@$mc0->print_q() @]*
+[@$mc0->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc0->correct_ans() ));
+
+Section::End();
+##########################
+Section::Begin("Part 2: Test Statistic");
+
+BEGIN_PGML
+In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$x]`] oz.  Assume this sample comes from a large production run of cans where the fluid volume has a known standard deviation of [`\sigma = [$sigma]`] oz.
+
+a. [@$mc1->print_q() @]*
+[@$mc1->print_a() @]*
+
+a. The value of the test statistic for this sample is [_______] (round to at least three decimal places).
+END_PGML
+
+# Multiple choice question
+ANS(radio_cmp($mc1->correct_ans() ));
+
+# Test statistic checker
+$ans_stat = Real($teststat)->with(tolType=>'absolute', tolerance=>.00051);
+sub mycheckt {
+  my ($correct, $student, $ansHash) = @_;
+  Value->Error("Do not convert to percent!") if $student == $correct*100;
+  return ($student == $correct) || ($student == $teststat_r3) || ($student ==  $teststat_r1);
+}
+ANS($ans_stat->cmp(checker=>~~&mycheckt)->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Close! Check your computations/rounding."],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student + $correct) <= .01;
+} => ["Have you switched the hypothesized value with the sample value?"]
+)));
+
+
+Section::End();
+##########################
+Section::Begin("Part 3: P-Value");
+
+BEGIN_PGML
+a. The P-value for this sample is [_______] (round to at least three decimal places).
+END_PGML
+
+# P-Value checker
+$ans_pval = Real($pleft)->with(tolType=>'absolute', tolerance=>$abstol);
+sub mycheck {
+  my ($correct, $student, $ansHash) = @_;
+  Value->Error("Do not convert to percent!") if ( $correct > 0 && $student == $correct*100);
+  return ($student == $correct) || ($student == $pleft_r3);
+}
+
+# For catching various common errors
+ANS($ans_pval->cmp( checker=>~~&mycheck ) ->withPostFilter(AnswerHints(
+## Rounding errors
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Check your compuations/rounding, or try using $teststat_r3 for the test statistic."],
+## Wrong direction/alternaritve
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - (1-$correct)) <= .01) || (abs($student - 2*$correct) <=.01);
+} => ["Check that you are using the correct direction for the Alternative Hypothesis and the P-Value."],
+)));
+
+Section::End();
+##########################
+Section::Begin("Part 4: Final Conclusions");
+
+BEGIN_PGML
+a. [@$mc4->print_q()@]*  
+[@$mc4->print_a()@]*
+
+END_PGML
+
+ANS(radio_cmp($mc4->correct_ans() ));
+
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solutions
+BEGIN_PGML_SOLUTION
+Note that you can (and should) use technology to check your results.
+
+*Part 2:* 
+
+The standard deviation of [`\bar{x}`] for all samples of size [$n] is [`[$sigma]/\sqrt{[$n]}`] = [$sdp_round]...  
+
+Keep this value to at least five decimal places, or you may get a rounding error when computing the test statistic.
+
+Assuming the Null Hypothesis is true, the sample mean of [$x] comes from a Normal distribution with mean = [$mu] and StdDev = [$sdp_round]. 
+
+Convert to a z-score as usual:  
+
+[``z=\frac{[$x] - [$mu]}{[$sdp_round]} = [$teststat_r1]``]...
+
+---
+*Part 3:*
+
+The Alternative Hypothesis is left-sided. Use the Standard Normal distribution to find the proportion with [`z < [$teststat_r1]`].
+
+---
+*Part 4:*
+
+In percentage form, the P-value of [@ int(.5+$pleft*10000)/100 @]% is less than the 5% significance level, so reject the Null Hypothesis. 
+END_PGML_SOLUTION
+
+
+COMMENT("Gives feedback for errors commonly made by students.");
+ENDDOCUMENT();

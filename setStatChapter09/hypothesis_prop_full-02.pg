@@ -1,0 +1,117 @@
+##DESCRIPTION
+##  Hypothesis testing:  One proportion
+##ENDDESRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample proportion)
+## Institution()
+## Author()
+## Level(3)
+## MO(1)
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'Inference', 'one proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$n = (180,200,220,240,260)[random(0,4,1)];
+$alpha = 0.05;
+$alphap = 100*$alpha;
+$zcrit=udistr($alpha);
+
+# This makes sure that we fail to reject the null of p > 0.20
+$x = random(1 + (0.2 * $n), ($n + $zcrit * 2 * sqrt($n))/5, 1);
+$phat = $x/$n;
+$qhat = 1- $phat;
+$zstat = ($phat - 0.2)/sqrt(0.2*0.8)*sqrt($n);
+$pval = uprob($zstat);
+
+
+$mc = new_multiple_choice();
+$mc->qa("Based on the above results:","The sample fails to provide sufficient evidence that the psychic will be correct more than 20% of the time.");
+$mc->extra("The sample provides sufficient evidence that the psychic will be correct more than 20% of the time.","The sample provides sufficient evidence that the psychic will be correct exactly 20% of the time." );
+
+
+######################################
+#  Main text
+
+BEGIN_PGML
+
+A noted psychic was tested for Extrasensory Perception (ESP).  The psychic was presented with a series of face-down cards and was asked to identify the symbol on each card: a star, cross, circle, square, or three wavy lines. Let [`p`] be the probability that the psychic will correctly identify the symbol on any given card.
+
+To see if there is evidence that the psychic did better than just random guessing, we can test [`H_0: p = 0.20`] versus [`H_A: p > 0.20`], using a [$alphap]% significance level.
+
+The psychic was shown [$n] cards, and identified the correct symbol [$x] times. Assume this can be treated as a Simple Random Sample.
+
+1. The test statistic for this sample is [`z = `] [__________].  
+(Round to at least three decimal places).
+
+2. The P-value for this sample is [__________].  
+(Round to at least three decimal places, and do not convert to percent).
+
+3. [@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+$ans_a = Compute("$zstat")->with(tolType=>'absolute', tolerance=>'0.001');  
+ANS($ans_a->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student-$correct) < .01 ;
+      } => ["Close! Use more accuracy in our calculation."]
+)));
+
+$ans_b = Compute("$pval")->with(tolType=>'absolute', tolerance=>'0.001');  
+ANS($ans_b->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student-$pval*100) < .1 ;
+      } => ["Enter your answer in decimal form.  It looks like you entered a percent."]
+)));
+
+ANS(radio_cmp($mc->correct_ans() ));
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

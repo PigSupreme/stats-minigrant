@@ -1,0 +1,164 @@
+#DESCRIPTION
+## Hypothesis testing, P-value
+##
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One-sample t)
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics','hypothesis testing', 'p-value', 'data')
+## Date('04/08/2018');
+
+
+##ENDDESCRIPTION
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PG.pl",
+"PGbasicmacros.pl",
+"PGchoicemacros.pl",
+"PGanswermacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"MathObjects.pl",
+"PGML.pl",
+"scaffold.pl"
+
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+$muweek = random(4,6,1);
+$mutot = 15*$muweek;
+$stu1 = $mutot + random(-10,5,1);
+$stu2 = $mutot + random(-10,5,1);
+$stu3 = $mutot + random(-10,5,1);
+$stu4 = $mutot + random(-10,5,1);
+$stu5 = $mutot + random(-10,5,1);
+$stu6 = $mutot + random(-10,5,1);
+$stu7 = $mutot + random(-10,5,1);
+$stu8 = $mutot + random(-10,5,1);
+$stu9 = $mutot + random(-10,5,1);
+$stu10 = $mutot + random(-10,5,1);
+$stu11 = $mutot + random(-10,5,1);
+$stu12 = $mutot + random(-10,5,1);
+$n=12;
+$xbartrue = ($stu1+$stu2+$stu3+$stu4+$stu5+$stu6+$stu7+$stu8+$stu9+$stu10+$stu11+$stu12)/$n;
+$xbar = int(.5+100*$xbartrue)/100;
+
+$sigma = random(6,10,1);
+$alpha = 0.05;
+$alphap = 100 * $alpha;
+$zstat = ($xbar-$mutot)/($sigma/sqrt($n));
+$zcrit = -udistr($alpha);
+$pval = normal_prob(-infty,$zstat,mean=>0,deviation=>1);
+
+$dlist = List("$stu1,$stu2,$stu3 ,$stu4,$stu5,$stu6,$stu7,$stu8,$stu9,$stu10,$stu11,$stu12");
+
+$mc0 = new_multiple_choice();
+$mc0->qa("If `\mu` is the actual mean number of hours spent for the semester (among all students in the course), state appropriate hypotheses for this test.","Null: `\mu=` $mutot; Alternative: `\mu<` $mutot");
+$mc0->extra("Null: `\mu>` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu=` $mutot; Alternative: `\mu >` $mutot",
+"Null: `\mu>` $mutot; Alternative: `\mu\leq` $mutot",
+"Null: `\mu<` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu\ne` $mutot; Alternative: `\mu=` $mutot",
+"Null: `\mu\ne` $mutot; Alternative: `\mu<` $mutot");
+
+$mc = new_multiple_choice();
+@ans = (
+"There is sufficient evidence to conclude that the average amount of time spent on homework is less than the recommended amount.",
+"There is insufficient evidence to conclude that the average amount of time spent on homework is less than the recommended amount.",
+"There is sufficient evidence to conclude that the average amount of time spent on homework is at least the recommended amount.",
+"There is sufficient evidence to conclude that the average amount of time spent on homework is equal to the recommended amount.",
+"There is sufficient evidence to conclude that the average amount of time spent on homework is different than the recommended amount.",
+);
+if ($pval < $alpha) {$tag = 0;} else {$tag = 1;}
+$mc -> qa("Based on this sample data and using a $alphap% significance level:", $ans[$tag]);
+$mc -> extra($ans[1-$tag],$ans[2],$ans[3]);
+$lessmore = ("less than", "not less than")[$tag];
+$rejectfail = ("reject", "fail to reject")[$tag];
+
+#######################################################
+BEGIN_PGML
+In an introductory college course, the instructor recommends that students should spend [$muweek] hours per week on course-related activities outside of regular class time. The semester lasts 15 weeks, so students should spend a total of [$mutot] hours over the entire semester. The instructor suspects that, on average, students are spending less time than recommended, and plans to conduct a hypothesis test.
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+
+BEGIN_PGML
+[@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc0->correct_ans));
+Section::End();
+
+###
+Section::Begin();
+BEGIN_PGML
+In a random sample of 12 students from the course, each student was asked how many hours he or she spent during the semsester on course-related activities outside of regular class time. The data are listed below.
+
+[$dlist]
+
+The value of [`\overline{x}`] for this sample is [__________]  
+(round to exactly two decimal places).
+
+END_PGML
+ANS(num_cmp($xbar,tol=>0.0001));
+Section::End();
+
+###
+Section::Begin();
+BEGIN_PGML
+Assume all 12 students answered truthfully and accurately, and that the data come from a population having a Normal distribution with a standard deviation of [$sigma] hours. Use [`\bar{x}`] = [$xbar] and round the following answers to at least four decimal places.
+
+The value of the test statistic for this sample is [__________].
+
+The P-value for this sample is [__________] (do not convert to percent).
+END_PGML
+ANS(num_cmp($zstat,tol=>0.0005));
+ANS(num_cmp($pval,tol=>0.0005));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc ->print_q() @]*
+[@ $mc ->print_a() @]*
+
+END_PGML
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+
+
+Scaffold::End();
+
+
+
+
+#####################################################
+### Solutions
+$xbar_r2 = int(.5 + 10000*$xbar)/10000;
+$ssdxbar = int(.5+10000*$sigma/sqrt($n))/10000;
+$zstat_r3 = int(.5 + 10000*$zstat)/10000;
+BEGIN_PGML_SOLUTION
+Use technology to find the sample mean: [`\bar{x} = [$xbar_r2]`] (rounded).
+
+Since you are given a population standard deviation ([`\sigma = [$sigma]`], the standard deviation of samples means for all samples of this size is  
+[``\frac{\sigma}{\sqrt{n}} = \frac{[$sigma]}{\sqrt{[$n]}}= [$ssdxbar]...``]
+
+The test statistic is a z-score:  
+[``z = \frac{[$xbar_r2] - [$mutot]}{[$ssdxbar]}=[$zstat_r3]\dots``]
+
+The Alternative Hypothesis is left-sided, so the P-Value is proprotion/area to the left of [`z = [$zstat_r3]`].
+
+Since the P-Value ([@ int(.5+10000*$pval)/10000 @] = [@ int(.5+10000*$pval)/100 @]%) is [$lessmore] the 5% significance level, [$rejectfail] the Null Hypothesis.
+
+END_PGML_SOLUTION
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

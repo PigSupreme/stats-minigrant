@@ -1,0 +1,123 @@
+##DESCRIPTION
+##  Template for Multiple Select Problems
+##ENDDESCRIPTION
+
+##KEYWORDS(''')
+
+## DBsubject('Sample Problems')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('')
+## Institution('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGML.pl",
+"scaffold.pl"
+);
+
+TEXT(beginproblem());
+
+# Don't show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 0;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+$pi = Real("pi");
+$product = "Rokovoko Thwappaccino Cyclone";
+$mutot = "1%";
+$inc = random(10,30,5)." cents";
+
+$mc0 = new_multiple_choice();
+$mc0->qa("Which of the following are appropriate Null and Alternative Hypotheses?","`H_0`: `p\geq` $mutot; `\quad H_A`: `p<` $mutot");
+$mc0->extra("`H_0`: `p<` $mutot; `\quad H_A`: `p\geq` $mutot",
+"`H_0`: `p<` $mutot; `\quad H_A`: `p>` $mutot",
+"`H_0`: `p>` $mutot; `\quad H_A`: `p<` $mutot",
+"`H_0`: `p\ne` $mutot; `\quad H_A`: `p=` $mutot"
+);
+
+$mc1 = new_multiple_choice();
+$mc1->qa("Which of the following describes a Type I error for this test?","1% or more of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.");
+$mc1->extra("Less than 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"More than 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"Exactly 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"The sample data were not from a Simple Random Sample.",
+"The sample size was too small."
+);
+
+$mc2 = new_multiple_choice();
+$mc2->qa("Which of the following describes a Type II error for this test?","Less than 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.");
+$mc2->extra("1% or more of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"More than 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"Exactly 1% of existing customers would stop buying their coffee from Queequeq's, but the sample data indicates otherwise.",
+"The sample data were not from a Simple Random Sample.",
+"The sample size was too small."
+);
+
+install_problem_grader(~~&std_problem_grader);
+$showPartialCorrectAnswers = 0;
+##############################################################
+#
+#  Text
+#
+#
+
+BEGIN_PGML
+
+Queequeq's Coffeehouse is considering raising the price of its [$product] by [$inc], but is concerned that it will lose customers if it does so. It is determined that if 1% or more of existing customers would stop buying their coffee from Queequeq's, then the company would actually lose money as a result of the price increase.
+
+Let [`p`] be the actual percentage of existing customers who would stop buying their coffee from Queequeq's if the price of a [$product] was increased by [$inc].
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc0->correct_ans));
+
+Section::End();
+Section::Begin();
+
+BEGIN_PGML
+The company takes a random sample among its existing customers and asks how they would react to the potential price increase.
+
+[@ $mc1 ->print_q() @]*
+[@ $mc1 ->print_a() @]*
+
+[@ $mc2 ->print_q() @]*
+[@ $mc2 ->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc1->correct_ans));
+ANS(radio_cmp($mc2->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+BEGIN_PGML_SOLUTION
+A Type I error means that we reject the Null Hypothesis when it was acutally true.
+
+A Type II error means that we fail to reject the Null Hypothesis when it was acutally false.
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        
