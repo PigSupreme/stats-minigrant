@@ -1,0 +1,139 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+Context()->flags->set(tolType=>'absolute',tolerance=>.00051);
+
+# Sample Size
+$n = random(400,500,5);
+
+# Number of Categories and Expected Proportions
+$k = 4;
+@eprops = (.30, .25, .25, .20);
+@epercs = (30, 25, 25, 20);
+
+# Number of Observations in each Category
+$count = 0;
+for (my $i=0; $i<$k-1; $i++) {
+  $obs[$i] = int($n*($eprops[$i]+random(-0.015, 0.015, 0.001)));
+  if($obs[$i]<5) {$obs[$i]=5}
+  $count = $count + $obs[$i];
+  }
+# Last category
+if ($n -$count > 5) {
+  $obs[$k-1] = $n - $count;
+  } else {
+  $obs[$k-1] += random(5,9);
+  }
+$n = $count + $obs[$k-1];
+
+#####################################
+## Adjust observations here if needed
+#####################################
+# This makes the total number of observations a multiple of 10
+# so that expected counts come out nicely.
+$tofill = 20 - ($n % 20);
+for (my $i=0; $i<$tofill; $i++) {
+  $obs[$i%$k]++;
+  $n++;
+  }
+#####################################
+
+# Expected Counts and Test Statistic (Chi-Squared)
+$stat = 0;
+@ecounts = ();
+@ecounts_ans = ();
+for (my $i=0; $i<$k; $i++) {
+  $this_e = $n*$eprops[$i];
+  $stat = $stat + (($obs[$i] - $this_e)**2)/$this_e;
+  push(@ecounts,$this_e);
+  push(@ecounts_ans,ans_rule(5));
+  ANS(Real("$this_e")->cmp());
+  }
+
+# Confidence Level
+$alpha = .05;
+$alphap = 100*$alpha;
+
+# Critical value and P-Value for Goodness-of-Fit
+$crit = chisqrdistr($k-1,$alpha);
+$pval = chisqrprob($k-1,$stat);
+
+# Final Conclusions...
+$mc = new_multiple_choice();
+$fakedir = ($test < 5) ? "smaller" : "larger";
+@ans = ("We can reject the University's claim, because the P-Value is smaller than $alphap%.",
+	"We fail to reject the University's claim, because the P-Value is not smaller than $alphap%.");
+@ans_wrong = (
+"We fail to reject the University's claim, because the test statistic is larger than $alphap%.",
+"We can reject the University's claim, because the test statistic is larger than $alphap%.",
+"We can reject the University's claim, because the test statistic is $fakedir than the P-value.",
+"We fail to reject the University's claim, because the test statistic is $fakedir than the P-value."
+);
+if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+
+$mc -> qa("Using a $alphap% significance level:", $ans[$tag]);
+$mc -> extra($ans[1-$tag], @ans_wrong);
+
+BEGIN_PGML
+A large university claims that its undergraduate students consist of [$epercs[0]]% Freshmen, [$epercs[1]]% Sophomores, [$epercs[2]]% Juniors, and [$epercs[3]]% Seniors. We want to test this claim using a Goodnees-of-Fit test.
+
+Suppose we have a Simple Random Sample of [$n] students from this university. Find the Expected Count (number of students) for each letter grade.
+END_PGML
+
+
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('Class','Freshman', 'Sophomore', 'Junior', 'Senior')\}
+\{row('Observed Count', @obs)\}
+\{row('Expected Count', @ecounts_ans)\}
+\{endtable()\}$BR
+END_TEXT
+BEGIN_PGML
+Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
+
+The P-Value for this sample is [_______]{$pval} (do not convert to percent).
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

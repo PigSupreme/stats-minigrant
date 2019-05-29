@@ -1,0 +1,180 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+Context()->flags->set(tolType=>'absolute',tolerance=>.00051);
+
+# Sample Size
+$n = random(200,490,10);
+
+# Number of Categories and Expected Proportions
+$k = 4;
+@epercs = (28.1, 20.0, 22.1, 29.8);
+@eprops = (.281, .200, .221, .298);
+
+# Number of Observations in each Category
+$count = 0;
+for (my $i=0; $i<$k-1; $i++) {
+  $obs[$i] = int($n*($eprops[$i]+random(0.01, 0.04, 0.001)));
+  if($obs[$i]<5) {$obs[$i]=5}
+  $count = $count + $obs[$i];
+  }
+# Last category
+if ($n -$count > 5) {
+  $obs[$k-1] = $n - $count;
+  } else {
+  $obs[$k-1] += random(5,9);
+  }
+$n = $count + $obs[$k-1];
+
+#####################################
+## Adjust observations here if needed
+#####################################
+# This makes the total number of observations a multiple of 10
+# so that expected counts come out nicely.
+$tofill = 10 - ($n % 10);
+for (my $i=0; $i<$tofill; $i++) {
+  $obs[$i % $k]++;
+  $n++;
+  }
+#####################################
+
+# Expected Counts and Test Statistic (Chi-Squared)
+$stat = 0;
+@ecounts = ();
+@ecounts_ans = ();
+for (my $i=0; $i<$k; $i++) {
+  $this_e = $n*$eprops[$i];
+  $stat = $stat + (($obs[$i] - $this_e)**2)/$this_e;
+  push(@ecounts,$this_e);
+  push(@ecounts_ans,ans_rule(5));
+  }
+
+# Confidence Level
+$alpha = .05;
+
+# Critical value and P-Value for Goodness-of-Fit
+$crit = chisqrdistr($k-1,$alpha);
+$pval = chisqrprob($k-1,$stat);
+
+# Final Conclusions...
+$mc = new_multiple_choice();
+@ans = ('We can reject the claim that the actual grade distribution fits the suggested distribution.',
+	'It is not unreasonable to assume the actual grade distribution fits the suggested distribution.');
+
+if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+
+$mc -> qa('Based on the above results:', $ans[$tag]);
+$mc -> extra($ans[1-$tag]);
+
+BEGIN_PGML
+Some instructors (but not the author of this problem!) use "norm-referencing" when assigning final letter grades. This means that a certain percentage of students are expected to receive each letter grade; a suggested distribution might look like this:
+END_PGML
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('Class','Freshman', 'Sophomore', 'Junior', 'Senior')\}
+\{row('Expected Percent', @epercs)\}
+\{endtable()\}$BR
+END_TEXT
+
+BEGIN_PGML
+so that the top [@ $eprops[0]*100 @]% of students would receive an A, the next [@ $eprops[1]*100 @]% would receive a B, and so forth. A common criticism of this system is that even if all students perform well, some will still receive a letter grade of D or F.
+
+We can test whether an actual set of grades follows the suggested distribution, regardless of what system is used for grading. We will do this using a Goodness-of-Fit test at the [@ $alpha*100 @]% significance level.
+
+END_PGML
+
+Scaffold::Begin();
+
+Section::Begin();
+BEGIN_PGML
+Suppose we have actual grades for a set of [$n] students. Assuming this is a Simple Random Sample from a large population, find the Expected Count (number of students) for each letter grade.
+
+END_PGML
+
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('Class','Freshman', 'Sophomore', 'Junior', 'Senior')\}
+\{row('Expected Percent', @epercs)\}
+\{row('Expected Count', @ecounts_ans)\}
+\{endtable()\}$BR
+$PAR
+END_TEXT
+foreach my $i (0..$k-1) {
+  ANS(Real("$ecounts[$i]")->cmp);
+  }
+BEGIN_PGML
+This satisfies the requirements for a Goodness-of-Fit test, because the expected count in each category is at least [______]{"5"}.
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_TEXT
+Here are the Expected Counts (from above) and the Observed Counts (in a Simple Random Sample of $n students:$BR
+$PAR
+\{begintable(5)\}
+\{row('Class','Freshman', 'Sophomore', 'Junior', 'Senior')\}
+\{row('Observed Count', @obs)\}
+\{row('Expected Count', @ecounts)\}
+\{endtable()\}$BR
+END_TEXT
+BEGIN_PGML
+Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
+
+The degrees of freedom for this test statistic is [_______]{$k-1}.
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The P-Value for this sample is [_______]{$pval} (do not convert to percent).
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+Scaffold::End();
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
