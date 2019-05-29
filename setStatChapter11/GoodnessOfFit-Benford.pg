@@ -1,0 +1,175 @@
+## DESCRIPTION
+##   Goodness-of-Fit (Simplified Benford's Law)
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+Context()->flags->set(tolType=>'absolute',tolerance=>.00051);
+
+# Sample Size
+$n = random(1010,1390,10);
+
+# Number of Categories and Expected Proportions
+$k = 3;
+@epercs = (60, 24, 16);
+@eprops = (.6, .24, .16);
+
+# Number of Observations in each Category
+$count = 0;
+for (my $i=0; $i<$k-1; $i++) {
+  $obs[$i] = int($n*($eprops[$i]+random(0.01, 0.04, 0.001)));
+  if($obs[$i]<5) {$obs[$i]=5}
+  $count = $count + $obs[$i];
+  }
+# Last category
+if ($n -$count > 5) {
+  $obs[$k-1] = $n - $count;
+  } else {
+  $obs[$k-1] += random(5,9);
+  }
+$n = $count + $obs[$k-1];
+
+#####################################
+## Adjust observations here if needed
+#####################################
+# This makes the total number of observations a multiple of 10
+# so that expected counts come out nicely.
+$tofill = 10 - ($n % 10);
+for (my $i=0; $i<$tofill; $i++) {
+  $obs[$i % $k]++;
+  $n++;
+  }
+#####################################
+
+# Expected Counts and Test Statistic (Chi-Squared)
+$stat = 0;
+@ecounts = ();
+@ecounts_ans = ();
+for (my $i=0; $i<$k; $i++) {
+  $this_e = $n*$eprops[$i];
+  $stat = $stat + (($obs[$i] - $this_e)**2)/$this_e;
+  push(@ecounts,$this_e);
+  push(@ecounts_ans,ans_rule(5));
+  }
+
+# Confidence Level
+$alpha = .05;
+
+# Critical value and P-Value for Goodness-of-Fit
+$crit = chisqrdistr($k-1,$alpha);
+$pval = chisqrprob($k-1,$stat);
+
+# Final Conclusions...
+$mc = new_multiple_choice();
+@ans = ('We can reject the claim that the actual distribution fits expectations.',
+	'It is not unreasonable to assume the actual grade distribution fits expectations.');
+
+if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+
+$mc -> qa('Based on the above results:', $ans[$tag]);
+$mc -> extra($ans[1-$tag]);
+
+BEGIN_PGML
+Very large sets of certain types of financial data (such as amount due on customer's utility bills) tend to follow a rule known as Benford's Law. Values of the first/leading digit (which must be 1-9), do not occur with equal probability, and that smaller numbers tend to occur more frequently. Here is a simplified version:
+END_PGML
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('First Digit','1-3', '4-6', '7-9')\}
+\{row('Expected Percent', @epercs)\}
+\{endtable()\}$BR
+END_TEXT
+
+BEGIN_PGML
+This is often used in fraud detection in financial data; if a Goodness-of-Fit suggests that a given data set does not follow the expectations above, it is possible the data were falsified, and can be reviewed more closely. We'll use a [@ $alpha*100 @]% significance level.
+
+END_PGML
+
+Scaffold::Begin();
+
+Section::Begin();
+BEGIN_PGML
+START HERE! Suppose we have actual .... Assuming this is a Simple Random Sample from a large population, find the Expected Count for each category.
+
+END_PGML
+
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('First Digit','1-3', '4-6', '7-9')\}
+\{row('Expected Percent', @epercs)\}
+\{row('Expected Count', @ecounts_ans)\}
+\{endtable()\}$BR
+$PAR
+END_TEXT
+foreach my $i (0..$k-1) {
+  ANS(Real("$ecounts[$i]")->cmp);
+  }
+Section::End();
+
+Section::Begin();
+BEGIN_TEXT
+Here are the Expected Counts (from above) and the Observed Counts (in a Simple Random Sample of $n students:$BR
+$PAR
+\{begintable(5)\}
+\{row('First Digit','1-3', '4-6', '7-9')\}
+\{row('Observed Count', @obs)\}
+\{row('Expected Count', @ecounts)\}
+\{endtable()\}$BR
+END_TEXT
+BEGIN_PGML
+Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
+
+The degrees of freedom for this test statistic is [_______]{$k-1}.
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The P-Value for this sample is [_______]{$pval} (do not convert to percent).
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+Scaffold::End();
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
