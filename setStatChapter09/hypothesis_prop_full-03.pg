@@ -1,0 +1,141 @@
+##DESCRIPTION
+##  Hypothesis testing:  One proportion
+##ENDDESRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample proportion)
+## Institution()
+## Author()
+## Level(3)
+## MO(1)
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'Inference', 'one proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$face = ("heads","tails")[random(0,1,1)];
+
+$n = (180,200,220,240,260)[random(0,4,1)];
+$alpha = random(0.01,0.04.0.01);
+$alphap = 100*$alpha;
+$zcrit=udistr($alpha);
+
+# This makes sure that we reject the null of p != 0.50
+$x = 0.5*$n + $zcrit*sqrt(0.5*0.5*$n) + random(2,6,1);
+$x = round($x);
+$phat = $x/$n;
+$qhat = 1- $phat;
+$zstat = ($phat - 0.5)/sqrt(0.5*0.5)*sqrt($n);
+$pval = 2*uprob($zstat);
+
+$mc = new_multiple_choice();
+$mc->qa("At the $alphap% significance level:", "The sample provides sufficient evidence that the coin is unfair.");
+$mc->extra("The sample fails to provide sufficient evidence that the coin is unfair.",
+"The sample provides sufficient evidence that the coin is fair.");
+
+######################################
+#  Main text
+
+
+BEGIN_PGML
+
+If you flip a fair coin, the probability that the result is [$face] will be 0.50. A given coin is tested for fairness using a hypothesis test of [`H_0: p = 0.50`] versus [`H_A: p \neq 0.50`].
+
+The given coin is flipped [$n] times, and comes up [$face] [$x] times. Assume this can be treated as a Simple Random Sample.
+
+END_PGML
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+a. The test statistic for this sample is [`z = `] [__________].  
+(Round to at least three decimal places).
+
+a. The P-value for this sample is [__________].  
+(Round to at least three decimal places, and do not convert to percent).
+END_PGML
+
+$showPartialCorrectAnswers = 1;
+
+$ans_a = Compute("$zstat")->with(tolType=>'absolute', tolerance=>'0.001');  
+ANS($ans_a->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student-$correct) < .01 ;
+      } => ["Close! Use more accuracy in our calculation."]
+)));
+
+$ans_b = Compute("$pval")->with(tolType=>'absolute', tolerance=>'0.001');  
+ANS($ans_b->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student-100*$pval) <.1 ;
+      } => ["Enter your answer in decimal form.  It looks like you entered a percent."],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student-$pval/2) <.01 ;
+      } => ["The Alternative Hypothesis is two-sided."]
+)));
+
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 0;
+ANS(radio_cmp($mc->correct_ans() ));
+
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solutions
+$stddev_phat = int(.5+100000*sqrt(0.5*0.5/$n))/100000;
+BEGIN_PGML_SOLUTION
+Note that you can (and should) use technology to check your results.
+
+When computing the sample proportion [`\hat{p}`], you can enter the exact fraction [$x]/[$n] and let WebWorK do the arithmetic.
+
+To compute the Standard Deviation of [`\hat{p}`], remember to use the hypothesized value (from the Null Hypothesis) and not the sample proportion. The formula is  
+
+[``\sqrt{\frac{p(1-p)}{n}} = \sqrt{\frac{0.50 * 0.50}{[$n]}} = [$stddev_phat]\dots``]  
+
+Keep this value to at least five decimal places, or you may get a rounding error when computing the test statistic.
+
+Assuming the Null Hypothesis is true, the sample statistic comes from a Normal distribution with mean = 0.50 and StdDev = [$stddev_phat]....  
+Convert to a z-score as usual:  
+
+[``z=\frac{([$x]/[$n]) - 0.50}{[$stddev_phat]}``] = [@ int(.5+$zstat*1000)/1000 @]...
+
+The Alternative Hypothesis is two-sided. Use the Standard Normal distribution to find the proportion with [`z > \lvert[@ int(.5+$zstat*1000)/1000 @]\rvert`]. Multiply this by 2 to get the two-sided P-Value.
+
+In percentage form, the P-value of [@ int(.5+$pval*10000)/100 @]% is less than the [@ 100*$alpha @]% significance level, so reject the Null Hypothesis. 
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

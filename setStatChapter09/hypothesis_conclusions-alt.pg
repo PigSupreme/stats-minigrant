@@ -1,0 +1,102 @@
+##DESCRIPTION
+##  Hypothesis test, general concepts.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - t)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+$m= random(0,3,1);
+$name = ("Nwabudike", "Deirdre", "Corazon", "Miriam")[$m];
+$pronoun = "she";
+if ($m==0) {$pronoun = "he";}
+$poss = "her";
+if ($m==0) {$poss = "his";}
+$n = random(201,499,1);
+$perc = random(21.1,39.9,.2);
+
+$dir = random(0,1);
+$d = ("<",">")[$dir];
+$dtext =  ("less","more")[$dir];
+$dw = (">","<")[$dir];
+
+
+$p = random(0.005,0.15,0.001);
+$pperc = 100*$p;
+if ($p<.05) {$inda = 1}
+if ($p<.10) {$indb = 1}
+@yn = ("No","Yes");
+
+$mc0 = new_multiple_choice();
+$mc0->qa("The Null Hypothesis for this test is:","\(p = $perc\)%");
+$mc0->extra("\(p < $perc\)%", "\(p > $perc\)%", "\(p \neq $perc\)%");
+
+$mc1 = new_multiple_choice();
+$mc1->qa("The Alternative Hypothesis for this test is:","\(p $d $perc\)%");
+$mc1->extra("\(p $dw $perc\)%", "\(p = $perc\)%", "\(p \neq $perc\)%");
+
+$mca = new_multiple_choice();
+$mca->qa("At a 5% level of significance, does the sample provide sufficient evidence that $name is correct?", "$yn[$inda]");
+$mca->extra("$yn[1-$inda]");
+$mca->makeLast("No");
+
+$mcb = new_multiple_choice();
+$mcb->qa("At a 10% level of significance, does the sample provide sufficient evidence that $name is correct?", "$yn[$indb]");
+$mcb->extra("$yn[1-$indb]");
+$mcb->makeLast("No");
+
+######################################
+#  Main text
+
+BEGIN_PGML
+[$name] was told that [$perc]% of the employees at [$poss] company live Outside The Perimeter, but [$pronoun] suspects the true percentage is [$dtext] than this and plans to conduct a hypothesis test. Let _p_ be the true percentage of employees who live Outside The Perimeter.
+
+(a) [@ $mc0->print_q() @]*
+[@ $mc0->print_a() @]*
+
+(b) [@ $mc1->print_q() @]*
+[@ $mc1->print_a() @]*
+
+From a simple random sample of [$n] employees, [$name] calculates a _P_-value of [$pperc]%.
+
+(c) [@ $mca->print_q() @]*
+[@ $mca->print_a() @]*
+
+(d) [@ $mcb->print_q() @]*
+[@ $mcb->print_a() @]*
+
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 0;
+
+ANS(radio_cmp($mc0->correct_ans() ));
+ANS(radio_cmp($mc1->correct_ans() ));
+ANS(radio_cmp($mca->correct_ans() ));
+ANS(radio_cmp($mcb->correct_ans() ));
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

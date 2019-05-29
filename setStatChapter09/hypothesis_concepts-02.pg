@@ -1,0 +1,105 @@
+##DESCRIPTION
+##  Statistics problem: confidence intervals
+##ENDDESCRIPTION
+
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Concepts)
+## Date()
+## Institution()
+## Author()
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",
+   "MathObjects.pl",
+   "PGchoicemacros.pl",
+   "PGML.pl",
+   "scaffold.pl"
+);
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+
+
+######################################################
+# Setup
+$qnum = 0;
+$mc_text[$qnum] = "If we change the significance level of a hypothesis test from 5% to 10%, which of the following will happen? Check all that apply.";
+@mc_correct[$qnum] = [
+  "It is more likely that we reject the null hypothesis.",
+  "The probability of a Type I error increases.",
+  "The probability of a Type II error decreases."
+  ];
+@mc_wrong[$qnum] = [
+  "It is less likely that we reject the null hypothesis.",
+  "It is less likely the null hypothesis is true.",
+  "It is more likely that the null hypothesis is true.",
+  "The probability of a Type II error increases.",
+  "The probability of a Type I error decreases."
+  ];
+###
+$qnum++;
+$mc_text[$qnum] = "If we change the significance level of a hypothesis test from 5% to 2%, which of the following will happen? Check all that apply.";
+@mc_correct[$qnum] = [
+  "It is more likely that we fail to reject the null hypothesis.",
+  "The probability of a Type II error increases.",
+  "The probability of a Type I error decreases."
+  ];
+@mc_wrong[$qnum] = [
+  "It is less likely that we fail to reject the null hypothesis.",
+  "It is more likely that we conclude the null hypothesis is true.",
+  "It is more likely that the null hypothesis is true.",
+  "The probability of a Type I error increases.",
+  "The probability of a Type II error decreases."
+  ];
+
+
+foreach my $i (0..$qnum) {
+  $mc[$i] = new_checkbox_multiple_choice();
+  $mc[$i] -> qa ($mc_text[$i], @{$mc_correct[$i]});
+  $mc[$i] -> extra(@{$mc_wrong[$i]});
+  }
+
+install_problem_grader(~~&std_problem_grader);
+$showPartialCorrectAnswers = 0;
+
+##############################################################
+#
+#  Text
+#
+#
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+[@ $mc[0]->print_q() @]*  
+[@ $mc[0]-> print_a() @]*
+END_PGML
+ANS( checkbox_cmp( $mc[0]->correct_ans() ) );
+Section::End();
+Section::Begin();
+
+BEGIN_PGML
+[@ $mc[1]->print_q() @]*  
+[@ $mc[1]-> print_a() @]*
+END_PGML
+ANS( checkbox_cmp( $mc[1]->correct_ans() ) );
+Section::End();
+Scaffold::End();
+
+
+
+ENDDOCUMENT(); 

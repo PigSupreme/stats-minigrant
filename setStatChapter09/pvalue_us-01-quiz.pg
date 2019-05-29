@@ -1,0 +1,66 @@
+#DESCRIPTION
+## Hypothesis testing, P-value
+##
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection()
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics','hypothesis testing', 'p-value')
+## Date('11/03/2017');
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+);
+
+TEXT(&beginproblem);
+
+######################################
+#  Setup
+$abstol = 0.000051;
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
+
+$tscore = random(2.501,2.999,.002);
+$n = random(11,19,1);
+$df = $n -1;
+
+$pright = Real(tprob($df, $tscore))->with(tolType=>'absolute', tolerance=>$abstol);
+$pright_wdf = tprob($n, $tscore); #Use wrong df
+$pright_wdf1 = tprob($n+1, $tscore); #Use wrong df
+
+$ptwo = Real(2*$pright)->with(tolType=>'absolute', tolerance=>2*$abstol);
+$ptwo_wdf = 2*$pright_wdf;
+$ptwo_wdf1 = 2*$pright_wdf1;
+
+######################################
+#  Main text
+
+BEGIN_PGML
+In a hypothesis test of a population mean, a Simple Random Sample of size [$n] has a test statistic of [`t = [$tscore]`].
+
+a. With a right-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
+
+a. With a two-sided alternative hypothesis, the _P_-Value for this sample is.
+[_____] (round to at least four decimal places).
+
+END_PGML
+######################################
+#  Answers
+
+$ans_pright = Real($pright)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_pright->cmp);
+
+$ans_ptwo = Real($ptwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
+ANS($ans_ptwo->cmp);
+
+COMMENT('Use a t distribution to get the exact P-Value');
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

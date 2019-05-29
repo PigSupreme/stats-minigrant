@@ -1,0 +1,100 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Concepts)
+## Institution(The College of Idaho)
+## Author(R Cruz, L Danielson, J Guild)
+## Level(2)
+## TitleText1('The Basic Practice of Statistics')
+## AuthorText1('David Moore')
+## EditionText1('5e')
+## Section1('14')
+## Problem1('')
+## KEYWORDS('statistics', 'inference', 'confidence interval')
+## Updated: 2010/10
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+@order = NchooseK(3,3);
+push(@order, random(3,4));
+
+$mc[0] = new_multiple_choice();
+     $mc[0]->qa("In a hypothesis test, the significance level \(\alpha\) (alpha) is...",
+	"...the probability of rejecting the null hypothesis when the null hypothesis is actually true."); 
+     $mc[0]->extra(
+	"...the probability that the null hypothesis is true.", 
+    "...the probability that the null hypothesis is false.",
+    "...the probability, assuming the null hypothesis is false, that another sample would be at least as unusual as the one actually observed.");
+
+$mc[1] = new_multiple_choice();
+     $mc[1] ->qa("In a hypothesis test, the $BITALIC P$EITALIC-value is...","...the probability, assuming the null hypothesis is true, that another sample would be at least as unusual as the one actually observed."); 
+     $mc[1]->extra(
+	"...the probability that the null hypothesis is true.", 
+    "...the probability that the null hypothesis is false.",
+    "...the probability of rejecting the null hypothesis when the null hypothesis is actually true.");
+
+$mc[2] = new_multiple_choice();
+     $mc[2] ->qa("In a hypothesis test, which of the following would provide evidence against the null hypothesis?","Obtaining data with a small $BITALIC P$EITALIC-value."); 
+     $mc[2]->extra("Obtaining data with a large $BITALIC P$EITALIC-value.", 
+	"Using a small level of significance.", 
+            "Using a large level of significance.");
+
+$mc[3] = new_multiple_choice();
+     $mc[3] ->qa("In a hypothesis test, which of the following describes a Type I error?","Rejecting the Null Hypothesis when the Null Hypothesis was actually True."); 
+     $mc[3]->extra(
+     "Rejecting the Alternative Hypothesis when the Alternative Hypothesis was actually True.",
+     "Failing to reject the Null Hypothesis when the Null Hypothesis was actually False.",
+	 "Failing to reject the Alternative Hypothesis when the Alternative Hypothesis was actually False."
+     );
+
+$mc[4] = new_multiple_choice();
+     $mc[4] ->qa("In a hypothesis test, which of the following describes a Type II error?","Failing to reject the Null Hypothesis when the Null Hypothesis was actually False."); 
+     $mc[4]->extra(
+     "Rejecting the Alternative Hypothesis when the Alternative Hypothesis was actually True.",
+     "Rejecting the Null Hypothesis when the Null Hypothesis was actually True.",
+	 "Failing to reject the Alternative Hypothesis when the Alternative Hypothesis was actually False."
+     );
+
+######################################
+#  Main text
+
+BEGIN_PGML
+For each problem, select the best response.
+
+1. [@ $mc[[$order[0]]]->print_q() @]*
+[@ $mc[[$order[0]]] -> print_a() @]*
+
+1. [@ $mc[[$order[1]]]->print_q() @]*
+[@ $mc[[$order[1]]] -> print_a() @]*
+
+1. [@ $mc[[$order[2]]]->print_q() @]*
+[@ $mc[[$order[2]]] -> print_a() @]*
+
+1. [@ $mc[[$order[3]]]->print_q() @]*
+[@ $mc[[$order[3]]] -> print_a() @]*
+
+END_PGML
+
+######################################
+#  Answers
+
+install_problem_grader(~~&std_problem_grader);
+$showPartialCorrectAnswers = 0;
+
+ANS(radio_cmp($mc[$order[0]]->correct_ans));
+ANS(radio_cmp($mc[$order[1]]->correct_ans));
+ANS(radio_cmp($mc[$order[2]]->correct_ans));
+ANS(radio_cmp($mc[$order[3]]->correct_ans));
+
+ENDDOCUMENT();       # This should be the last executable line in the problem

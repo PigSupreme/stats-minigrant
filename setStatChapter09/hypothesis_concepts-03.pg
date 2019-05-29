@@ -1,0 +1,94 @@
+##DESCRIPTION
+##  Statistics problem: Hypothesis Test Concepts
+##ENDDESCRIPTION
+
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Concepts)
+## Date(11/5/2016)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(3)
+## KEYWORDS('statistics', 'statistical inference', 'hypothesis test', 'p-value')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "MathObjects.pl",
+   "PGchoicemacros.pl",
+   "PGML.pl"
+);
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+# Do not show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+$alpha = random(0.02, 0.04, 0.01);
+$alphap = 100* $alpha;
+$pv[0] = 100*random($alpha/10, $alpha-0.01, 0.0001);
+$pv[1] = 100*random($alpha+0.01, 2*$alpha, 0.0001);
+
+$index = random(0,1);
+$lo = ("first", "second")[$index];
+$hi = ("first", "second")[1-$index];
+$pv1 = $pv[$index];
+$pv2 = $pv[1-$index];
+
+
+$mc = new_checkbox_multiple_choice();
+$mc->qa("Select the true statement(s) below. There may be more than one correct answer",
+  "The $lo researcher would reject the null hypothesis.",
+  "The $lo researcher's sample provides stronger evidence against the null hypothesis.",
+  "The $hi researcher would fail to reject the null hypothesis."
+  );
+$mc->extra(
+  "The $hi researcher would reject the null hypothesis.",
+  "The $hi researcher would conclude that the null hypothesis is true.",
+  "The $lo researcher would fail to reject the null hypothesis.",
+  "The $lo researcher would conclude that the null hypothesis is true.",
+  "The $hi researcher's sample provides stronger evidence against the null hypothesis.",
+  );
+
+
+##############################################################
+#
+#  Text
+#
+#
+
+BEGIN_PGML
+
+Two researchers, working independently, conduct the same hypothesis test with different samples. Each uses a significance level of [$alphap]%. The first researcher's sample has a P-value of [$pv1]%; the second researcher's sample has a P-value of [$pv2]%.
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+
+END_PGML
+
+Context()->normalStrings;
+
+##############################################################
+#
+#  Answers
+#
+#
+
+ANS( checkbox_cmp( $mc->correct_ans() ) );
+
+ENDDOCUMENT(); 
