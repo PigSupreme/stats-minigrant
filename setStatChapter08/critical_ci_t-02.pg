@@ -1,0 +1,113 @@
+##DESCRIPTION
+##  Critical Values for t-confidence intervals
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Student t')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.00051,
+  tolType => "absolute");
+
+@nlist = ();
+$n = (random(31,39,1));
+$cl = random(82,88,2);
+
+@tcrit = (); # Correct Answers
+@twrongdf = (); # For feedback if students use df = sample size
+@zwrong = (); # Feedback for using z
+for my $i (0..4) {
+  push(@nlist, $n);
+  push(@tcrit, tdistr($n-1, (1-$cl/100)/2));
+  push(@twrongdf, tdistr($n, (1-$cl/100)/2));
+  push(@zwrong, udistr((1-$cl/100)/2));
+  $n = $n + random(10,19,1);
+  }
+
+@r = (0,1,2,3,4);
+
+@qtext = ();
+@a = ();
+for my $i (0..4) {
+  @qtext[$i] = "The t-critical value for a(n) $cl% confidence interval with sample size @nlist[$i] is: ";
+  @a[$i] = @tcrit[$i];
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the following critical t-scores used in a(n) [$cl]% confidence interval for a population mean when the population's standard deviation ([`\sigma`]) is unknown. Give each answer to at least three decimal places.
+* [$qtext[0]][______]
+* [$qtext[1]][______]
+* [$qtext[2]][______]
+* [$qtext[3]][______]
+* [$qtext[4]][______]
+
+END_PGML
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+
+$abstol = Context()->flags->get("tolerance");
+for my $i (0..4) {
+  $ans[$i] = Compute($a[$i])->with(tolerance=>$abstol, tolType=> 'absolute');
+  ANS($ans[$i]->cmp->withPostFilter(AnswerHints(
+       sub {
+           my ($correct,$student,$anshash) = @_;
+           return $student == $twrongdf[$i];
+           } => ["Are you using sample size instead of degrees of freedom?"],
+       sub {
+           my ($correct,$student,$anshash) = @_;
+           return $student == $zwrong[$i];
+           } => ["Are you using z instead of t?"],
+       sub {
+           my ($correct,$student,$anshash) = @_;
+           return abs($student-$correct) < 2*$abstol;
+           } => ["Your answer is close.  Check your computations."]
+  )));
+  }
+
+#### Solutions ####################
+$solnperc = $cl;
+$solnprop = $solnperc/100;
+$solnarea = (1-$solnprop)/2;
+$areaperc = 100*$solnarea;
+
+BEGIN_PGML_SOLUTION
+*Note:* If you are using a traditional t-score table (which typically lists values to three decimal places only), you may get slightly different answers than shown.
+
+Since all parts ask for a [$solnperc]% critical value, you'll use the same area for all of them:  (1-[$solnprop])/2 = [$solnarea].
+
+In each case, use (degrees of freedom) = (sample size) - 1, and find the cut-off t-score such for an upper area of [$solnarea] (or [$areaperc]%).
+
+END_PGML_SOLUTION
+
+COMMENT("Gives feedback if students use df = sample size.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

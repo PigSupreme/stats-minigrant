@@ -1,0 +1,97 @@
+##DESCRIPTION
+## DBsubject('Statistics')
+## DBchapter('Confidence intervals')
+## DBsection('One sample proportion')
+## Institution()
+## Author('Michael J. Dancs')
+## KEYWORDS('Confidence Intervals')
+##ENDDESCRIPTION
+
+DOCUMENT();     
+loadMacros(
+  "PGstandard.pl",  
+  "PGauxiliaryFunctions.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "answerHints.pl"
+);     
+TEXT(&beginproblem);
+Context("Numeric");
+$abstol = 0.01;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+
+$size = random( 500, 1500, 200 );
+@name = ( 'workers', 'voters', 'homeowners', 'car owners' );
+@item = (  'donated to charity', ' voted during the last election', 
+          ' a swimming pool in their backyard', ' received a speeding ticket in the past year');
+@wd1 = ( 'had', '', 'had', '' );
+@wd2 = ( 'have', '', 'have', '' );
+$ind1 = random( 0, 3, 1 );
+$p = random( .1, .5, .01 );
+$q = 1 - $p;
+$sample =  $p * $size;
+$fact = 1.960 * sqrt( $p*$q/ $size );   # Standard Error
+$ans1 = Real("100 * ( $p - $fact )");
+$ans2 = Real("100 * ( $p + $fact )");
+
+BEGIN_PGML
+
+In a simple random sample of [$size] [$name[$ind1]] in a particular city, [$sample] of those in the sample [$wd1[$ind1]] [$item[$ind1]]. Find a 95% confidence interval for the true percent of [$name[$ind1]] in this city who [$wd2[$ind1]] [$item[$ind1]].
+
+Express your results as percents. Round to at least two decimal places.
+
+Answer: Between [__________]% and [__________]%
+
+END_PGML
+
+#### Answers #####################################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+# Generic check for proportion versus percentage
+$pererr = "It looks like you've entered a proportion. This problem wants you to convert to percent.";
+$percheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct/100) < 20*$abstol)
+  };
+
+ANS($ans1->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS($ans2->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+### Solutions ###########################################3
+$zcrit = 1.960;
+$stderr = sqrt($p*$q/$size);
+$moeans = $zcrit * $stderr; 
+BEGIN_PGML_SOLUTION
+
+1. The sample statistic (point estimate) is [`\hat{p}`] = [$sample]/[$size] = [$p]. Leave this in decimal form for now.  
+1. Inference about proportions uses z-scores; the 95% critical value is 1.960.  
+1. For all samples of size [$n], the standard error (approximate standard deviation) of [`\hat{p}`] is given by  
+[``\begin{align*}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}&= \text{sqrt}([$p] * [$q] / [$size])\\ &= [$stderr]\end{align*}``]  
+leave this unrounded if possible.  
+1. The Margin of Error (some call this EBP) is the product of the last two values:  
+[``[$zcrit] * [$stderr] = [$moeans]``].  
+1. The lower limit of the confidence interval is:  
+[``[$p]  - [$moeans]``].  
+1. The upper limit of the confidence interval is:  
+[``[$p]  + [$moeans]``].  
+1. The problem wants percentages, so make sure to convert the previous answers ( you should receive a warning if you've done everything else correctly).
+
+If you like memorzing formulas; the one used in the computations above is:
+>>[``\hat{p}\pm z_{\alpha/2}\cdot\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}``]<<
+
+END_PGML_SOLUTION
+
+
+
+ENDDOCUMENT();      
+

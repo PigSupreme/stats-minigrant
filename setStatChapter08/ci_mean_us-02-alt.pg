@@ -1,0 +1,86 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Confidence intervals)
+## DBsection(One sample mean - z)
+## Date(6/3/2002)
+## Institution(The College of Idaho)
+## Author(R Cruz, L Danielson, J Guild)
+## MLT(CI_1z_05)
+## MLTleader(1)
+## Level(1)
+## MO(1)
+## TitleText1('The Basic Practice of Statistics')
+## AuthorText1('David Moore')
+## EditionText1('5e')
+## Section1('14')
+## Problem1('')
+## TitleText2('Mathematical Statistics')
+## AuthorText2('Wackerly, Mendenhall, Scheaffer')
+## EditionText2('6')
+## Section2('8.6')
+## Problem2('43')
+## KEYWORDS('statistics', 'inference', 'confidence interval','large sample','estimates','confidence interval')
+## Updated: 2010/10
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$showPartialCorrectAnswers = 1;
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute',tolerance=>.0051);
+
+$n = random(11,15);
+$mean = random(2.51,2.99,2);
+$s = random(0.15,0.95,.1);
+$se = $s/sqrt($n);
+
+@squest = ();
+
+$clperc = list_random(96, 98, 99);
+$cl = $clperc/100;
+$tcrit = tdistr($n-1, (1-$cl)/2);
+$moer = 100*$tcrit*$se;
+$moe = int(.5+100*$tcrit*$se)/100;
+$ans1 = int(.5+100*($mean-$tcrit*$se))/100;
+$ans2 = int(.5+100*($mean+$tcrit*$se))/100;
+
+######################################
+#  Main text
+
+
+BEGIN_PGML
+In a simple random sample of [$n] gas stations in the metropolitan area, the price per gallon of regular gasoline had a mean of $[$mean] and a (sample) standard deviation of $[$s]. Use this sample data to find a [$clperc]% confidence interval for the mean price per gallon of regular gasoline for all gas stations the metropolitan area.
+
+Round all answers to the nearest cent (two decimal places).
+
+$[_______]{"$ans1"} [` < \mu < `] $[_______]{"$ans2"}
+
+The margin of error for this confidence interval is: $[______]{"$moe"}
+
+END_PGML
+
+######################################
+#  Answers
+
+
+
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
+## These tags keep this problem from being added to the NPL database
+## 
+DBsubject('ZZZ-Inserted Text')
+DBchapter('ZZZ-Inserted Text')
+DBsection('ZZZ-Inserted Text')

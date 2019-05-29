@@ -1,0 +1,140 @@
+##DESCRIPTION
+##  z-confidence interval for a single mean
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Mean')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('One sample mean - z')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+$abstol = .00051;
+Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+$n = random(75,135,10);
+$mean = random(162.1,168.1,.2);
+$sigma = random(5.01, 8.99,.02);
+$gender = ("men", "women")[random(0,1,1)];
+
+@cl = (90, 95, 99);
+@zcrit = (1.6449, 1.960, 2.5758);
+$sdxbar = $sigma/sqrt($n);
+
+for my $i (0..2) {
+  @ci_left[$i] = $mean - $zcrit[$i]*$sdxbar;
+  @ci_right[$i] = $mean + $zcrit[$i]*$sdxbar;
+  # Lower limit provides feedback if students use t-scores
+  @ci_wrong_left[$i] = $mean - tdistr($n-1, (1-$cl[$i]/100)/2)*$sdxbar;
+  @ci_wrong2_left[$i] = $mean - tdistr($n, (1-$cl[$i]/100)/2)*$sdxbar;
+  @ci_wrong_right[$i] = $mean + tdistr($n-1, (1-$cl[$i]/100)/2)*$sdxbar;
+  @ci_wrong2_right[$i] = $mean + tdistr($n, (1-$cl[$i]/100)/2)*$sdxbar;
+  }
+	
+######################################
+#  Main text
+
+BEGIN_PGML
+The heights of all [$gender] in a large population follow a Normal distribution with unknown mean [`\mu`] and standard deviation [`\sigma`] = [$sigma] cm. A simple random sample of [$n] [$gender] produced a mean height of [`\bar{x}`] = [$mean] cm.
+
+In each question below, give answers to at least two decimal places.
+
+a. Find a [$cl[0]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+b. Find a [$cl[1]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+c. Find a [$cl[2]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+END_PGML
+
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$errtol = 20*$abstol;
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < $errtol)
+  };
+
+for my $i (0..2) {
+    # Check for correct distribution (z or t); dynamic tolerance
+    $ans_left[$i] = Real($ci_left[$i]);
+    $dtol[$i] = abs($ans_left[$i] - $ci_wrong_left[$i])/2; 
+    # Left endpoints
+    ANS($ans_left[$i]->cmp->withPostFilter(AnswerHints(
+      sub{
+        my ($correct,$student,$ans) = @_;
+        return abs($student - $ci_wrong_left[$i]) < $dtol[$i] || 
+          abs($student - $ci_wrong2_left[$i]) < $dtol[$i];
+    } => ["Check that you are using the correct distribution (z or t)."],
+      $tolcheck=>$tolerr
+    )));
+    # Right endpoints
+    ANS(Real($ci_right[$i])->cmp->withPostFilter(AnswerHints(
+      sub{
+        my ($correct,$student,$ans) = @_;
+        return abs($student - $ci_wrong_right[$i]) < $dtol[$i] || 
+          abs($student - $ci_wrong2_right[$i]) < $dtol[$i];
+    } => ["Check that you are using the correct distribution (z or t)."],
+      $tolcheck=>$tolerr
+    )));
+}
+
+### Solutions ###########################################3
+BEGIN_PGML_SOLUTION
+To find the [$cl[0]]% confidence interval:
+
+1. The sample statistic (point estimate) is [$mean].  
+1. Since the population standard deviation [`\sigma=[$sigma]`] is known, the critical value is a z-score. Find it using technology or a table: [$zcrit[0]].  
+1. For all samples of size [$n], the standard deviation of [`\bar{x}`] is given by  
+[``\frac{\sigma}{\sqrt{n}}= [$sigma]/\text{sqrt}([$n]) = [$sdxbar];``]  
+leave this unrounded if possible.  
+1. The Margin of Error (some call this EBM) is the product of the last two values. You can compute it directly as:  
+[``[$zcrit[0]] * [$sigma]/\text{sqrt}([$n])=[@ $zcrit[0]*$sdxbar @]``].  
+1. The lower limit of the confidence interval is:  
+[``[$mean]  - [@ $zcrit[0]*$sdxbar @]``].  
+1. The upper limit of the confidence interval is:  
+[``[$mean]  + [@ $zcrit[0]*$sdxbar @]``].  
+
+The steps are the same for the other two parts, but use a different critical value ([$zcrit[1]] for [$cl[1]]% and [$zcrit[2]] for [$cl[2]]%).
+
+
+If you like memorzing formulas; the one used in the computations above is:
+>>[``\bar{x}\pm z_{\alpha/2}\cdot\frac{\sigma}{\sqrt{n}}``]<<
+
+END_PGML_SOLUTION
+
+COMMENT("Gives feedback for using the wrong distribution.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
