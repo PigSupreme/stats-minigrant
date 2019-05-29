@@ -1,0 +1,100 @@
+##DESCRIPTION
+##  Critical Values for z-confidence intervals
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'z-score')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "answerHints.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.00051,
+  tolType => "absolute",
+);
+
+@cl = (70, 75, 80, 85, 92, 96, 99);
+@zcrit = (1.0364, 1.1503, 1.2816, 1.4395, 1.7507, 2.0537, 2.5758);
+
+@r = NchooseK(scalar(@cl),5);
+
+@qtext = ();
+@a = ();
+for my $i (0..4) {
+  @qtext[$i] = "The z-critical value for a(n) @cl[$r[$i]]% confidence level is: ";
+  @a[$i] = @zcrit[$r[$i]];
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the critical z-score value for each of the following confidence levels. Give each answer to at least three decimal places.
+* [$qtext[0]][______]
+* [$qtext[1]][______]
+* [$qtext[2]][______]
+* [$qtext[3]][______]
+* [$qtext[4]][______]
+
+
+END_PGML
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+
+########################################################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. It is possible that you need to round to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+
+foreach my $i (0..4) {
+  ANS(Real($a[$i])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr)));
+}
+$solnperc = @cl[$r[0]];
+$solnprop = $solnperc/100;
+$solnarea = (1-$solnprop)/2;
+$areaperc = 100*$solnarea;
+
+BEGIN_PGML_SOLUTION
+*Note:* If you are using a traditional z-score table (which typically lists values to three decimal places only), you may get slightly different answers than shown. If your instructor insists on using tables for this type of problem, ask him/her to show you how to compute log(2018) to three decimal places without using technology.
+
+To compute the [$solnperc]% z-critical value:
+
+*Method 1 (Preferred):* Convert the Confidence Level to decimal: [$solnperc]% = [$solnprop]. Subtract this from 1 and divide by 2: (1-[$solnprop])/2 = [$solnarea]. Find the cut-off z-score such for an upper area of [$solnarea] (or [$areaperc]%); many textbooks using the notation [`z_{[$solnarea]}`] for this.
+
+*Method 2 (Using a z-score table):* Proceed as above, but find the area closest to [$solnarea] in the table. The corresponding z-score will be negative; ignoring the negative sign gives the critical value.
+END_PGML_SOLUTION
+
+
+COMMENT("Hard-coded values with randomized order.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

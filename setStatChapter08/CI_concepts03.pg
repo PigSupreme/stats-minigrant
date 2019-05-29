@@ -1,0 +1,94 @@
+#DESCRIPTION
+##  Statistics: Introduction
+##ENDDESCRIPTION
+
+##KEYWORDS('statistics', 'confidence intervals')
+
+## DBsubject('Statistics')
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Level(2)
+## Date('04/01/2017')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('No Text')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGML.pl"
+);
+
+TEXT(  beginproblem() );
+
+##############################################################
+#
+#  Setup
+#
+#
+$showPartialCorrectAnswers = 0;
+
+$n = random(1210,1590,10);
+$cl = random(91,99,2)."%";
+$x = int(random(.81,.89,.02)*$n);
+$phat = $x/$n;
+$phat3 = int(.5+$phat*1000)/1000;
+$phatper = $phat*100;
+$moe = random(2.1, 2.9,.1);
+$pper = int(.5+$phatper*100)/100;
+$cil = $pper - $moe;
+$cih = $pper + $moe;
+$scenario_individuals ="college students";
+$scenario_successes = "of students who receive financial aid";
+
+# Question text here
+$qtext = "Based on a simple random sample of $n $scenario_individuals, a $cl confidence interval for the percentage $scenario_successes is reported as $pper% \(\pm\) $moe%. Which of the following is/are correct interpretation(s) of this confidence interval?";
+
+# List correct answer(s) here:
+@correct = (
+"There is a $cl probability that the true percentage $scenario_successes is between $cil% and $cih%.",
+"There is a $cl probability that the true percentage $scenario_successes is within $moe% of $pper%."
+);
+
+# List wrong answer(s) here
+@wrong = (
+"The percentage of $scenario_individuals in the population $scenario_successes is between $cil% and $cih%.",
+"If we select an individual from the population, there is a $cl probability that this individual is one of the $scenario_successes.",
+"In $cl of all samples of size $n from this population, the percentage $scenario_successes is between $cil% and $cih%.",
+"In any simple random sample of $n $scenario_individuals from the population, there is a $cl probability that the percentage $scenario_successes in the sample is within $moe% of the percentage $scenario_successes in the entire population."
+);
+
+$mc_holder = new_checkbox_multiple_choice();
+
+$mc_holder->qa("There may be more than one correct answer; you must check all correct answers in order to get credit for this problem.",
+@correct
+);
+$mc_holder->extra(@wrong);
+$mc_holder->makeLast("In $cl of all samples of size $n from this population, the percentage $scenario_successes is between $cil% and $cih%.");
+
+#######
+
+BEGIN_PGML
+
+[$qtext]
+
+[@ $mc_holder->print_q() @]*  
+[@ $mc_holder->print_a() @]*
+
+END_PGML
+
+#######
+# All-or-nothing grader
+$showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
+
+ANS( checkbox_cmp($mc_holder->correct_ans) );
+
+ENDDOCUMENT();

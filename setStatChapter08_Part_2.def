@@ -1,0 +1,114 @@
+assignmentType      = default
+openDate          = 03/13/2019 at 11:59pm EDT
+reducedScoringDate = 03/21/2019 at 06:59am EDT
+dueDate           = 03/24/2019 at 11:59pm EDT
+answerDate        = 03/24/2019 at 11:59pm EDT
+enableReducedScoring = N
+paperHeaderFile   = defaultHeader
+screenHeaderFile  = defaultHeader
+description       = 
+restrictProbProgression = 0
+emailInstructor   = 0
+
+problemListV2 
+problem_start
+problem_id = 1
+source_file = setStatChapter08/CI_concepts03.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 2
+source_file = setStatChapter08/CI_concepts04.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 3
+source_file = setStatChapter08/critical_ci_z.pg
+value = 1
+max_attempts = -1
+showMeAnother = 5
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 4
+source_file = setStatChapter08/ci_prop-01.pg
+value = 1
+max_attempts = -1
+showMeAnother = 5
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 5
+source_file = setStatChapter08/ci_prop-02.pg
+value = 1
+max_attempts = -1
+showMeAnother = 5
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 6
+source_file = setStatChapter08/ci_prop-03.pg
+value = 1
+max_attempts = -1
+showMeAnother = 5
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 7
+source_file = setStatChapter08/CI_prop_moe-01.pg
+value = 1
+max_attempts = -1
+showMeAnother = 5
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 8
+source_file = setStatChapter08/ci_prop-sample_size-01.pg
+value = 1
+max_attempts = -1
+showMeAnother = 3
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 9
+source_file = setStatChapter08/ci_prop-sample_size-02.pg
+value = 1
+max_attempts = -1
+showMeAnother = 3
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 10
+source_file = setStatChapter08/ci_mean-sample_size-01.pg
+value = 1
+max_attempts = -1
+showMeAnother = 3
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+

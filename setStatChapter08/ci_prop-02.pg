@@ -1,0 +1,131 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Confidence intervals)
+## DBsection(One sample proportion)
+##KEYWORDS(''')
+
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('')
+## Institution('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+$abstol = 0.01;
+Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+$n = random(750,1350,10);
+$x = int(random(.6*$n,.7*$n,1));
+$phat = $x/$n;
+$phatr = $phat*100;
+$sep = sqrt($phat*(1-$phat)/$n);
+$type = ("workers", "students")[random(0,1,1)];
+
+@quest = ("Find a 95% confidence interval for p",
+	  "Find a 90% confidence interval for p",
+	  "Find a 99% confidence interval for p");
+@slice = NchooseK(3,3);
+@squest = @quest[@slice];
+
+@ans1 = ($phatr - 195.966 * $sep, $phatr - 164.485 * $sep, $phatr - 257.583 * $sep);
+@ans2 = ($phatr + 195.966 * $sep, $phatr + 164.485 * $sep, $phatr + 257.583 * $sep);
+	
+@sans1 = @ans1[@slice];
+@sans2 = @ans2[@slice];
+
+$time = random(15,40,5);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+In a simple random sample of [$n] [$type] from a large population, it is found that [$x] commute an average of more than [$time] minutes per day. Use this sample to estimate the true percentage, p, of [$type] in this population who commute an average of more than [$time] minutes per day.
+
+In each question below, give answers as percents, rounded to at least two decimal places.
+
+(a) [$squest[0]]  
+[___]{width=>10}% < p < [___]{width=>10}%
+
+(b) [$squest[1]]  
+[___]{width=>10}% < p < [___]{width=>10}%
+
+(c) [$squest[2]]  
+[___]{width=>10}% < p < [___]{width=>10}%
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+# Generic check for proportion versus percentage
+$pererr = "It looks like you've entered a proportion. This problem wants you to convert to percent.";
+$percheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct/100) < 20*$abstol)
+  };
+
+ANS(Real($sans1[0])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS(Real($sans2[0])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS(Real($sans1[1])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS(Real($sans2[1])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS(Real($sans1[2])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+ANS(Real($sans2[2])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr, $percheck=>$pererr)));
+
+### Solutions ###########################################3
+$zcrit = 1.960;
+$stderr = sqrt($phat*(1-$phat)/$n);
+$moeans = $zcrit * $stderr; 
+BEGIN_PGML_SOLUTION
+
+1. The sample statistic (point estimate) is [`\hat{p}`]= [$x]/[$n] = [$phat]. Leave this in decimal form for now.  
+1. Inference about proportions uses z-scores; the 95% critical value is 1.960.  
+1. For all samples of size [$n], the standard error (approximate standard deviation) of [`\hat{p}`] is given by  
+[``\begin{align*}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}&= \text{sqrt}([$phat] * [@ 1-$phat @] / [$n])\\& = [$stderr]\end{align*}``]  
+leave this unrounded if possible.  
+1. The Margin of Error (some call this EBP) is the product of the last two values:  
+[``[$zcrit] * [$stderr] = [$moeans]``].  
+1. The lower limit of the confidence interval is:  
+[``[$phat]  - [$moeans]``].  
+1. The upper limit of the confidence interval is:  
+[``[$phat]  + [$moeans]``].  
+1. The problem wants percentages, so make sure to convert the previous answers ( you should receive a warning if you've done everything else correctly).
+
+If you like memorzing formulas; the one used in the computations above is:
+>>[``\hat{p}\pm z_{\alpha/2}\cdot\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}``]<<
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

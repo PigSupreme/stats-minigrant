@@ -1,0 +1,80 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Confidence intervals)
+## DBsection(One sample mean - t)
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.000051,
+  tolType => "absolute");
+
+@tcrit = ();
+@qtext = ();
+@a = ();
+for my $i (0..2) {
+  $df = 10*$i + random(10,20,2);
+  $n = $df + 1;
+  $cl = random(80,99);
+  @a[$i] = tdistr($df, (1-$cl/100)/2);
+  @qtext[$i] = "A(n) $cl% confidence level for a population mean, based on a Simple Random Sample of size $n, when the population's standard deviation is unknown:";
+  }
+
+for my $i (3..4) {
+  $cl = random(80,98,2);
+  $n = random(31,50);
+  @a[$i] = udistr((1-$cl/100)/2);
+  @qtext[$i] = "A(n) $cl% confidence level for a population mean, based on a Simple Random Sample of size $n, when the population's standard deviation is known:";
+  }
+
+$cl = random(71,93,2);
+$n = random(31,50);
+$a[5] = udistr((1-$cl/100)/2);
+$qtext[5] = "A(n) $cl% confidence level for a population proportion, based on a Simple Random Sample of size $n:";
+
+@ord = NchooseK(6,6);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the critical value for each of the following confidence intervals. Give each answer to at least four decimal places.
+
+1. [$qtext[$ord[0]]][______]{$a[$ord[0]]}  
+
+1. [$qtext[$ord[1]]][______]{$a[$ord[1]]}  
+
+1. [$qtext[$ord[2]]][______]{$a[$ord[2]]}  
+
+1. [$qtext[$ord[3]]][______]{$a[$ord[3]]}  
+
+1. [$qtext[$ord[4]]][______]{$a[$ord[4]]}  
+
+1. [$qtext[$ord[5]]][______]{$a[$ord[5]]}  
+
+END_PGML
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
+
+## These tags keep this problem from being added to the NPL database
+## 
+DBsubject('ZZZ-Inserted Text')
+DBchapter('ZZZ-Inserted Text')
+DBsection('ZZZ-Inserted Text')
