@@ -1,0 +1,104 @@
+##DESCRIPTION
+##  Hypothesis test for two proportions, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Two sample proportion)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing')
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+
+$n = random(50,90,10);
+$m = $n-20;
+$x2 = random(10,$m,1);
+$x1 = $x2 + random(5,12,1); 
+#rigged so that smallest possible z = 1.08, biggest is z = 2.57
+$p1 = ($x1/$n);
+$p2 = ($x2/$n);
+$phat = ($x1+$x2)/(2*$n);
+$sd = sqrt($phat*(1-$phat)*(2/$n));
+$test_raw = ($p1-$p2)/$sd;
+$test = int(10000*(.00005 + $test_raw))/10000;
+$p_val = 2* uprob($test_raw);
+
+# WebWorK doesn't behave when P is close to zero
+if ($pval < .0001) {$pval = 0};
+
+$alpha = .05;
+$alphap = 100*$alpha;
+
+if ($p_val < $alpha) {$tag = 0;} else {$tag = 1;}
+@ans = ("Reject the null hypothesis, and thus conclude that there is a significant difference between the two sections' success rates.",
+        "Fail to reject the null hypothesis, and thus conclude that both sections might have the same sucess rate.");
+
+$mc = new_multiple_choice();
+$mc -> qa('Based on the sample data, we would:', $ans[$tag]);
+$mc -> extra($ans[1-$tag],"Fail to reject the null hypothesis, and conclude that there is no difference in success rates.","Reject the null hypothesis, and  conclude there is no significant difference in success rates.");
+
+$showPartialCorrectAnswers = 1;
+######################################
+#  Main text
+
+BEGIN_PGML
+We wish to determine if a two sections of the same introductory course have significantly different "success rates" (defined as the proportion of students who receive a course grade of A, B, or C). The first section meets in the early morning, the second section meets in the late afternoon.
+
+Each section has [$n] students. Among the early morning section, [$x1] receive an A, B, or C. Among the late afternoon section, [$x2] receive an A, B, or C.. Assume these can be treated as independent simple random samples from their respective populations.
+
+Use this sample data to test the claim [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) \ne 0`], using a significance level of [$alphap]%.
+
+The value of the test statistic is [`z = `] [___________] (round to at least four decimal places).
+END_PGML
+$ans_a = Real("$test")->with(tolType=>'absolute', tolerance=>'0.00051');  
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$anshash) = @_;
+         return abs($student-$correct) < .01;
+         } => ["Your answer is close.  Try the calculation using more accuracy."]
+)));
+
+BEGIN_PGML
+
+The P-value for this sample is [___________] (do not convert to percent).
+
+END_PGML
+## NOTE: 0.008 is the max p-val difference if z is off by +/- 0.02
+$ans_b = Real("$p_val")->with(tolType=>'absolute', tolerance=>'0.008');  
+ANS($ans_b->cmp->withPostFilter(AnswerHints(
+     $p_val*100 => ["Do not convert to percent."]
+)));
+
+BEGIN_PGML
+[@ $mc->print_q() @]*  
+[@ $mc->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc->correct_ans));
+
+##############
+### Solutions
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
