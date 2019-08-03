@@ -1,0 +1,69 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+
+TEXT(beginproblem());
+
+Title("Previewing, Submitting, and Viewing Answers");
+
+##############################################
+
+BEGIN_PGML
+
+The Preview and Submit/Check answer buttons at the bottom of the screen are what cause [$WW] to process your answers. _Nothing that you type or select for an answer will have any effect until you press one of these buttons!_
+
+* "Preview My Answers" is useful when your answer is a complicated expression and you want to make sure that you've entered it in correct mathematical notation.  Using this button causes [$WW] to check if it can understand your answer, then displays its interpretation of what you have entered (with nice mathematical formatting where appropriate).  If you are working on a problem that has a limited number of attempts, previewing does not use up any of your attempts.
+
+* "Submit Answers" causes [$WW] to check your answers, then report your results and score for the problem (this is discussed below).  _If you are working on a problem that has a limited number of attempts, this will use up one of your attempts!_ You must Submit Answers in order to receive credit for a problem. This button will disappear after an assignment is due.
+
+* "Check Answers" appears only after an assigmnent is due and answers are available to students. This works exactly like Submit Answers except that no changes will be made to your recorded score (so you can use this for extra practice). Additionally, if the "CorrectAnswers" checkbox (above the buttons) is selected, you will also see the correct answers for the problem.
+
+---
+To see how this works, fill in the blanks below exactly as instructed; then press "Preview My Answers" at the bottom of the page.
+
+* Type "1-3/4" (without the quotes) in the blank: [__________]{"1-3/4"}
+* Type "(1-3)/4" (without the quotes) in the blank: [__________]{"(1-3)/4"}
+* Type "1-(3/4" (without the quotes; yes, the error is intentional) in the blank: [__________]{"1-(3/4)"}
+
+The top of the preview page shows each answer blank in order, with "Entered" and "Answer Preview" items. Notice that "Entered" evaluated your expressions and converted to a single decimal value (more on this in a later problem), whereas "Answer Preview" shows standard written mathematical notation.
+
+If you followed the instructions above, the last answer is missing a parenthesis somewhere, and [$WW] informs you that there is a problem in the "Message" area. Change the last answer to "1-(3/4)" and Preview again
+
+Note that your previous answers are saved in the answer blanks as long as you stay on the same problem.
+
+---
+Now use the "Submit Answers" button (or "Check Answers" if the due date has passed). If you did everything as instructed, you will see the preview information above plus an additional "Result" column that tells you which answers are correct. [$WW] will sometimes, but not always, show an additional "Message" for incorrect answers.
+
+Verify at the bottom of the page (below the Preview/Submit buttons) and/or the Problem list (left sidebar) that you have full credit for this problem before moving on to the next.
+
+Note that if you are working on a problem with unlimited attempts, it is probably more convenient to always use "Submit Answers."
+
+---
+Some problems (including this one) have solutions that are hidden from students until answers are available. If the "Check Answers" button is available for this problem, you will also see a "Solution" link on the next line; click it to expand the solution.
+END_PGML
+
+BEGIN_PGML_SOLUTION
+In this case, the solution link is for demonstration only. Actual problems may have a solution with more useful information.
+
+Additional information (probably more useful to instructors than students) is available here:  
+[| http://webwork.maa.org/wiki/Preview/Check_Answer/Submit_Answer_Button_Behavior |]
+END_PGML_SOLUTION
+
+BEGIN_PGML
+If there is no Solution link, come back to this problem once answers are available.
+
+END_PGML
+
+install_forgiving_grader();
+$showPartialCorrectAnswers = 1;
+
+##############################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

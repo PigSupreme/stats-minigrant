@@ -1,0 +1,68 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+$showPartialCorrectAnswers = 1;
+
+TEXT(beginproblem());
+Title("Multiple Answers in One Blank");
+
+##############################################
+
+Context("Numeric");
+
+$a = random(1,5,1);
+$asqr = $a*$a;
+$f = Formula("(x^2-$a^2)")->reduce;
+
+Context()->texStrings;
+BEGIN_TEXT
+
+You may sometimes be asked to provide more than one answer in a single
+answer blank.  For example, you may need to enter more than one value for which an algebraic equation is true.  In this case, you should separate your
+answers by commas. A well-written problem will remind you about this.
+$PAR
+
+$BBOLD Example:$EBOLD List the value(s) of \(x\) for which \(\displaystyle $f=0\): \{ans_rule(20)\} (there are two such values; you can enter them in either order for this problem).
+END_TEXT
+Context()->normalStrings;
+Context()->strings->are(none=>{},NONE=>{alias=>"none"});
+
+ANS(List($a,-$a)->cmp);
+
+##################################################
+
+$b = random(2,4);
+$ans1 = List($b+1);
+
+$c = random($b+2, $b+4);
+$ans2 = List($c,$c+1);
+
+$ans3 = List("none");
+
+Context()->texStrings;
+BEGIN_PGML
+---
+Some problems allow either a single answer or a comma-seperated list; this is done so that the answer format does not tell you how to solve the actual problem. Empty sets/lists of answers are usually entered as "NONE" (without the quotes), although a well-written problem should remind you what to use.
+
+In each case below, list all ntegers (whole numbers) that satisfy the given conditions. If there are no such integers, enter NONE as your answer.
+
+* [`[$b]<x<[$b + 2]`] : [_______________________]
+* [`[$c]\leq x\leq[$c +1]`]  [_______________________]
+* Both [`x<[$b]`] and [`x>[$c]`]: [_______________________]
+
+END_PGML
+ANS($ans1->cmp(showHints=>0, showLengthHints=>0, partialCredit=>0));
+ANS($ans2->cmp(showHints=>0, showLengthHints=>0, partialCredit=>0));
+ANS(String('NONE')->cmp);
+
+##################################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

@@ -1,0 +1,66 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGunion.pl",
+  "choiceUtils.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+);
+
+TEXT(beginproblem());
+Title("True/False and Multiple-Choice/Select Questions");
+
+##############################################
+
+$a = random(1,5,1);
+$b = random(6,10,1);
+$c = random(-10,-1,1);
+$d = random(-10,-1,1);
+$e = random(1,10,1);
+
+# Choices presented to students
+$tfbank = new_select_list();
+ $tfbank->rf_print_q(~~&pop_up_list_print_q);
+$tfbank-> ra_pop_up_list( [
+ No_answer => "Choose an answer",
+ True => "True",
+ False => "False" ]
+ );
+
+# Questions and correct answers
+$tfbank -> qa(
+  "\(\quad -$a \lt -$b\)",    "False",
+  "\(\quad $c \leq $c\)",      "True",
+  "\(\quad $d \lt $d\)",      "False",
+  "\(\quad \pi \geq 3.2\)",    "False",
+  "\(\quad $e-1 \le $e\)",    "True"
+);
+# Number of questions to pick
+$tfbank->choose(5);
+
+##################################################
+
+BEGIN_TEXT
+In most problems, $WW will tell tells you which of your answers are correct.  For questions with a limited number of options (such as True/False or Multiple Choice), $WW might only tell you whether all answers are correct, and will not give any partial credit. This is done to ensure that you actually understand the problem completely, and limits your ability to using systematic guessing or some other method to get credit for a problem you don't really know how to do.
+$PAR
+Problems of this sort will often limit the number of times you can submit answers and/or randomly generate a new version after a certain number of attempts, but this problem should not do so.
+$PAR
+Select True or False from the drop-down menu to the left of each question. Although these should be very easy problems, you may want to leave one or more answers blank/incorrect on purpose to see what happens when you submit your answers.
+$PAR
+\{$tfbank->print_q()\}
+$HR
+$PAR
+Note: Once solutions are available (which is never before the due date for the assignment), you can use the CorrectAnswers checkbox to see which of your answers were correct.
+$PAR
+END_TEXT
+
+ANS(str_cmp($tfbank->ra_correct_ans));
+install_problem_grader(~~&std_problem_grader);
+$showPartialCorrectAnswers = 0;
+
+
+##################################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

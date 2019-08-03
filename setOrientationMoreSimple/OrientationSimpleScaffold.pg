@@ -1,0 +1,99 @@
+##DESCRIPTION
+##  A sample scaffolded problem
+##ENDDESCRIPTION
+
+##KEYWORDS('SAMPLE', 'SCAFFOLD')
+
+## DBsubject('Sample Problems')
+## DBchapter('Essay Questions')
+## DBsection('')
+## Date('1/1/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "PGunion.pl",
+   "MathObjects.pl",
+   "scaffold.pl",
+   "PGML.pl",
+);
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+Title("Scaffolded Questions");
+
+# Show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 1;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+$global_x = 2;
+$s = sqrt($global_x);
+$ans = int($s);
+
+##############################################################
+#
+#  Text
+#
+#
+BEGIN_PGML
+Some WeBWorK problems, like this one, have multiple sections that are displayed in sequence rather than all at once. This is called a scaffold, since you must usually complete one section before moving on to the next. Available sections can be shown or hidden by clicking on their title bar; try this below.  
+
+END_PGML
+Scaffold::Begin();
+Section::Begin("Part 1");
+
+BEGIN_PGML
+Enter a postive number that is not a perfect square: [__________]
+
+Once you submit a correct answer for this section, the next will open automatically.
+END_PGML
+
+ANS(Real("$global_x")->cmp(
+     checker => sub {
+       my ($correct,$student,$ansHash) = @_;
+       # If correct, update the values for scaffold part 2
+       if (($student > 0) && (int(sqrt($student))**2 != $student)) {
+         $global_x = $student;
+         $s = sqrt($global_x);
+         $ans = int($s);
+         return 1
+       } else {
+         return 0
+       }
+     }
+   ));
+
+Section::End();
+
+####################
+Section::Begin("Part 2");
+BEGIN_PGML
+[`\sqrt{[$global_x]}\approx [$s]`]. What is the largest integer [`n`] such that [`n^2<[$global_x]`]? [_______]{$ans}
+END_PGML
+
+Section::End();
+
+Section::Begin("Additional notes");
+BEGIN_PGML
+This problem uses a clever trick to update Part 2 once you've correctly answered Part 1. If you have Part 2 correct but change your answer in Part 1, this may affect Part 2.
+END_PGML
+Section::End();
+
+Scaffold::End();
+ENDDOCUMENT();     

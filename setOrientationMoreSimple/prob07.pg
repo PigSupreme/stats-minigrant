@@ -1,0 +1,67 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+$showPartialCorrectAnswers = 1;
+
+TEXT(beginproblem());
+Title("Intervals as Answers");
+
+##################################################
+
+Context("Interval");
+
+$a = random(-5,5,1);
+$b = $a + random(2,4);
+$I0 = Compute("($a,$b]");
+$I = Compute("(-infinity,$a)");
+
+BEGIN_PGML
+The answer to some problems is an interval or range of real numbers, such as [`-2\leq x\lt 5`]. Since there are infintely-many real numbers in such an interval, it is impossible to list them all.
+
+[$WW] usually wants you to enter intervals of real numbers using standard interval notation. For example, [`[-2,5)`] represents the interval above, which includes the point [`x=-2`] (because a square bracket was used) but does not include the point [`x=5`] (because a round bracket/parenthesis was used). Note that the left endpoint must be less than the right, so [`(5,-2]`] is not a correct way to write this interval.
+
+* Write the interval [`[$a]\lt x\leq[$b]`] in standard notation: [__________________]
+
+Infinite intervals such as [`x\geq 1`] as written using an infinity symbol as a placeholder for the endpoint, [`[1,\infty)`] in this case. You can enter [`\infty`] as "INF" and [`-\infty`] as "-INF" (without the quotes in both cases). Note that [`-\infty`] and [`\infty`] are never actually included in the interval, so always use parentheses/round brackets with them.
+
+
+* Write the interval [`x\lt[$a]`] in standard notation (hint: the lower limit is [`-\infty`]): [__________________]
+
+---
+END_PGML
+ANS($I0->cmp);
+ANS($I->cmp);
+
+##################################################
+
+Context("Interval");
+
+$a = random(-8,-2,1);
+$b = random($a+1,$a+5,1);
+$c = random($b+1,$b+5,1);
+$I2 = Compute("[$a,$b) U ($b,$c)");
+
+BEGIN_PGML
+Some answers cannot be written as a single interval (for example, the solution to [`(x-1)^2\geq 4`] is "[`x\leq-1`] or [`x\geq 3`]"). This type of answer must be written using the _set union_ operator, [`\cup`], which can be entered as the UPPERCASE letter "U", without the quotes. Lowercase will not work here.
+
+The above answer would be written in this notation as [`(-\infty,-1]\cup[3,\infty)`].
+
+Write the set of points satisfying [`[$a]\leq x\lt [$c]`], but excluding [`x=[$b]`], as a union of two intervals in standard notation: [_____________________].
+
+(hint: If you're having trouble, draw a number line).
+
+END_PGML
+
+ANS($I2->cmp);
+
+##################################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

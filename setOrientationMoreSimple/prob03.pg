@@ -1,0 +1,79 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "contextLimitedNumeric.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+
+$showPartialCorrectAnswers = 1;
+
+TEXT(beginproblem());
+Title("Numerical Computations");
+
+##############################################
+
+BEGIN_TEXT
+
+Here are the standard symbols that $WW, along with most other
+computer software, uses for arithmetic operations:
+$PAR
+
+\{
+  BeginTable().
+   Row([$BBOLD.'Symbol'.$EBOLD,
+       $BBOLD.'Meaning'.$EBOLD,
+       $BBOLD.'Example'.$EBOLD]).
+    TableLine().
+    Row([computer("+"),'Addition',computer("3+4 = 7")],align=>"CENTER").
+    Row([computer("-"),'Subtraction',computer("3-4 = -1")],align=>"CENTER").
+    Row([computer("*"),'Multiplication',computer("3*4 = 12")],align=>"CENTER").
+    Row([computer("/"),'Division',computer("3/4 = .75")],align=>"CENTER").
+    Row([computer($CARET)." or ".computer("**"),'Exponentiation',
+      computer("3${CARET}4 = 81")." or ".
+      computer("3**4 = 81")],align=>"CENTER").
+    Row([computer("sqrt()"),'Square Root',computer("sqrt(3) = 1.73205...")],align=>"CENTER").
+    TableLine().
+  EndTable()
+\}
+$PAR
+
+END_TEXT
+
+##################################################
+
+Context("Numeric");
+$a = non_zero_random(-5,5,1);
+$b = non_zero_random(-5,5,1);
+$c = non_zero_random(-3,3,1) * 2;
+$d = non_zero_random(-5,5,1);
+
+BEGIN_PGML
+
+For basic arithmetic computations, it is usually best to enter exact answers directly into [$WW] answer blanks; this avoids rounding errors and saves you the trouble of transfering an answer from some other calculator.
+
+As an example, [`1+\sqrt{3}`] is approximately [`2.73...`], but [$WW] will not accept an answer of [`2.73`] in the next blank (try it):
+
+[__________]{Real("1+sqrt(3)")->with(tol_type=>absolute, tolerance=>0.0001)}
+
+The issue here is that [$WW] is expecting more than two decimal places in the answer, but there is no clear indication of this sort of thing in many standard problems. Rather than having to guess how many decimal places you need, it's better to enter the exact answer as "1+sqrt(3)" (without the quotes) and let [$WW] handle the details.
+
+---
+Unless you are in a lower-level algebra course, purely numerical fractions can usually be left in non-reduced or improper forms, so you can type [`8/6`] instead of [`4/3`] or [`1.33`]; you can try this in the blank below:
+
+[__________]{Real("8/6")->with(tol_type=>absolute, tolerance=>0.0001)}
+
+If you try decimal form, [$WW] needs at least four decimal digits (1.3333) in this particular case. A well-written problem should specify this.
+
+---
+Additional notes: Unless the instructor has made course-wide changes or a particular problem overrides the defaults, [$WW] marks numerical answers that are within 0.1% of the expected answer as being correct (approximately five significant digits).
+END_PGML
+
+##################################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

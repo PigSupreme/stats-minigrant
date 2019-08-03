@@ -1,0 +1,48 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+
+TEXT(beginproblem());
+
+Title("$WW Problem Page Layout");
+
+##############################################
+BEGIN_PGML
+
+The [$WW] screen is divided into several areas, each used for a
+different purpose.  You will need to understand these
+in order to use [$WW] effectively.
+
+The area containing this text normally contains the problem you are trying to answer, including answer blanks, multiple-choice selectors, etc. There are no such blanks on this page.
+---
+Above this area are navigation buttons that allow you to move from problem to problem.  The "Previous Problem" (currently not selectable) and "Next Problem" buttons do what you would expect.  The "Problem List" button takes you back to the opening page for the homework set (the one that lists all the problems and
+gives the instructions for the homework set).
+
+A list of Problems also appears at the bottom of the left sidebar; along with the status of each problem. A "..." means you have attempted a problem but not earned full credit; a checkmark means you have earned full credit. The top of this problem list shows a progress bar for the entire assignment.
+
+Note: If you are on a narrow screen and cannot see the Main Menu or Problem list on the left sidebar, use the > button near the very top of the page to show the sidebar. It may appear above or below the main problem area.
+---
+Below the area you are reading, look for buttons to Preview and Submit or Check your answers; these will be explained in the next problem.
+
+Below these buttons is information that [$WW] has recorded about your work on this problem, including how much credit you have received.  After you have submitted answers to a problem, look for a line that says "Your overall recorded score is ..." (the score is shown as a percent).
+
+Near the very bottom of each problem page is a button to "Email Instructor" that you should use if/when you need help. Your instructor will provide further details on appropriate usage.
+---
+To receive credit for this problem, press the "Submit Answers" button. Confirm that your response was recorded and that you have received credit before moving on to the next problem.
+
+END_PGML
+
+
+install_forgiving_grader();
+$showPartialCorrectAnswers = 1;
+
+##############################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
