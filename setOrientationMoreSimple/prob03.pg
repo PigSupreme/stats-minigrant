@@ -1,3 +1,10 @@
+## DBsubject(WeBWorK)
+## DBchapter(WeBWorK tutorial)
+## DBsection(WeBWorK tutorial)
+## Level(1)
+## Author(Michael J. Dancs)
+## Institution(Clayton State University)
+
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
@@ -9,7 +16,6 @@ loadMacros(
   "PGcourse.pl",
   "PGML.pl"
 );
-
 
 $showPartialCorrectAnswers = 1;
 

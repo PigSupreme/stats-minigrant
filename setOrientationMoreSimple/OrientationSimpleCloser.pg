@@ -1,3 +1,8 @@
+## DBsubject(WeBWorK)
+## DBchapter(WeBWorK tutorial)
+## DBsection(WeBWorK tutorial)
+## Level(1)
+
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
