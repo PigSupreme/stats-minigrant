@@ -96,9 +96,3 @@ $showPartialCorrectAnswers = 0;
 ANS( checkbox_cmp($mc_holder->correct_ans) );
 
 ENDDOCUMENT();
-
-## These tags keep this problem from being added to the NPL database
-## 
-DBsubject('ZZZ-Inserted Text')
-DBchapter('ZZZ-Inserted Text')
-DBsection('ZZZ-Inserted Text')
