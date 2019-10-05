@@ -6,7 +6,7 @@
 ## DBsection('One sample mean')
 ## Institution('Clayton State University')
 ## Author('Michael J. Dancs')
-## KEYWORDS('statistics', 'Inference', 'proportion')
+## KEYWORDS('statistics', 'inference', 'mean')
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
