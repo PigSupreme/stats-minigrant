@@ -35,7 +35,7 @@ Context()->flags->set(
   tolerance => 0.00051,
   tolType => "absolute");
 
-@cl_base = (80, 90, 95, 98, 99);
+@cl_base = (90, 92, 95, 98, 99);
 # Randomize the order
 @r = NchooseK(5,5);
 for my $i (0..4) {
@@ -51,7 +51,7 @@ for my $i (0..4) {
   @tcrit[$i] = tdistr($df, (1-@cl[$i]/100)/2);
   @twrongdf[$i] = tdistr($n, (1-@cl[$i]/100)/2);
   @zwrong[$i] = udistr((1-@cl[$i]/100)/2);
-  @qtext[$i] = "The t-critical value for a(n) @cl[$i]% confidence level is: ";
+  @qtext[$i] = "The t-critical value for a @cl[$i]% confidence level is: ";
   @a[$i] = @tcrit[$i];
   }
 
@@ -60,7 +60,8 @@ $tlist = List(@twrongdf);
 #  Main text
 
 BEGIN_PGML
-To construct a confidence interval for a population mean with unknown population standard deviation [`\sigma`], find the critical t-score value for each of the following confidence levels, assuming a sample size of [$n]. Give each answer to at least three decimal places.  
+To construct a confidence interval for a population mean when the population standard deviation is unknown, find the critical t-score value for each of the following confidence levels, assuming a sample size of [$n]. Give each answer to at least three decimal places.  
+
 * [$qtext[0]][______]
 * [$qtext[1]][______]
 * [$qtext[2]][______]

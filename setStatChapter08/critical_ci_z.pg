@@ -42,24 +42,27 @@ Context()->flags->set(
 
 @r = NchooseK(scalar(@cl),5);
 
-@qtext = ();
-@a = ();
+@qtext = ("The z-critical value for a 95% confidence level is: ");
+@a = (1.960);
 for my $i (0..4) {
-  @qtext[$i] = "The z-critical value for a(n) @cl[$r[$i]]% confidence level is: ";
-  @a[$i] = @zcrit[$r[$i]];
+  $lvl = @cl[$r[$i]];
+  $art = ((80 <= $lvl) && ($lvl < 90)) ? "an" : "a";
+  push(@qtext, "The z-critical value for $art $lvl% confidence level is: ");
+  push(@a, @zcrit[$r[$i]]);
   }
 
 ######################################
 #  Main text
 
 BEGIN_PGML
-Find the critical z-score value for each of the following confidence levels. Give each answer to at least three decimal places.
+Find the critical z-score value for each of the following confidence levels. Give each answer to at least three decimal places.  
+
 * [$qtext[0]][______]
 * [$qtext[1]][______]
 * [$qtext[2]][______]
 * [$qtext[3]][______]
 * [$qtext[4]][______]
-
+* [$qtext[5]][______]
 
 END_PGML
 ######################################
@@ -75,7 +78,7 @@ $tolcheck = sub{
   return (abs($student - $correct) < 20*$abstol)
   };
 
-foreach my $i (0..4) {
+foreach my $i (0..5) {
   ANS(Real($a[$i])->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr)));
 }
 $solnperc = @cl[$r[0]];
