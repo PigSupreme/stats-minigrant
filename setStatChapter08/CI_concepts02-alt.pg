@@ -1,15 +1,15 @@
 #DESCRIPTION
-##  Statistics: Introduction
+##  Confidence Intervals: Concepts
 ##ENDDESCRIPTION
 
-##KEYWORDS('statistics', 'multiple choice', 'concepts', 'GOAT')
+##KEYWORDS('statistics', 'multiple choice', 'concepts', 'confidence interval')
 
 ## DBsubject('Statistics')
 ## DBchapter('Estimation')
 ## DBsection('Confidence Intervals')
 ## Level(2)
-## Date('04/01/2017')
-## Author('MJD')
+## Date('10/05/2019')
+## Author('Michael J. Dancs')
 ## Institution('Clayton State University')
 ## TitleText1('No Text')
 ## EditionText1('')
@@ -32,47 +32,50 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
-$showPartialCorrectAnswers = 0;
 
+# Randomize flavour text
+$i = random(0,2);
+$scenario_string = ("age", "weight", "credit card balance")[$i];
+$art = ("an", "a", "a")[$i];
+$units = ("years","pounds","")[$i];
+$d = ("","",'$')[$i];
+$dd = ("(in years)","(in pounds)","")[$i];
+
+# Actual mathematical information
 $n = random(1010,1090,10);
 $cl = random(91,99,2);
 $alpha = 100 - $cl;
-$i = random(0,2);
 $mu = (37, 210, 1200)[$i];
-$scenario_string = ("age","weight","credit card balance")[$i];
-$units = ("years","pounds","")[$i];
-$d = ("","",'$')[$i];
-$dd = ("(in years)","(in pounds)","");
-$xbar = $mu + random (-9.15,9.15,0.2);
+$xbar = $mu + random(-9.15,9.15,0.2);
 $moe = random(4.15,9.95,0.2);
 $cil = $xbar - $moe;
 $cih = $xbar + $moe;
 
 # Question text here
-$qtext = "A $cl% confidence interval for the mean $scenario_string of a certain population is reported as $d\($xbar \pm $d$moe\), based on data from a Simple Random Sample of size $n. Which of the following is/are INCORRECT interpretation(s) of this confidence interval?";
+$qtext = "A $cl% confidence interval for the mean $scenario_string $dd of a certain population is reported as $d\($xbar \pm $d$moe\), based on data from a Simple Random Sample of size $n. Which of the following is/are correct interpretation(s) of this confidence interval?";
 
 # List correct answer(s) here:
 @correct = (
-"$cl% of all individuals in this population have a(n) $scenario_string within $d$moe $units of $d$xbar.",
-"$cl% of all samples of size $n would have a mean $scenario_string within $d$moe $units of $d$xbar.",
-"There is a $cl% chance that another sample of size $n would have a mean $scenario_string within $d$moe $units of $xbar.",
-"$cl% of the $n individuals in this sample have a(n) $scenario_string that is within $d$moe $units of the true population mean.",
-"$alpha% of the individuals in the sample have a(n) $scenario_string that is more than $d$moe $units away from the true population mean.",
-"$alpha% of the individuals in the population have a(n) $scenario_string that is more than $d$moe $units away from the true population mean."
-)[NchooseK(6,3)];
-
-# List wrong answer(s) here
-@wrong = (
 "There is a $cl% chance that the true mean $scenario_string for the entire population is within $d$moe $units of $d$xbar.",
 "There is a $cl% chance that $d$xbar is within $d$moe $units of the true population mean.",
 "For $cl% of all samples of size $n, the true mean $scenario_string for the entire population will be within $d$moe $units of the mean $scenario_string for that sample.",
 "For $cl% of all samples of size $n, the true mean $scenario_string for that sample will be within $d$moe $units of the mean $scenario_string for that entire population."
 )[NchooseK(4,2)];
-push(@wrong, "There is an $alpha% chance that the true mean $scenario_string for the entire population will be more than $d$moe $units away from $d$xbar.");
+push(@correct, "There is an $alpha% chance that the true mean $scenario_string for the entire population will be more than $d$moe $units away from $d$xbar.");
+
+# List wrong answers here:
+@wrong = (
+"$cl% of all individuals in this population have $art $scenario_string within $d$moe $units of $d$xbar.",
+"$cl% of all samples of size $n would have a mean $scenario_string within $d$moe $units of $d$xbar.",
+"There is a $cl% chance that another sample of size $n would have a mean $scenario_string within $d$moe $units of $xbar.",
+"$cl% of the $n individuals in this sample have $art $scenario_string that is within $d$moe $units of the true population mean.",
+"$alpha% of the individuals in the sample have $art $scenario_string that is more than $d$moe $units away from the true population mean.",
+"$alpha% of the individuals in the population have $art $scenario_string that is more than $d$moe $units away from the true population mean."
+)[NchooseK(6,3)];
 
 $mc_holder = new_checkbox_multiple_choice();
 
-$mc_holder->qa("There may be more than one incorrect statement; you must check all of them in order to get credit for this problem.",
+$mc_holder->qa("There may be more than one correct statement; you must check all of them in order to get credit for this problem.",
 @correct
 );
 $mc_holder->extra(@wrong);
@@ -90,9 +93,9 @@ BEGIN_PGML
 END_PGML
 
 #######
-
+# All-or-nothing grader
 $showPartialCorrectAnswers = 0;
-
+install_problem_grader(~~&std_problem_grader);
 ANS( checkbox_cmp($mc_holder->correct_ans) );
 
 ENDDOCUMENT();

@@ -1,15 +1,14 @@
 #DESCRIPTION
-##  Statistics: Introduction
+##  Confidence Intervals: Concepts
 ##ENDDESCRIPTION
 
-##KEYWORDS('statistics', 'confidence intervals')
+##KEYWORDS('statistics', 'multiple choice', 'concepts', 'confidence intervals')
 
-## DBsubject('Statistics')
 ## DBsubject('Statistics')
 ## DBchapter('Confidence Intervals')
 ## DBsection('Concepts')
 ## Level(2)
-## Date('04/01/2017')
+## Date('10/05/2019')
 ## Author('Michael J. Dancs')
 ## Institution('Clayton State University')
 ## TitleText1('No Text')
@@ -33,7 +32,6 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
-$showPartialCorrectAnswers = 0;
 
 $n = random(1210,1590,10);
 $cl = random(91,99,2)."%";
@@ -88,7 +86,6 @@ END_PGML
 # All-or-nothing grader
 $showPartialCorrectAnswers = 0;
 install_problem_grader(~~&std_problem_grader);
-
 ANS( checkbox_cmp($mc_holder->correct_ans) );
 
 ENDDOCUMENT();
