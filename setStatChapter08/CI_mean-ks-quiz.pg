@@ -32,21 +32,19 @@ TEXT(beginproblem());
 ######################################
 #  Setup
 Context("Numeric");
-$abstol = .00051;
-Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+$type = list_random("compact", "mid-size", "full-size");
+
+# We'll ask for MoE to the nearest whole dollar, so the sample mean
+# must be a whole number to avoid rounding issues in upper/lower CI.
+$mean1 = (18,25,27)[$randi];
+$mean2 = random(100,999,1);
+$mean = 1000*$mean1 + $mean2;
 
 $n = random(50,90,5);
 
-$randi = random(0,2);
-$type = ("compact", "mid-size", "full-size")[$randi]; 
-$mean1 = (18,25,27)[$randi];
-$mean2 = random(100,999,1);
-
-$mean = 1000*$mean1 + $mean2;
-
 $dev1 = random(2,3,1);
 $dev2 = random(100,999,1);
-
 $dev = 1000*$dev1 + $dev2;
 
 $choice = random(0,2,1);
@@ -71,20 +69,20 @@ $mc->extra(
   "No, because the population's standard deviation is known."
 );
 
-
 ######################################
 #  Main text
 BEGIN_PGML
 In 2018, the prices of new [$type] cars sold by a local dealership followed an approximately Normal distribution with a standard deviation of $[$dev1],[$dev2].
+---
+In a simple random sample of [$n] new [$type] cars sold in 2018 by this dealership, the average sale prices had a mean of $[$mean1],[$mean2].  
 
-In a simple random sample of [$n] new [$type] cars sold in 2018 by this dealer, the average sale prices had a mean of $[$mean1],[$mean2].  
----
-In a [$article] [$CLP]% confidence interval for the mean price of new [$type] cars sold by this dealership, the Margin of Error is [__________] (round to the nearest whole dollar).
----
-Find the [$CLP]% confidence interval, using the above sample data:  
-[__________] [`< \mu < `] [__________]  
+a. Using this sample, [$article] [$CLP]% confidence interval for the mean price of new [$type] cars sold by this dealership has a Margin of Error of $[__________] (round to the nearest whole dollar).
+
+a. Using this sample, [$article] [$CLP]% confidence interval for the mean price of new [$type] cars sold by this dealership is $[__________] [`< \mu < `] $[__________]  
 (round each value to the nearest whole dollar)
+
 ---
+
 [@ $mc->print_q() @]*  
 [@ $mc->print_a() @]*
 END_PGML
@@ -99,12 +97,15 @@ $moe_tol = abs($moe_ans - $moe_t)/2;
 $cil = Real("$mean - $moe");
 $ciu = Real("$mean + $moe");
 
+# Student is correct, but didn't round as instructed
 $wholecheck = sub{
   my ($correct, $student, $ans) = @_;
   return ($student != round($student)) && abs($student - $correct)<.51;
   };
+$wholeerr = "Round to the nearest whole dollar.";
   
 ANS($moe->cmp->withPostFilter(AnswerHints(
+  $wholecheck => $wholeerr,
   sub{
      my ($correct,$student,$ans)=@_;
      return abs($student - $moe_ans) < $moe_tol;
@@ -112,21 +113,18 @@ ANS($moe->cmp->withPostFilter(AnswerHints(
   sub{
      my ($correct,$student,$ans)=@_;
      return abs($student - $moe_t) < $moe_tol;
-  } => ["Are you using the correct distribution (z or t)?"],
-  $wholecheck => ["Round to the nearest whole dollar."]
+  } => ["Are you using the correct distribution (z or t)?"]
 )));
 
 ANS($cil->cmp->withPostFilter(AnswerHints(
-     $wholecheck => ["Round to the nearest whole dollar."]
+     $wholecheck => $wholeerr
 )));
 
 ANS($ciu->cmp->withPostFilter(AnswerHints(
-     $wholecheck => ["Round to the nearest whole dollar."]
+     $wholecheck => $wholeerr
 )));
 
 ANS( radio_cmp($mc->correct_ans) );
-
-ENDDOCUMENT();       # This should be the last executable line in the problem.
 
 ### Solutions #############################################
 BEGIN_PGML_SOLUTION
