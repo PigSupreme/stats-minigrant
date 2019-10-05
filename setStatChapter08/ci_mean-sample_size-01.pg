@@ -33,11 +33,14 @@ $sdpop = 15;
 @level = (88,90,94,96);
 @z = (1.5548, 1.6449, 1.8808, 2.0537);
 $choose = random(0,3,1);
+
+# Rounding here is for display purposes only
 $nraw = round(1000*(($sdpop*$z[$choose] / $moe) ** 2))/1000;
-$upperval = (100-$level[$choose])/2;
 $n = int($nraw);
 if ($nraw > $n) {$n = $n + 1;}
-$goat = random(2,5,1);
+
+# Used in feedback; some students round before squaring
+$n_early_sqrt = round(($sdpop*$z[$choose])/$moe);
 
 ######################################
 #  Main text
@@ -56,12 +59,12 @@ END_PGML
 
 $showPartialCorrectAnswers = 1;
 
-$anz = Compute($z[$choose])->with(tolType=>'absolute', tolerance=>'0.00001');
+$anz = Compute($z[$choose])->with(tolType=>'absolute', tolerance=>'0.000051');
 ANS($anz->cmp->withPostFilter(AnswerHints(
   sub {
       my ($correct,$student,$anshash) = @_;
       return abs($student - int(.5+1000*$correct)/1000) < 0.001 ;
-      } => ["If you are using a table, it is not sufficiently accurate for this problem. If not, check your rounding"],
+      } => ["If you are using a table, it is not sufficiently accurate for this problem. If not, check your rounding."],
   sub {
       my ($correct,$student,$anshash) = @_;
       return abs($student - $correct) < 0.001 ;
@@ -84,7 +87,13 @@ ANS($ans->cmp->withPostFilter(AnswerHints(
   sub {
       my ($correct,$student,$anshash) = @_;
       return $student == $correct -1;
-      } => ["Almost correct, but sample size cannot be smaller than $nraw...."]
+      } => ["Almost correct, but sample size cannot be smaller than $nraw...."],
+  # Early rounding (before squaring)
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return (sqrt($student) - $n_early_sqrt) < 2;
+      } => ["Do not round until the end of the calculation."],
+
 )));
 
 Section::End();
