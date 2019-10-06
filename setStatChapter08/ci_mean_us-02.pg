@@ -31,6 +31,10 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
+Context("Numeric");
+$showPartialCorrectAnswers = 1;
+$abstol = .0000000051;
+Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
 
 $n = random(11,15);
 $mean = random(107,199,2);
@@ -51,18 +55,16 @@ $ans2 = int(.5+100*($mean+$tcrit*$se))/100;
 ######################################
 #  Main text
 
-$showPartialCorrectAnswers = 1;
-$abstol = .0051;
-Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
-
 BEGIN_PGML
 In a sample of [$n] textbooks from lower-level mathematics courses, the cost of a hardcover printed version has a mean of $[$mean].00 and a (sample) standard deviation of $[$s]. Use this sample data to find a [$clperc]% confidence interval for the mean cost of hardcover printed textbooks from all lower-level mathematics courses.
 
 Round all answers to the nearest cent (two decimal places).
 
-$[_______] [` < \mu < `] $[_______]
+a. The margin of error for this confidence interval is: $[______]
 
-The margin of error for this confidence interval is: $[______]
+b. The confidence interval is $[_______] [` < \mu < `] $[_______]
+
+
 
 END_PGML
 
@@ -72,17 +74,11 @@ END_PGML
 $centcheck = sub{
   my ($correct, $student, $ans) = @_;
   return (100*$student != round(100*$student)) && abs($student - $correct)<.0051;
-  };
-  
-ANS(Real($ans1)->cmp->withPostFilter(AnswerHints(
-  $centcheck => ["Round to the nearest cent."]
-  )));
-ANS(Real($ans2)->cmp->withPostFilter(AnswerHints(
-  $centcheck => ["Round to the nearest cent."]
-  )));
+  };  
 
 $moe_tol = abs($moe - $moe_z)/2;
 ANS(Real($moe)->cmp->withPostFilter(AnswerHints(
+  $centcheck => "Round to the nearest cent.",
   sub{
      my ($correct,$student,$ans) = @_;
      return abs($student - $moe_z) < $moe_tol;
@@ -90,9 +86,15 @@ ANS(Real($moe)->cmp->withPostFilter(AnswerHints(
   sub{
      my ($correct,$student,$ans) = @_;
      return abs($student - $correct) < $moe_tol;
-  } => "You are close. Check your rounding, and make sure you are using the correct distribution.",
-  $centcheck => ["Round to the nearest cent."]
+  } => "You are close. Check your rounding, and make sure you are using the correct distribution."
 )));
+
+ANS(Real($ans1)->cmp->withPostFilter(AnswerHints(
+  $centcheck => ["Round to the nearest cent."]
+  )));
+ANS(Real($ans2)->cmp->withPostFilter(AnswerHints(
+  $centcheck => ["Round to the nearest cent."]
+  )));
 
 ### Solutions ###########################################3
 BEGIN_PGML_SOLUTION
