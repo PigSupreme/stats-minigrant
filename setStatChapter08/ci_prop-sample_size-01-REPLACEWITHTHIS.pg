@@ -29,10 +29,12 @@ $mp = $m*100;
 @level = (80,90,96,99);
 @z = (1.2816, 1.6449, 2.0537, 2.5758);
 $choose = random(0,3,1);
+
+# Rounded answer is used only in feedback
 $nraw = round(1000*((0.5*$z[$choose] / $m) ** 2))/1000;
+
 $n = int($nraw);
 if ($nraw > $n) {$n = $n + 1;}
-$goat = random(2,5,1);
 
 $mchoice = new_checkbox_multiple_choice();
 
