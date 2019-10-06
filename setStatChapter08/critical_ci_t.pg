@@ -111,6 +111,6 @@ To compute the [$solnperc]% t-critical value:
 END_PGML_SOLUTION
 
 
-COMMENT("Gives feedback if students use df = sample size.");
+COMMENT("Gives feedback if students use Normal or df = sample size.");
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.

@@ -1,9 +1,20 @@
-## DESCRIPTION
-## DBsubject(Statistics)
-## DBchapter(Confidence intervals)
-## DBsection(One sample mean - z)
+##DESCRIPTION
+##  Critical Values for t-confidence intervals
+##ENDDESCRIPTION
 
-## KEYWORDS('DELETE')
+##KEYWORDS('Confidence Interval', 'Student t', 'quiz')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('10/5/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
@@ -46,11 +57,6 @@ for my $i (0..4) {
 #  Main text
 
 BEGIN_PGML
-
-## DELETE THIS PROBLEM
-* Replaced by critical_ci_t-quiz.pg  
-
----
 Find the critical t-score value for each of the following confidence levels, using a sample of [$n] individuals. Give each answer to at least three decimal places.
 * [$qtext[0]][______]{$a[0]}
 * [$qtext[1]][______]{$a[1]}
@@ -66,10 +72,3 @@ END_PGML
 $showPartialCorrectAnswers = 1;
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
-
-
-## These tags keep this problem from being added to the NPL database
-## 
-DBsubject('ZZZ-Inserted Text')
-DBchapter('ZZZ-Inserted Text')
-DBsection('ZZZ-Inserted Text')
