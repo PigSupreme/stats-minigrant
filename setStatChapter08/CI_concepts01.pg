@@ -8,7 +8,7 @@
 ## DBchapter('Estimation')
 ## DBsection('Confidence Intervals')
 ## Level(2)
-## Date('04/01/2017')
+## Date('09/03/2019')
 ## Author('MJD')
 ## Institution('Clayton State University')
 ## TitleText1('No Text')
@@ -36,6 +36,7 @@ $showPartialCorrectAnswers = 0;
 
 $n = random(40,90,10);
 $cl = random(80,89,1)."%";
+$art = "an";
 $xbar = random (510,530,1);
 $moe = random(4,9,1);
 $cil = $xbar - $moe;
@@ -43,18 +44,19 @@ $cih = $xbar + $moe;
 $scenario_string = "SAT MATH score";
 
 # Question text here
-$qtext = "Based on a simple random sample of size $n, a(n) $cl confidence interval for the mean $scenario_string in some large population is \($cil < \mu < $cih\). Which of the following is/are correct interpretation(s) of this confidence interval?";
+$qtext = "Based on a simple random sample of size $n, $art $cl confidence interval for the mean $scenario_string in some large population is \($cil < \mu < $cih\). Which of the following is/are correct interpretation(s) of this confidence interval?";
 
 # List correct answer(s) here:
 @correct = (
-"There is a $cl chance that the true mean $scenario_string for the entire population is between $cil and $cih."
+"There is $art $cl chance that the true mean $scenario_string for the entire population is between $cil and $cih.",
+"There is $art $cl chance the interval \($cil < \mu < $cih\) contains the true mean $scenario_string for the entire population."
 );
 
 # List wrong answer(s) here
 @wrong = (
 "$cl of individuals in this population have a $scenario_string between $cil and $cih.",
 "$cl of all samples of size $n from this population would have a mean $scenario_string between $cil and $cih.",
-"There is a $cl chance that another sample of size $n from this population would have a mean $scenario_string between $cil and $cih.",
+"There is $art $cl chance that another sample of size $n from this population would have a mean $scenario_string between $cil and $cih.",
 "$cl of individuals in this sample have a mean $scenario_string between $cil and $cih."
 );
 

@@ -32,19 +32,17 @@ TEXT(beginproblem());
 ######################################
 #  Setup
 Context("Numeric");
-$abstol = .00051;
-Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+# We'll ask for MoE to the nearest whole dollar, so the sample mean
+# must be a whole number to avoid rounding issues in upper/lower CI.
+$mean1 = random(42,44,1);
+$mean2 = random(100,999,1);
+$mean = 1000*$mean1 + $mean2;
 
 $n = random(50,150,5);
 
-$mean1 = random(42,44,1);
-$mean2 = random(100,999,1);
-
-$mean = 1000*$mean1 + $mean2;
-
 $dev1 = random(8,10,1);
 $dev2 = random(100,999,1);
-
 $dev = 1000*$dev1 + $dev2;
 
 $choice = random(0,3,1);
@@ -76,7 +74,7 @@ END_PGML
 ######################################
 #  Answers
 $showPartialCorrectAnswers = 1;
-Context()->flags->set(tolType=>'absolute',tolerance=>.001);
+Context()->flags->set(tolType=>'absolute',tolerance=>.0051);
 
 $moe = Real("$moe_ans");
 $moe_tol = abs($moe_ans - $moe_t)/2;  
@@ -87,8 +85,10 @@ $wholecheck = sub{
   my ($correct, $student, $ans) = @_;
   return ($student != round($student)) && abs($student - $correct)<.51;
   };
+$wholeerr = "Round to the nearest whole dollar.";
   
 ANS($moe->cmp->withPostFilter(AnswerHints(
+  $wholecheck => $wholeerr,
   sub{
      my ($correct,$student,$ans)=@_;
      return abs($student - $moe_ans) < $moe_tol;
@@ -96,16 +96,15 @@ ANS($moe->cmp->withPostFilter(AnswerHints(
   sub{
      my ($correct,$student,$ans)=@_;
      return abs($student - $moe_t) < $moe_tol;
-  } => ["Are you using the correct distribution (z or t)?"],
-  $wholecheck => ["Round to the nearest whole dollar."]
+  } => ["Are you using the correct distribution (z or t)?"]
 )));
 
 ANS($cil->cmp->withPostFilter(AnswerHints(
-     $wholecheck => ["Round to the nearest whole dollar."]
+  $wholecheck => $wholeerr
 )));
 
 ANS($ciu->cmp->withPostFilter(AnswerHints(
-     $wholecheck => ["Round to the nearest whole dollar."]
+  $wholecheck => $wholeerr
 )));
 
 ### Solutions #############################################
@@ -129,4 +128,3 @@ If you like memorzing formulas; the one used in the computations above is:
 END_PGML_SOLUTION
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
-
