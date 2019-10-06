@@ -41,8 +41,6 @@ $ans2 = Real("100 * ( $p + $fact )")->with(tolerance => 0.01,
   tolType => "absolute");
 
 BEGIN_PGML
-## DELETE THIS PROBLEM
-* Replaced by ci_prop-01-quiz.pg
 
 In a simple random sample of [$size] [$name[$ind1]] in a particular city, [$sample] of those in the sample [$wd1[$ind1]] [$item[$ind1]]. Find a [$cl]% confidence interval for the true percent of [$name[$ind1]] in this city who [$wd2[$ind1]] [$item[$ind1]].
 

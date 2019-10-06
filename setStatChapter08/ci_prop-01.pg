@@ -25,9 +25,9 @@ Context()->flags->set(
 
 
 $size = random( 500, 1500, 200 );
-@name = ( 'workers', 'voters', 'homeowners', 'car owners' );
-@item = (  'donated to charity', ' voted during the last election', 
-          ' a swimming pool in their backyard', ' received a speeding ticket in the past year');
+@name = ('workers', 'voters', 'homeowners', 'car owners');
+@item = ('donated to charity', 'voted during the last election', 
+          'a swimming pool in their backyard', 'received a speeding ticket in the past year');
 @wd1 = ( 'had', '', 'had', '' );
 @wd2 = ( 'have', '', 'have', '' );
 $ind1 = random( 0, 3, 1 );
