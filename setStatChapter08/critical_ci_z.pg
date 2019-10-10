@@ -7,7 +7,7 @@
 ## DBsubject('Statistics')
 ## DBchapter('Confidence Intervals')
 ## DBsection('Concepts')
-## Date('3/27/2018')
+## Date('10/10/2019')
 ## Author('Michael J. Dancs')
 ## Institution('Clayton State University')
 ## TitleText1('')
@@ -87,7 +87,7 @@ $solnarea = (1-$solnprop)/2;
 $areaperc = 100*$solnarea;
 
 BEGIN_PGML_SOLUTION
-*Note:* If you are using a traditional z-score table (which typically lists values to three decimal places only), you may get slightly different answers than shown. If your instructor insists on using tables for this type of problem, ask him/her to show you how to compute log(2018) to three decimal places without using technology.
+*Note:* If you are using a traditional z-score table (which typically lists values to three decimal places only), you may get slightly different answers than shown.
 
 To compute the [$solnperc]% z-critical value:
 
