@@ -41,26 +41,29 @@ $phat3 = int(.5+$phat*1000)/1000;
 $phatper = $phat*100;
 $moe = random(2.1, 2.9,.1);
 $pper = int(.5+$phatper*100)/100;
+if ($pper == int($pper)) {$pper = $pper -.03}
 $cil = $pper - $moe;
 $cih = $pper + $moe;
 $scenario_individuals ="college students";
-$scenario_successes = "of students who receive financial aid";
+$scenario_successes = "students who receive financial aid";
 
 # Question text here
 $qtext = "Based on a simple random sample of $n $scenario_individuals, a $cl confidence interval for the percentage $scenario_successes is reported as $pper% \(\pm\) $moe%. Which of the following is/are correct interpretation(s) of this confidence interval?";
 
 # List correct answer(s) here:
 @correct = (
-"There is a $cl probability that the true percentage $scenario_successes is between $cil% and $cih%.",
-"There is a $cl probability that the true percentage $scenario_successes is within $moe% of $pper%."
+"There is a $cl probability that the true percentage of $scenario_successes in the entire population is between $cil% and $cih%.",
+"There is a $cl probability that the true percentage of $scenario_successes in the entire population is within $moe% of $pper%."
 );
 
 # List wrong answer(s) here
 @wrong = (
-"The percentage of $scenario_individuals in the population $scenario_successes is between $cil% and $cih%.",
+#"The percentage of $scenario_individuals in the population $scenario_successes is  definitely between $cil% and $cih%.",
+"If we select an individual from the population, there is an $pper% probability that this individual is one of the $scenario_successes.",
 "If we select an individual from the population, there is a $cl probability that this individual is one of the $scenario_successes.",
 "In $cl of all samples of size $n from this population, the percentage $scenario_successes is between $cil% and $cih%.",
-"In any simple random sample of $n $scenario_individuals from the population, there is a $cl probability that the percentage $scenario_successes in the sample is within $moe% of the percentage $scenario_successes in the entire population."
+"In any simple random sample of $n $scenario_individuals from the population, there is a $cl probability that the percentage of $scenario_successes in the sample is within $moe% of the percentage of $scenario_successes in the entire population.",
+"There is an $pper% probability that the true percentage of $scenario_successes is within $moe% of $cl."
 );
 
 $mc_holder = new_checkbox_multiple_choice();
