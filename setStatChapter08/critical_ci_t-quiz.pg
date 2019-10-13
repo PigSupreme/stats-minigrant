@@ -1,0 +1,74 @@
+##DESCRIPTION
+##  Critical Values for t-confidence intervals
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Student t', 'quiz')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('10/5/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.00051,
+  tolType => "absolute");
+
+@cl = (80, 90, 95, 98, 99);
+
+$df = random(10,20,2);
+$n = $df + 1;
+@tcrit = ();
+for my $i (0..scalar(@cl)-1) {
+  @tcrit[$i] = tdistr($df, (1-@cl[$i]/100)/2);
+  }
+
+@r = NchooseK(5,5);
+@r = (0,1,2,3,4);
+
+@qtext = ();
+@a = ();
+for my $i (0..4) {
+  @qtext[$i] = "The t-critical value for a(n) @cl[$r[$i]]% confidence level is: ";
+  @a[$i] = @tcrit[$r[$i]];
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the critical t-score value for each of the following confidence levels, using a sample of [$n] individuals. Give each answer to at least three decimal places.
+* [$qtext[0]][______]{$a[0]}
+* [$qtext[1]][______]{$a[1]}
+* [$qtext[2]][______]{$a[2]}
+* [$qtext[3]][______]{$a[3]}
+* [$qtext[4]][______]{$a[4]}
+
+
+END_PGML
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

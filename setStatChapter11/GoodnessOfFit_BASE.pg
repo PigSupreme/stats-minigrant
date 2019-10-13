@@ -1,0 +1,111 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+## KEYWORDS()
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGanswermacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+# Sample Size
+$n = random(200, 400);
+
+# Number of Categories and Expected Proportions
+$k = 5;
+@eprops = (.15, .34, .40, .08, .03);
+
+# Number of Observations in each Category
+$count = 0;
+for (my $i=0; $i<$k-1; $i++) {
+  $obs[$i] = int($n*($eprops[$i]+random(-0.01, 0.01, 0.001)));
+  $count = $count + $obs[$i];
+  }
+$obs[$k-1] = $n - $count;
+
+#####################################
+## Adjust observations here if needed
+#####################################
+
+# Test Statistic (Chi-Squared)
+$stat = 0;
+for (my $i=0; $i<$k; $i++) {
+  $this_e = $n*$eprops[$i];
+  $stat = $stat + (($obs[$i] - $this_e)**2)/$this_e;
+  }
+
+# Confidence Level
+$alpha = .05;
+
+# Critical value and P-Value for Goodness-of-Fit
+$crit = chisqrdistr($k-1,$alpha);
+$pval = chisqrprob($k-1,$stat);
+
+$mc = new_multiple_choice();
+
+@ans = ('It is not reasonable to assume the actual grade distribution fits the suggested distribution.',
+	'It is reasonable to assume the actual grade distribution fits the suggested distribution.');
+
+if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+
+$mc -> qa('Based on the above results:', $ans[$tag]);
+$mc -> extra($ans[1-$tag]);
+
+BEGIN_PGML
+Some instructors (but not the author of this problem!) use a "norm-referenced" grading system when assigning final letter grades. This means that a certain percentage of students are expected to receive each letter grade. A suggested distribution might look like this:
+END_PGML
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('Grade','A', 'B', 'C', 'D', 'F')\}
+\{row('Proportion of Students', $eprops[0], $eprops[1], $eprops[2], $eprops[3], $eprops[4])\}
+\{endtable()\}$BR
+END_TEXT
+
+BEGIN_PGML
+so that the top [@ $eprops[0]*100 @]% of students would receive an A, the next [@ $eprops[1]*100 @]% would receive a B, and so forth. A common criticism is that even if all students perform well, some of them will still receive a letter grade of D or F.
+
+---
+We can test whether an actual set of grades follows the suggested distribution, regardless of what system is used for grading. Suppose we have a set of [$n] students with the following grade distribution:
+END_PGML
+
+BEGIN_TEXT
+$PAR
+\{begintable(5)\}
+\{row('Grade','A', 'B', 'C', 'D', 'F')\}
+\{row('Number of Students', $obs[0], $obs[1], $obs[2], $obs[3], $obs[4])\}
+\{endtable()\}$BR
+END_TEXT
+
+BEGIN_PGML
+At the [@ $alpha*100 @]% significance level, test the claim that actual grades  conform to the suggested distribution.
+
+The value of the test statistic is [_______]{$stat}.
+
+The degrees of freedom for this test statistic is [_______]{$k-1}.
+
+The P-Value is [_______]{$pval} (do not convert to percent).
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

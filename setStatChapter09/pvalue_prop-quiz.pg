@@ -1,0 +1,67 @@
+#DESCRIPTION
+## Hypothesis testing, P-value
+##
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection()
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics','hypothesis testing', 'p-value')
+## Date('04/08/2018');
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl"
+);
+
+TEXT(&beginproblem);
+
+######################################
+#  Setup
+
+$mu = random(5, 20, 1);
+$zscore = random(-2.59, -2.31, 0.01);
+
+######################################
+#  Main text
+
+BEGIN_TEXT
+In a hypothesis test of a population proportion, sample data gives a test statistic of \( z = $zscore \). In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
+$PAR
+(a) With a left-sided alternative hypothesis, the P-Value for this sample is \{ans_rule(15)\}.
+$BR
+
+(b) With a right-sided alternative hypothesis, the P-Value for this sample is \{ans_rule(15)\}.
+$BR
+
+(c) With a two-sided alternative hypothesis, the P-Value for this sample is \{ans_rule(15)\}.
+
+END_TEXT
+
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+$abstol = 0.00051;
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
+
+# Assumes the z-score is negative
+$leftpval = int(10000*(.00005 + uprob(abs($zscore))))/10000; 
+$rightpval = 1 - $leftpval;
+$pvaltwo = 2*$leftpval;
+
+$ans_a = Real($leftpval)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_a->cmp);
+
+$ans_b = Real($leftpval)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_a->cmp);
+
+$ans_c = Real($pvaltwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
+ANS($ans_b->cmp);
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

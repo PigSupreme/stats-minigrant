@@ -2,17 +2,8 @@
 ## DBsubject(Statistics)
 ## DBchapter(Confidence intervals)
 ## DBsection(One sample mean - z)
-## Institution(The College of Idaho)
-## Author(R Cruz, L Danielson, J Guild)
-## MLT(CI_1z_05)
-## Level(2)
-## TitleText1('The Basic Practice of Statistics')
-## AuthorText1('David Moore')
-## EditionText1('5e')
-## Section1('14')
-## Problem1('')
-## KEYWORDS('statistics', 'inference', 'confidence interval')
-## Updated: 2009/03
+
+## KEYWORDS('DELETE')
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
@@ -55,6 +46,11 @@ for my $i (0..4) {
 #  Main text
 
 BEGIN_PGML
+
+## DELETE THIS PROBLEM
+* Replaced by critical_ci_t-quiz.pg  
+
+---
 Find the critical t-score value for each of the following confidence levels, using a sample of [$n] individuals. Give each answer to at least three decimal places.
 * [$qtext[0]][______]{$a[0]}
 * [$qtext[1]][______]{$a[1]}

@@ -1,0 +1,139 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple linear regression)
+## DBsection(Correlation)
+## Institution()
+## Author()
+## MLT()
+## Level()
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistic', 'correlation', 'scatterplots')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGgraphmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$n = 0;
+$xmin = 400;
+$xmax = 650;
+$xoff = 25;
+$ymin = 2.4;
+$ymax = 3.8;
+$yoff = 0.2;
+$xthird = ($xmax-$xmin)/3;
+$ythird = ($ymax-$ymin)/3;
+# Generate Data Here
+do {
+@xdata = ();
+@ydata = ();
+foreach my $i (0..2) {
+  foreach my $j (0..2) {
+    foreach my $k (0..1+abs($i-$j)) {
+      push(@xdata,$xmin+$xthird*($i+random(0.1,0.9,.001)));
+      push(@ydata,$ymin+$ythird*($j+random(0.1,0.9,.001)));
+      $n++;
+    }
+  }
+}
+$cor = sample_correlation(~~@xdata,~~@ydata);
+} while (abs($cor)>0.3);
+
+# Dynamically-generated Scatterplot
+$sp_image = init_graph($xmin-3*$xoff,$ymin-2*$yoff,$xmax+2*$xoff,$ymax+0.2*$yoff,
+  axes=>[$xmin-$xoff,$ymin-$yoff]
+  );
+for(my $i=0; $i<$n; $i++) {
+  $sp_image->stamps(closed_circle($xdata[$i],$ydata[$i],'black'));
+}
+
+@ticks = ();
+for (my $x=$xmin; $x<=$xmax; $x+=$xoff) {
+  push(@ticks, $x);
+  if (scalar(@ticks)%2 == 0) {#(($x - ($xmin-5)) % 20 == 0) {
+    $sp_image->lb(new Label($x, $ymin-1.3*$yoff, $x, 'black', 'center', 'middle'));
+  }
+}
+$sp_image->h_ticks($ymin-$yoff, "black", @ticks);
+
+@ticks = ();
+for (my $y=$ymin; $y<=$ymax; $y+=$yoff) {
+  push(@ticks, $y);
+  $sp_image->lb(new Label($xmin-1.2*$xoff, $y, $y, 'black', 'right', 'middle'));
+}
+$sp_image->v_ticks($xmin-$xoff, "black", @ticks);
+
+
+$index = random(0,1); # To randomly order the first two problems.
+$year = list_random("Freshman","Sophomore","Junior");
+$subject = list_random("Math", "Reading", "Writing");
+$mcq = new_multiple_choice();
+$mcq->qa("For the purpose of this scenario, the response variable is:",
+"$year GPA."); 
+$mcq->extra("SAT $subject Score. ", 
+"either $year GPA or SAT $subject score; it doesn't matter which.", 
+"the number of points in the scatterplot.",
+"the difference between $year GPA and SAT $subject score."
+);
+$mc[$index] = $mcq;
+
+$mcq = new_multiple_choice();
+$mcq->qa("For the purpose of this scenario, the explanatory variable is:","SAT $subject Score."); 
+$mcq->extra("$year GPA.", 
+"either $year GPA or SAT $subject score; it doesn't matter which.", 
+"the number of points in the scatterplot.",
+"the difference between $year GPA and SAT $subject score."
+);
+$mc[1-$index] = $mcq;
+
+$r = int($cor*10000)/10000;
+
+$mclast = new_multiple_choice();
+$mclast->qa("The value of the linear correlation coefficient for this sample data is $r. Together with the scatterplot, this sample suggests:","It would not be useful to use a student's SAT $subject Score to predict the student's $year  GPA.");
+$mclast->extra("It would be very useful to use a a student's SAT $subject Score to predict the student's $year GPA, using a linear function.",
+"It would be very useful to use a a student's SAT $subject Score to predict the student's $year GPA, using a non-linear function.",
+"It would be more useful to use a a student's $year GPA to predict the student's SAT $subject score.");
+
+######################################
+#  Main text	
+
+BEGIN_PGML
+We took a Simple Random Sample of [$n] college students at the end of their [$year] year, and recorded each student's Grade Point Average (GPA) and SAT [$subject] Score. The goal is to determine if SAT scores, which are taken prior to college, can predict college GPA. The sample data are plotted below.  
+
+[@ image(insertGraph($sp_image), width=>400, height=>400) @]*
+
+a. [@ $mc[0]->print_q() @]*
+[@ $mc[0]->print_a() @]*
+
+a. [@ $mc[1]->print_q() @]*
+[@ $mc[1]->print_a() @]*
+
+a. [@ $mclast->print_q() @]*
+[@ $mclast->print_a() @]*
+
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 0;
+
+ANS(radio_cmp($mc[0]->correct_ans));
+ANS(radio_cmp($mc[1]->correct_ans));
+ANS(radio_cmp($mclast->correct_ans));
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

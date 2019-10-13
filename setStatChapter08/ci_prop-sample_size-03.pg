@@ -1,0 +1,105 @@
+##DESCRIPTION
+##  Hypothesis testing:  One proportion
+##ENDDESRIPTION
+## DBsubject(Statistics)
+## DBchapter(Confidence intervals)
+## DBsection(One sample proportion)
+## Institution()
+## Author()
+## KEYWORDS('statistics', 'Inference', 'one proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$m = 0.025;
+$mp = $m*100;
+
+@level = (80,90,96,99);
+@z = (1.2816, 1.6449, 2.0537, 2.5758);
+$choose = random(0,3,1);
+
+# Rounded answer is used only in feedback
+$nraw = round(1000*((0.5*$z[$choose] / $m) ** 2))/1000;
+
+$n = int($nraw);
+if ($nraw > $n) {$n = $n + 1;}
+
+$mchoice = new_checkbox_multiple_choice();
+
+$mchoice->qa("There may be more than one correct answer; you must check all correct answers in order to get credit for this problem.",
+@correct
+);
+$mchoice->extra(@wrong);
+
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Social media companies are increasingly concerned about fake user accounts; at least this is what they want the general public and government regulators to believe. One such company wants to know the percentage of its user accounts that are fake, but claims it lacks the resources to thoroughly analyze each account (despite the fact that in the time it takes you to complete this problem, that company will probably have made more profit than your lifetime earnings). Instead, the company plans to construct a [$level[$choose]]% confidence interval for the percentage of its user accounts that are fake, using a Simple Random Sample.
+
+(a) What is the critical value for such a confidence interval? Give your answer to exactly four decimal places.  
+[_________]
+
+(b) In order that the confidence interval has a margin of error of at most [$mp]%, what is the minimum sample size required?  
+[_________]
+
+
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+$anz = Compute($z[$choose])->with(tolType=>'absolute', tolerance=>'0.00001');
+ANS($anz->cmp->withPostFilter(AnswerHints(
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - int(.5+1000*$correct)/1000) < 0.001 ;
+      } => ["If you are using a table, it is not sufficiently accurate for this problem. If not, check your rounding"],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - $correct) < 0.001 ;
+      } => ["Make sure you are using the correct distribution, and check your rounding."],
+)));
+
+$ans = Compute("$n")->with(tolType=>'absolute', tolerance=>'0.0000001');  
+ANS($ans->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return int($student)-$student != 0 ;
+      } => ["Your answer must be a whole number."],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return $student == $correct -1;
+      } => ["Almost correct, but sample size cannot be smaller than $nraw...."]
+)));
+
+### Solutions ###############################
+$zans = $z[$choose];
+BEGIN_PGML_SOLUTION
+(a) Use technology to find the [$level[$choose]]% z-critical value: [$zans]. Most tables will give this to three decimals places only, which may not be sufficiently accurate for the next part!
+
+(b) Use the formula for planned sample size, making sure to convert the [$mp]% maximum MoE to decimal form:
+
+[``n\geq\left( \frac{0.5 * \text{(Critical Value)}}{\text{Maximum MoE}}\right)^2=\left(\frac{0.5 * [$zans]}{[@ $mp/100 @]}\right)^2=[$nraw]...``]
+
+The smallest whole number that satisfies this is n = [$n].
+END_PGML_SOLUTION
+
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
+

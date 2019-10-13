@@ -1,0 +1,150 @@
+##DESCRIPTION
+##  Hypothesis Test for Proportions, P-Value method
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Two sample proportion)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$n = random(50,90,10);
+$ntot = 2*$n;
+
+$m = $n-20;
+$x2 = random(10,$m,1);
+$x1 = $x2 + random(5,12,1);
+###NOTE: Set so that smallest possible z = 1.08, biggest is z = 2.57
+$p1 = ($x1/$n);
+$p2 = ($x2/$n);
+$phat = ($x1+$x2)/(2*$n);
+$sd = sqrt($phat*(1-$phat)*(2/$n));
+
+$test_raw = ($p1-$p2)/$sd;
+$test = int(10000*(.00005 + $test_raw))/10000;
+$p_val = uprob($test_raw);
+
+# WebWorK doesn't behave when P is close to zero
+if ($pval < .0001) {$pval = 0};
+
+$alpha = .05;
+$alphap = $alpha*100;
+
+if ($p_val < $alpha ) {$tag = 0;} else {$tag = 1;}
+@ans = ("Reject the null hypothesis, and conclude that the newly-developed drug is more effective than the existing one.",
+        "Fail to reject the null hypothesis, and do not conclude that the newly-developed drug is more effective than the existing one.");
+
+$mc = new_multiple_choice();
+$mc -> qa('Based on the sample data, we would:', $ans[$tag]);
+$mc -> extra($ans[1-$tag],"Reject the null hypothesis, and conclude that both drugs are equally effective.","Fail to reject the null hypothesis, and  conclude that both drugs are equally effective.");
+
+######################################
+#  Main text
+
+BEGIN_PGML
+A large pharmaceutical company advertises that its newly-deleveloped drug is "more effective" at curing a certain disease than the existing drug of its leading competitor. To test this claim, we can compare the proportions of patients who are cured of the disease, depending on which drug they are using for treatment.
+
+In a simple random sample of [$n] patients being treated with the newly-developed drug, [$x1] patients were successfully cured of the disease. In an independent simple random sample of [$n] patients being treated with the existing drug, [$x2] patients were successfully cured of the disease.  
+
+Use the sample data to test the hypotheses [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) > 0`], using a significance level of [$alpha]%.
+
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();    
+BEGIN_PGML
+The value of the test statistic is [`z`] = [_______________] (round to at least four decimal places).
+END_PGML
+$ans_a = Real("$test")->with(tolType=>'absolute', tolerance=>'0.0051');  
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$anshash) = @_;
+         return abs($student-$correct) < .05;
+         } => ["Your answer is close.  Try the calculation using more accuracy."]
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The P-value for this sample is [_________________].  
+
+(If you are having rounding issues, use z = [$test] and compute the P-Value manually).
+END_PGML
+##NOTE: With the smallest z-score, z = 1.08, diff betw P-val of z +/- .02 is 0.0045 
+#       With the biggest z-score, z = 2.57, diff betw P-val and 2*P-val is 0.0051
+$ans_b = Real("$p_val")->with(tolType=>'absolute', tolerance=>'0.005');  
+$ans_b2 = Real("$p_val*2")->with(tolType=>'absolute', tolerance=>'0.01');  
+ANS($ans_b->cmp->withPostFilter(AnswerHints(
+    $ans_b2  => ["It looks like you used a two-sided alternative hypothesis."],
+    1-$p_val  => ["Check the direction of the alternative hypothesis."],
+    $p_val*100 => ["Do not convert to percent."],
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc->print_q() @]*  
+[@ $mc->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+Scaffold::End();
+
+##############
+### Solutions
+
+$p1r = int(.5+100000*$p1)/100000;
+$p2r = int(.5+100000*$p2)/100000;
+$pdiffr = int(.5+($p1 - $p2)*100000)/100000;
+$phatr = int(.5+100000*$phat)/100000;
+$sdr = int(.5+1000000*$sd)/1000000;
+$pvalr = int(.5+$p_val*100000)/100000;
+
+BEGIN_PGML_SOLUTION
+It is assumed that you will be using technology to perform this computations. If not....
+
+The difference in sample proportions is:  
+[``\frac{[$x1]}{[$n]} - \frac{[$x2]}{[$n]} = [$p1r] - [$p2r] = [$pdiffr]``]
+
+The pooled sample proportion is:  
+[``\frac{[$x1]+[$x2]}{[$n]+[$n]} = [$phatr]``]
+
+Use this to compute the standard error (approximate standard deviation) of the difference in sample proportions:  
+[``\sqrt{[$phatr](1-[$phatr])\left(\frac{1}{[$n]}+\frac{1}{[$n]}\right)}=[$sdr]``]
+
+The test statistic is:  
+[``z = \frac{[$pdiffr]}{[$sdr]} = [$test]...``]
+
+The P-value is the proportion of z-scores (in the Standard Normal Distribution) to the right of z = [$test], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
+
+The P-Value is [@ $p_val < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

@@ -1,0 +1,88 @@
+#DESCRIPTION
+## Hypothesis testing, P-value
+##
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection()
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics','hypothesis testing', 'p-value')
+## Date('04/08/2018');
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+);
+
+TEXT(&beginproblem);
+
+######################################
+#  Setup
+
+$zscore = random(1.01, 1.99, 0.01);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+In a hypothesis test comparing two population proportions, sample data gives a test statistic of [` z = [$zscore] `]. In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
+
+a. With a right-sided alternative hypothesis, the P-Value for this sample is [_______________].
+
+b. With a two-sided alternative hypothesis, the P-Value for this sample is [_______________].
+
+END_PGML
+
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+$abstol = 0.00051;
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
+
+$rightpval = int(10000*(.00005 + uprob(abs($zscore))))/10000;              
+# Assumes the z-score is positive
+$pvaltwo = 2*$rightpval;
+
+$ans_a = Real($rightpval);
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs((1-$correct)-$student) <= $abstol;
+       } => ["Check the direction of your P-Value.", score => 0],
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs(2*$correct-$student) <= 2*$abstol;
+       } => ["Your answer appears to be the two-sided P-Value.", score => 0],
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs($correct-$student) <= 10*$abstol;
+       } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+)));
+
+$ans_b = Real($pvaltwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
+ANS($ans_b->cmp->withPostFilter(AnswerHints(
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs(.5*$correct-$student) <= $abstol;
+       } => ["Your answer appears to be the one-sided P-value.", score => 0],
+sub{
+        my ($correct,$student,$ans) = @_;
+        return abs($correct-$student) <= 20*$abstol;
+       } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+)));
+################################################
+### Solutions
+BEGIN_PGML_SOLUTION
+a. The right-sided P-Value is the proportion/area to the left of [`z = [$zscore]`], using the Standard Normal distribution.
+
+a. Since the test statistic was positive, the two-sided P-value is twice the right-sided P-Value (found in part a). You can enter 2*[$rightpval] and let WebWorK do the arithmetic.
+END_PGML_SOLUTION
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

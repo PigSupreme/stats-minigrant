@@ -1,0 +1,144 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple linear regression)
+## DBsection(Correlation)
+## Institution('')
+## Author('')
+## TitleText1('')
+## Problem1('')
+## KEYWORDS('statistic', 'correlation', 'scatterplots','Correlation', 'Coefficient')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$n = 11;
+
+@right = ("...a strong positive linear relationship between \(x\) and \(y\).",
+"...a strong non-linear relationship between \(x\) and \(y\).",
+"...a strong negative linear relationship between \(x\) and \(y\)."
+);
+
+@wrong = ("...a very weak positive linear relationship between \(x\) and \(y\).",
+"...a very weak negative linear relationship between \(x\) and \(y\).",
+"...no apparent relationship between \(x\) and \(y\).");
+
+@ylists = ((),(),());
+@k = NchooseK(3,3);
+
+$c1 = random(-0.91, -0.13, 0.02);
+$c2 = random(15.1,20.1,.2);
+$xn = 0;
+@x = ();
+$i = 0;
+for(my $i=0;$i<$n;$i++){
+	$xn = $xn + random(2,5);
+    push(@x, $xn);
+    
+    # Strong positive linear
+    $y = $xn + 1.1*sin(20*$xn);
+ 	$ylists[0][$i] = round($y);
+    # Very strong nonlinear
+	$y = $c1*($xn-$c2)**2 +4.2*$c2+random(-2,3);
+ 	$ylists[1][$i] = round($y);
+    # Strong negative linear
+    $y = ($n+3) - $xn/2 - 2.5*sin(15*$xn);
+ 	$ylists[2][$i] = round($y);
+}
+
+foreach my $j (0..2) {
+  $r =  sample_correlation(~~@x,~~@{@ylists[$j]});
+  $cor_rnd = int(.5+abs($r)*10000)/10000;
+  $cor[$j] = ($r>0) ? $cor_rnd : -$cor_rnd;
+}
+
+$mc[0] = new_multiple_choice();
+$mc[0] -> qa('There appears to be...',$right[$k[0]]);
+$mc[0] -> extra(@wrong,@right[$k[1],$k[2]]);
+
+$mc[1] = new_multiple_choice();
+$mc[1] -> qa('There appears to be...',$right[$k[1]]);
+$mc[1] -> extra(@wrong,@right[$k[0],$k[2]]);
+
+$mc[2] = new_multiple_choice();
+$mc[2] -> qa('There appears to be...',$right[$k[2]]);
+$mc[2] -> extra(@wrong,@right[$k[0],$k[1]]);
+
+
+######################################
+#  Main text	
+
+BEGIN_PGML
+For each data set below:
+* Find the value of the correlation coefficient _r_, rounded to at least four decimal places.
+* Use a scatterplot and the value of _r_ to determine the possible relationship relationship between the two variables.
+
+---
+END_PGML
+
+$i = $k[0];
+BEGIN_TEXT
+\{begintable(12)\}
+\{row('$BBOLD x $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD y $EBOLD $SPACE ',@{@ylists[$i]})\}
+\{endtable()\}
+$PAR
+END_TEXT
+BEGIN_PGML
+r = [________], and there is...
+[@ $mc[0]->print_a() @]*
+
+---
+END_PGML
+
+$i = $k[1];
+BEGIN_TEXT
+\{begintable(12)\}
+\{row('$BBOLD x $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD y $EBOLD $SPACE ',@{@ylists[$i]})\}
+\{endtable()\}
+$PAR
+END_TEXT
+BEGIN_PGML
+r = [________], and there is...
+[@ $mc[1]->print_a() @]*
+---
+END_PGML
+
+$i = $k[2];
+BEGIN_TEXT
+\{begintable(12)\}
+\{row('$BBOLD x $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD y $EBOLD $SPACE ',@{@ylists[$i]})\}
+\{endtable()\}
+$PAR
+END_TEXT
+BEGIN_PGML
+r = [________], and there is...
+[@ $mc[2]->print_a() @]*
+END_PGML
+
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+foreach my $j (0..2) {
+  ANS(Real("$cor[$k[$j]]")->cmp());
+  ANS(radio_cmp($mc[$j]->correct_ans));
+}
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

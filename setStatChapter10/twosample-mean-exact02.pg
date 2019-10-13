@@ -1,0 +1,225 @@
+## DESCRIPTION
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Independent samples - t')
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'two sample', 'hypothesis', 't score')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGnumericalmacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "answerHints.pl",
+  "scaffold.pl"
+);
+
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+$abstol = 0.00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+while($n1 == $n2) {
+  $n1 = random(31,50,1);
+  $n2 = random(31,50,1);
+  }
+$mean1 = random(68,85,.1);
+$mean2 = $mean1 - random(5,7,.1);
+while($s1 == $s2) {
+  $s1 = random(5,10,.01);
+  $s2 = random(5,10,.01);
+  }
+
+$alpha = list_random(0.1, 0.05, 0.02, 0.01);
+$alphaPercent = $alpha * 100;
+
+# Use exact degrees of freedom (Aspin-Welch)
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$df_true = $vard**2 / ( ($s1**4)/($n1**2)/($n1-1) +  ($s2**4)/($n2**2)/($n2-1) );
+$df = $df_true;
+
+# Test statistic
+$test = ($mean1-$mean2)/(sqrt($vard));
+
+# First exponent for Beta integrands; for easy reading below
+$ae = ($df/2)-1;
+
+# Non-regularized incomplete Beta($xlim, $df/2, 1/2)
+$urref = sub {return ($_[0]**$ae)/sqrt(1-$_[0])};  #Integrand
+$xlim = $df/($df + $test**2); # Upper limit of integration
+$urint = simpson($urref,0,$xlim,steps=>30000); #Def. Integral
+
+# Beta($df/2, 1/2) is improper at x=1, so we comptue via
+# the identity Beta(a,1/2) = Beta(a,3/2)*(2a+1)
+$rgref = sub {return ($_[0]**$ae)*sqrt(1-$_[0])};
+$rgint = simpson($rgref,0,1,steps=>30000)*($df+1);
+
+# Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
+$pright = $urint/(2*$rgint);
+$pleft = 1 - $pright;
+$ptwo = 2*min($pleft,$pright);
+
+# Use this P-value for the answer
+$pval = $pright;
+# WebWorK doesn't behave when P is close to zero
+if ($pval < .0001) {$pval = 0};
+
+$mc0 = new_multiple_choice();
+$mc0->qa("An appropriate alternative hypothesis is:",'\(\mu_1-\mu_2>0\)');
+$mc0->extra("\(\mu_1-\mu_2\neq 0\)",
+"\(\mu_1-\mu_2< 0\)",
+"\(\mu_1-\mu_2\leq 0\)",
+"\(\mu_1-\mu_2\geq 0\)"
+);
+
+$mc1 = new_multiple_choice();
+$mc1->qa("An appropriate null hypothesis is:","\(\mu_1-\mu_2= 0\)");
+$mc1->extra("\(\mu_1-\mu_2> 0\)",
+"\(\mu_1-\mu_2< 0\)",
+"\(\mu_1-\mu_2\neq 0\)"
+);
+
+@anse = ("There is a statistically significant difference between the mean scores of the two populations.", "The difference in sample means is not statistically significant.");
+if ($pval < $alpha) {$tag = 0;} else {$tag = 1;}
+$mc2 = new_multiple_choice();
+$mc2->qa("Using the above results, the professor would conclude:",@anse[$tag]);
+$mc2->extra(@anse[1-$tag]);
+
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 10*$abstol)
+  };
+
+######################################
+#  Main text
+
+#df = [$df]  
+#T = [$test]  
+#P-Value = [$pright]  
+
+BEGIN_PGML
+A statistics professor believes that the mean final exam score among students who are "rarely absent" is higher than the mean final exam score among students who are "frequently absent." He plans to conduct a hypothesis test, using a [$alphaPercent]% significance level.
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+
+BEGIN_PGML
+Let [`\mu_1`] be the true mean among rarely absent students and [`\mu_2`] be the true mean among frequently absent students.
+
+[@ $mc0->print_q() @]*
+[@ $mc0->print_a() @]*
+
+[@ $mc1->print_q() @]*
+[@ $mc1->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc0->correct_ans() ));
+ANS(radio_cmp($mc1->correct_ans() ));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+A simple random sample of [$n1] rarely absent students has a mean score of [$mean1] points with a standard deviation of [$s1] points. An independent simple random sample of [$n2] frequently absent students has a mean of [$mean2] points and a standard deviation of [$s2] points.  
+
+The value of the test statistic is [`t = `] [______]
+END_PGML
+ANS(Real($test)->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The P-Value is [_______] (round to four decimal places)
+END_PGML
+# For feedback with conservative df
+$df_o2 = min($n1, $n2) - 1;
+$p_o2 = tprob($df_o2, $test);
+# Minitab is lazy and rounds exact df down
+$df_mt = int($df_true);
+$p_mt = tprob($df_mt, $test);
+
+# Hints for alternative df
+$err_o2 = "You appear to be using df = (smaller sample size) - 1. Use technology to find the exact df.";
+$err_mt = "You might be using rounded df (Minitab, for example). Ask your instructor for help.";
+ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
+   $tolcheck=>$tolerr,
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval*100)) < 500*$abstol
+      } => "Do not convert to percent.",
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $p_o2)) < 10*$abstol
+      } => $err_o2,
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $p_mt)) < 10*$abstol
+      } => $err_mt,
+   )));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc2->print_q() @]*
+[@ $mc2->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc2->correct_ans() ));
+Section::End();
+Scaffold::End();
+
+##############
+### Solutions
+
+$mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
+$sdr = int(.5+1000000*sqrt($vard))/1000000;
+$statr = int(.5+10000*$test)/10000;
+$dfr = int(.5+$df_true*1000000)/1000000;
+$pvalr = int(.5+$pval*100000)/100000;
+$alphap = 100*$alpha;
+
+BEGIN_PGML_SOLUTION
+It is assumed that you will be using technology to perform this computations. If not....
+
+The difference in sample means is:  
+[``[$mean1]- [$mean2] = [$mdiffr]``]
+
+The standard error (approximate standard deviation) of the difference in sample means is :  
+[``\sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]``]
+
+The test statistic is:  
+[``t = \frac{[$mdiffr]}{[$sdr]} = [$statr]...``]
+
+This problem assumes you are using the exact formula for degrees of freedom, because the author made the effort to figure out how to do that in WebWorK rather than just using pre-existing problems. Use df = [$dfr].
+
+The one-sided P-value is the proportion of t-scores to the right of t = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
+
+The P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
+
+COMMENT("Uses Aspin-Welch formula (for df) and exact P-Value.");

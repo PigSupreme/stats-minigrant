@@ -1,12 +1,7 @@
 ##DESCRIPTION
 ##  Planned Sample Size
 ##ENDDESRIPTION
-## DBsubject('Statistics')
-## DBchapter('Confidence intervals')
-## DBsection('One sample mean')
-## Institution('Clayton State University')
-## Author('Michael J. Dancs')
-## KEYWORDS('statistics', 'Inference', 'proportion')
+## KEYWORDS('DELETE')
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
@@ -40,6 +35,14 @@ $goat = random(2,5,1);
 
 ######################################
 #  Main text
+BEGIN_PGML
+---
+## DELETE THIS PROBLEM
+* Replaced by (ALG Problem 10): ci_mean-sample_size-01.pg
+
+---
+END_PGML
+
 
 BEGIN_PGML
 [$name[$person]] plans to find an [$level[$choose]]% confidence interval 
