@@ -22,7 +22,8 @@ DOCUMENT();
 loadMacros(
 "PGstandard.pl",
 "PGchoicemacros.pl",
-"PGML.pl"
+"PGML.pl",
+"MathObjects.pl"
 );
 
 TEXT(  beginproblem() );
@@ -86,9 +87,10 @@ BEGIN_PGML
 END_PGML
 
 #######
-# All-or-nothing grader
+# Answers
 $showPartialCorrectAnswers = 0;
 install_problem_grader(~~&std_problem_grader);
 ANS( checkbox_cmp($mc_holder->correct_ans) );
+
 
 ENDDOCUMENT();
