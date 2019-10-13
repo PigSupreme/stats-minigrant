@@ -34,8 +34,6 @@ TEXT(  beginproblem() );
 #
 $showPartialCorrectAnswers = 0;
 
-
-
 $n = random(1210,1590,10);
 $cl = random(91,99,2)."%";
 $x = int(random(.81,.89,.02)*$n);
@@ -46,18 +44,20 @@ $moe = random(2.1, 2.9,.1);
 $pper = int(.5+$phatper*100)/100;
 $cil = $pper - $moe;
 $cih = $pper + $moe;
-$scenario_individuals ="college students";
-$scenario_successes = "of students who receive financial aid";
 
 # Question text here
 $qtext = "Prior to an election, various polling companies report the percentage of likely voters who support a particular candidate, often with a 3% margin of error. What does a 3% margin of error actually mean?";
 
 # List correct answer(s) here:
-@correct = ("It is probably true that the actual percentage of likely voters who support the candidate is within 3% of the reported percentage.");
+@correct = (
+"It is probably true that the actual percentage of likely voters who support the candidate is within 3% of the reported percentage.",
+"It is probably true that the reported percentage is with 3% of the actual percentage of likely voters who support the candidate."
+);
 
 # List wrong answer(s) here
 @wrong = (
-"It is definitely true that the actual percentage of likely voters who support the candidate is within 3% of the reported percentage.",
+"We are certain that the actual percentage of likely voters who support the candidate is within 3% of the reported percentage.",
+"We are certain that that the reported percentage is with 3% of the actual percentage of likely voters who support the candidate.",
 "Less than 3% of all likely voters were included in the sample.",
 "At most 3% of those in the sample are expected to vote differently than they claim."
 );
