@@ -35,39 +35,49 @@ $showPartialCorrectAnswers = 0;
 #
 #
 Context("Numeric");
+$topmatter = 'A recent news article claims that the average commute time using public transportation in Metro Atlanta is more than 50 minutes. We plan to evaluate this claim using a hypothesis test.';
+@mclist = ();
 
-$mc00 = new_multiple_choice();
-$mc00->qa("The parameter for this test would be:","The true proportion of individiuals that send text messages at least occasionally while driving who are involved in a serious accident.");
-$mc00->extra("The true proportion of all drivers who are involved in a serious accident.",
-"The proportion of individiuals in some sample who send text messages at least occasionally while driving and are involved in a serious accident.",
-"The true proportion of individiuals that send text messages at least occasionally while driving.",
-"The proportion of individiuals in some sample who are involved in a serious accident."
+$mc = new_multiple_choice();
+$mc->qa("An appropriate Null Hypothesis would be:","The average commute time using public transportation in Metro Atlanta is at most 50 minutes.");
+$mc->extra(
+"The average commute time using public transportation in Metro Atlanta is at least 50 minutes.",
+"The average commute time using public transportation in Metro Atlanta is less than 50 minutes.",
+"The average commute time using public transportation in Metro Atlanta is more than 50 minutes."
 );
+push(@mclist, $mc);
 
-$mc0 = new_multiple_choice();
-$mc0->qa("An appropriate Null Hypothesis would be:","Individuals who send text messages at least occasionally while driving are not more likely to be involved in a serious accident.");
-$mc0->extra("Individuals who send text messages at least occasionally while driving are more likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are less likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are more likely to be involved in a serious accident.",
-"Individuals who send text messages at least occasionally while driving are less likely to be involved in a serious accident."
+$mc = new_multiple_choice();
+$mc->qa("An appropriate Alternative Hypothesis would be:","The average commute time using public transportation in Metro Atlanta is more than 50 minutes.");
+$mc->extra(
+"The average commute time using public transportation in Metro Atlanta is at most 50 minutes.",
+"The average commute time using public transportation in Metro Atlanta is at least 50 minutes.",
+"The average commute time using public transportation in Metro Atlanta is less than 50 minutes."
 );
+push(@mclist, $mc);
 
-$mc1 = new_multiple_choice();
-$mc1->qa("An appropriate Alternative Hypothesis would be:","Individuals who send text messages at least occasionaly while driving are more likely to be involved in a serious accident.");
-$mc1->extra("Individuals who send text messages at least occasionally while driving are not more likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are less likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are more likely to be involved in a serious accident.",
-"Individuals who send text messages at least occasionaly while driving are less likely to be involved in a serious accident."
-);
 
-$mc2 = new_multiple_choice();
-$mc2->qa("We conclude from sample data that individuals who send text messages at least occasionaly while driving do not appear to be more likely to be involved in a serious accident. If this conclusion turns out to be inccorect, we have made:","A Type II Error, failing to reject the Null Hypothesis when it was actually false.");
-$mc2->extra("A Type II Error, rejecting the Null Hypothesis when it was actually true.",
+$mc = new_multiple_choice();
+$mc->qa("Suppose we conclude from sample data that the average commute time using public transportation in Metro Atlanta is indeed more than 50 minutes, but our results turn out to be incorrect. We have made:","A Type I Error, rejecting the Null Hypothesis when it was actually true.");
+$mc->extra(
+"A Type II Error, failing to reject the Null Hypothesis when it was actually false.",
 "A Type I Error, failing to reject the Null Hypothesis when it was actually false.",
-"A Type I Error, rejecting the Null Hypothesis when it was actually true.",
+"A Type II Error, rejecting the Null Hypothesis when it was actually true.",
 "A Type I Error, accepting the Null Hypothesis as true.",
 "A Type II Error, accepting the Null Hypothesis as true."
 );
+push(@mclist, $mc);
+
+
+$mc = new_multiple_choice();
+$mc->qa("Suppose our analysis of the sample data does not support the article's claim, but our results turn out to be incorrect. We have made:","A Type II Error, failing to reject the Null Hypothesis when it was actually false.");
+$mc->extra("A Type I Error, failing to reject the Null Hypothesis when it was actually false.",
+"A Type I Error, rejecting the Null Hypothesis when it was actually true.",
+"A Type I Error, accepting the Null Hypothesis as true.",
+"A Type II Error, accepting the Null Hypothesis as true.",
+"A Type II Error, rejecting the Null Hypothesis when it was actually true."
+);
+push(@mclist, $mc);
 
 ##############################################################
 #
@@ -75,31 +85,27 @@ $mc2->extra("A Type II Error, rejecting the Null Hypothesis when it was actually
 #
 #
 BEGIN_PGML
-It has been suggested that individuals who send text messages "at least occasionaly" while driving are more likely to be involved in a serious accident. Suppose we plan to study this using a hypothesis test.
-
-[@ $mc00 ->print_q() @]*
-[@ $mc00 ->print_a() @]*
-
-[@ $mc0 ->print_q() @]*
-[@ $mc0 ->print_a() @]*
-
-[@ $mc1 ->print_q() @]*
-[@ $mc1 ->print_a() @]*
-
-[@ $mc2 ->print_q() @]*
-[@ $mc2 ->print_a() @]*
-
-
+[$topmatter]
+---
 END_PGML
+
+foreach my $mcq (@mclist){
+  $mc = $mcq; # Needed for some arcane reaason
+  BEGIN_PGML
+  [@ $mc->print_q() @]*
+  [@ $mc->print_a() @]*  
+  
+  END_PGML
+  }
+
 
 ##############################################################
 #
 #  Answers
 #
 #
-ANS(radio_cmp($mc00->correct_ans));
-ANS(radio_cmp($mc0->correct_ans));
-ANS(radio_cmp($mc1->correct_ans));
-ANS(radio_cmp($mc2->correct_ans));
+foreach my $mc (@mclist) {
+  ANS(radio_cmp($mc->correct_ans))
+  }
 
-ENDDOCUMENT();        
+ENDDOCUMENT();
