@@ -37,17 +37,16 @@ $showPartialCorrectAnswers = 0;
 #
 Context("Numeric");
 
-$pi = Real("pi");
 $product = "Rokovoko Thwappaccino Cyclone";
-$mutot = "1%";
+$mutot = "1\%";
 $inc = random(10,30,5)." cents";
 
 $mc0 = new_multiple_choice();
-$mc0->qa("Which of the following are appropriate Null and Alternative Hypotheses?","`H_0`: `p\geq` $mutot; `\quad H_A`: `p<` $mutot");
-$mc0->extra("`H_0`: `p<` $mutot; `\quad H_A`: `p\geq` $mutot",
-"`H_0`: `p<` $mutot; `\quad H_A`: `p>` $mutot",
-"`H_0`: `p>` $mutot; `\quad H_A`: `p<` $mutot",
-"`H_0`: `p\ne` $mutot; `\quad H_A`: `p=` $mutot"
+$mc0->qa("Which of the following are appropriate Null and Alternative Hypotheses?","\(H_0: p\geq $mutot; \quad H_A: p< $mutot\)");
+$mc0->extra("\(H_0: p< $mutot; \quad H_A: p\geq $mutot\)",
+"\(H_0: p< $mutot; \quad H_A: p> $mutot\)",
+"\(H_0: p> $mutot; \quad H_A: p< $mutot\)",
+"\(H_0: p\ne $mutot; \quad H_A: p= $mutot\)"
 );
 
 $mc1 = new_multiple_choice();
@@ -114,9 +113,10 @@ Section::End();
 Scaffold::End();
 
 BEGIN_PGML_SOLUTION
-A Type I error means that we reject the Null Hypothesis when it was acutally true.
-
-A Type II error means that we fail to reject the Null Hypothesis when it was acutally false.
+* The Null Hypothesis must contain the possibility that [`p=[$mutot]`].
+* The Alternative Hypothesis cannot contain the possibility that [`p=[$mutot]`].
+* A Type I error means that we reject the Null Hypothesis when it was acutally true.
+* A Type II error means that we fail to reject the Null Hypothesis when it was acutally false.
 
 END_PGML_SOLUTION
 
