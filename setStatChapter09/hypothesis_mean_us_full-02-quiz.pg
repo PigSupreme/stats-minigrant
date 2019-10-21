@@ -33,10 +33,8 @@ $xbar = $mu-random(0.6,1.1,0.1);
 $samp = list_random(36,49,64,81);
 $sigma = random(2.01,3.99,0.02); # Actually, this is s
 
-$indx = random(0,4,1);
-$conf = 95;
-$alpha = 1-0.01*$conf;
-$alphap = 100 - $conf;
+$alpha = list_random(.10, .05, .02, .01);
+$alphap = 100*$alpha;
 
 $tstat = ($xbar-$mu)/($sigma/sqrt($samp));
 $pval= 1 - tprob($samp-1, $tstat); # Left-sided
