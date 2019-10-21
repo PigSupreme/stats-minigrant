@@ -107,7 +107,7 @@ Section::End();
 Section::Begin("Part 2: Test Statistic");
 
 BEGIN_PGML
-a. The lifetimes of the [$n] bulbs in the sample had a mean of [$xbar] hours and a standard deviation of [$sigma] hours. The value of the test statistic for this sample is [_______].
+a. The lifetimes of the [$n] bulbs in the sample had a mean of [$xbar] hours and a standard deviation of [$sigma] hours. The value of the test statistic for this sample is [_______] (give to at least three decimal places).
 
 a. [@$mc1->print_q() @]*
 [@$mc1->print_a() @]*
@@ -139,19 +139,19 @@ Section::End();
 Section::Begin("Part 3: P-Value");
 
 BEGIN_PGML
-a. The P-value for this sample is [_______] (do not convert to percent).
+a. The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
 END_PGML
 
 # P-Value checker
 $ans_pval = Real($pval)->with(tolType=>'absolute', tolerance=>$abstol);
-sub mycheckp {
-  my ($correct, $student, $ansHash) = @_;
-  Value->Error("Do not convert to percent!") if ($correct > 0 && $student == $correct*100);
-  return ($student == $correct) || ($student == $pvalround);
-}
 
 # For catching various common errors
-ANS($ans_pval->cmp( checker=>~~&mycheckp, tolType=>'absolute', tolerance=>$abstol ) ->withPostFilter(AnswerHints(
+ANS($ans_pval->cmp(tolType=>'absolute',tolerance=>$abstol)->withPostFilter(AnswerHints(
+## Gave answer in percent
+sub{
+  my ($correct, $student, $ansHash) = @_;
+  return (($correct > 0) && (abs($student - 100*$correct) < (100*$abstol)));
+} => ["Do not convert to percent!"],
 ## Rounding errors
 sub{
      my ($correct,$student,$ans)=@_;
