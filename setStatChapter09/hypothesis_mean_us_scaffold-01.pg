@@ -139,7 +139,7 @@ Section::End();
 Section::Begin("Part 3: P-Value");
 
 BEGIN_PGML
-a. The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
+The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
 END_PGML
 
 # P-Value checker
@@ -169,7 +169,7 @@ Section::End();
 Section::Begin("Part 4: Final Conclusions");
 
 BEGIN_PGML
-a. [@ $mc4 ->print_q() @]*
+[@ $mc4 ->print_q() @]*
 [@ $mc4 ->print_a() @]*
 END_PGML
 
