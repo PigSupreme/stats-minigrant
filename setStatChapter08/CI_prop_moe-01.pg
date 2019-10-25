@@ -105,15 +105,15 @@ ANS($moe_ans->cmp->withPostFilter(AnswerHints(
 $zcrit = int(5.+10000*$z)/10000;
 $phata = int(.5+100000*$phat)/100000;
 $stderr = sqrt($phata*(1-$phata)/$n);
-$moeans = $zcrit * $stderr; 
+$moeans = $z * $stderr; 
 BEGIN_PGML_SOLUTION
 1. The sample statistic (point estimate) is [$x]/[$n] = [$phata]. Leave this in decimal form for now.  
-1. Inference about proportions uses z-scores; the 90% critical value is 1.6449.  
+1. Inference about proportions uses z-scores; the [$CLP]% critical value is [$z].  
 1. For all samples of size [$n], the standard error (approximate standard deviation) of [`\hat{p}`] is given by  
 [``\begin{align*}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}&= \text{sqrt}([$phata] * [@ 1-$phata @] / [$n])\\&= [$stderr]\end{align*}``]  
 leave this unrounded if possible.  
 1. The Margin of Error (some call this EBP) is the product of the last two values:  
-[``[$zcrit] * [$stderr] = [$moeans]``].  
+[``[$z] * [$stderr] = [$moeans]``].  
 1. The lower limit of the confidence interval is:  
 [``[$phata]  - [$moeans]``].  
 1. The upper limit of the confidence interval is:  
