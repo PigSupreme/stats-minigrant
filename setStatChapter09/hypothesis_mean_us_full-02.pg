@@ -69,6 +69,9 @@ $mc -> extra($ans[1-$tag],
 "The sample provides sufficient evidence to conclude that this customer's average download speed is higher than advertised.");
 
 BEGIN_PGML
+### DELETE THIS PROBLEM
+* Superceded by P15.
+
 An internet service provider advertises that customers on its "high speed" plan will experience average download speeds of [$mu] Mbps. A dissatisfied customer believes his download speeds are significantly less than advertised. To test this claim, he checks his download speed at [$samp] randomly selected times over the course of one month. Assume this can be treated as a Simple Random Sample.
 
 1. [@ $mc00 ->print_q() @]*

@@ -24,7 +24,7 @@ TEXT(&beginproblem);
 
 ######################################
 #  Setup
-$abstol = 0.00051;
+$abstol = 0.000051;
 Context("Numeric");
 Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
 
@@ -75,11 +75,11 @@ sub{
 )));
 
 
-$ans_ptwo = Real($ptwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
+$ans_ptwo = Real($ptwo)->with(tolType=>'absolute', tolerance=>(2*$abstol));
 ANS($ans_ptwo->cmp->withPostFilter(AnswerHints(
 sub{
      my ($correct,$student,$ans)=@_;
-     return abs($student - (1 - $correct)) <= 2*$abstol;
+     return (abs($student - (1 - $correct)) <= (2*$abstol));
 } => ["Check the direction of your P-Value."],
 sub{
      my ($correct,$student,$ans)=@_;
@@ -87,7 +87,7 @@ sub{
 } => ["Are you using the correct df?"],
 sub{
      my ($correct,$student,$ans)=@_;
-     return abs($student - $correct) <= .02;
+     return (abs($student - $correct) <= .02);
 } => ["Close! Check your computations/rounding."]
 )));
 ################################################
@@ -95,9 +95,9 @@ sub{
 BEGIN_PGML_SOLUTION
 When using Student t scores for a single population mean, use df = n - 1.
 
-a. The right-sided P-Value is the proportion/area to the right of [`t = [$tscore]`]. Make sure you are using df = [$df].
+a. The right-sided P-Value ([$ans_pright]) is the proportion/area to the right of [`t = [$tscore]`]. Make sure you are using df = [$df].
 
-a. Since the test statistic was positive, the two-sided P-value is twice the right-sided P-Value (found in part a). You can enter 2*[$pright] and let WebWorK do the arithmetic.
+a. Since the test statistic was positive, the two-sided P-value ([$ans_ptwo]) is twice the right-sided P-Value (found in part a). You can enter 2*[$pright] and let WebWorK do the arithmetic.
 END_PGML_SOLUTION
 
 COMMENT('Use a t distribution to get the exact P-Value');

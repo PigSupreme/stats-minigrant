@@ -112,7 +112,7 @@ END_PGML
 ANS(radio_cmp($mc1->correct_ans() ));
 
 # Test statistic checker
-$ans_stat = Real($teststat)->with(tolType=>'absolute', tolerance=>.00051);
+$ans_stat = Real($teststat)->with(tolType=>'absolute', tolerance=>$abstol);
 sub mycheckt {
   my ($correct, $student, $ansHash) = @_;
   Value->Error("Do not convert to percent!") if $student == $correct*100;

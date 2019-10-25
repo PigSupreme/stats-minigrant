@@ -53,6 +53,8 @@ $mc->extra("The sample provides sufficient evidence that the psychic will be cor
 #  Main text
 
 BEGIN_PGML
+### DELETE THIS PROBLEM
+* Superceded by P20 (scaffold and better checking).
 
 A noted psychic was tested for Extrasensory Perception (ESP).  The psychic was presented with a series of face-down cards and was asked to identify the symbol on each card: a star, cross, circle, square, or three wavy lines. Let [`p`] be the probability that the psychic will correctly identify the symbol on any given card.
 

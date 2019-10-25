@@ -71,6 +71,13 @@ $mc4 -> extra($ans[1-$tag], "Reject \(H_0\); there is sufficient evidence to con
 ######################################
 #  Main text
 
+BEGIN_PGML
+### DELETE THIS PROBLEM.
+* Superceded by problem 17.
+
+END_PGML
+
+
 Scaffold::Begin();
 Section::Begin("Part 1: Stating Hypotheses");
 ##########################

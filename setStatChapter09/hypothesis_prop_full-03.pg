@@ -4,8 +4,8 @@
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
 ## DBsection(One sample proportion)
-## Institution()
-## Author()
+## Institution(Clayton State Univeristy)
+## Author(Michael J. Dancs)
 ## Level(3)
 ## MO(1)
 ## TitleText1('')
@@ -13,7 +13,7 @@
 ## EditionText1('')
 ## Section1('')
 ## Problem1('')
-## KEYWORDS('statistics', 'Inference', 'one proportion')
+## KEYWORDS('statistics', 'inference', 'one proportion')
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
@@ -37,10 +37,11 @@ $face = ("heads","tails")[random(0,1,1)];
 $n = (180,200,220,240,260)[random(0,4,1)];
 $alpha = random(0.01,0.04.0.01);
 $alphap = 100*$alpha;
-$zcrit=udistr($alpha);
+$p0 = 0.5;
 
 # This makes sure that we reject the null of p != 0.50
-$x = 0.5*$n + $zcrit*sqrt(0.5*0.5*$n) + random(2,6,1);
+$zcrit = udistr($alpha/2);  # Two-sided critical value
+$x = $n*$p0 + ($zcrit+.01)*sqrt($p0*(1-$p0)*$n) + random(2,6,1);
 $x = round($x);
 $phat = $x/$n;
 $qhat = 1- $phat;
@@ -133,9 +134,10 @@ Convert to a z-score as usual:
 
 [``z=\frac{([$x]/[$n]) - 0.50}{[$stddev_phat]}``] = [@ int(.5+$zstat*1000)/1000 @]...
 
-The Alternative Hypothesis is two-sided. Use the Standard Normal distribution to find the proportion with [`z > \lvert[@ int(.5+$zstat*1000)/1000 @]\rvert`]. Multiply this by 2 to get the two-sided P-Value.
+The Alternative Hypothesis is two-sided. Use the Standard Normal distribution to find the proportion with [`z > [@ abs(int(.5+$zstat*1000)/1000) @]`]. Multiply this by 2 to get the two-sided P-Value.
 
 In percentage form, the P-value of [@ int(.5+$pval*10000)/100 @]% is less than the [@ 100*$alpha @]% significance level, so reject the Null Hypothesis. 
+
 END_PGML_SOLUTION
 
 ENDDOCUMENT();        # This should be the last executable line in the problem.
