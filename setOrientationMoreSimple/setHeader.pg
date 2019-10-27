@@ -1,0 +1,105 @@
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGunion.pl",
+  "PGcourse.pl",
+);
+
+$WW = "WeBWorK";
+
+if ($displayMode eq 'TeX') {
+
+TEXT($BEGIN_ONE_COLUMN,
+    '\noindent{\large\bf '.$studentName.'}\hfill{\large\bf '.$course.'}',
+    '\par\noindent',
+"
+This set of $WW problems is designed to orient you to the 
+$WW system and to help you learn how to communicate with the 
+software. You will be learning about how to understand what
+you see on the screen and about how to enter your answers when you do 
+the problems. You will practice entering numerical and functional
+expressions and look at ways to find and correct errors in your 
+entries.
+
+This particular version is intended for lower-level (pre-calculus) courses,
+and has been modified from the default set.
+
+",
+     "WeBWorK assignment $setNumber is due on $formattedDueDate.",
+     $END_ONE_COLUMN
+);
+
+} else {
+
+BEGIN_TEXT
+
+${BBOLD}Orientation to WeBWorK${EBOLD}
+$PAR
+
+This set of $WW problems is designed to orient you to the $WW system
+and to help you learn how to communicate with the software. You will
+be learning about how to understand what you see on the screen and
+about how to enter your answers when you do the problems.  You will
+practice entering numerical and functional expressions and look at
+ways to find and correct errors in your entries.
+$PAR
+
+Start by examining the features of this page.  The panels at the
+left (the ${LQ}MAIN MENU${RQ}) and top help you to navigate to the different 
+pages available in WeBWorK.  Note you can collapse and
+uncollapse the ${LQ}MAIN MENU${RQ} by clicking on the boxed angle bracket just above the boldface course name so if you don't see the MAIN MENU click 
+on the boxed angle bracket to make MAIN MENU reappear.
+
+$PAR
+On the left, in the ${LQ}MAIN MENU${RQ} panel, you have already 
+seen the ${LQ}Homework Sets${RQ} page,
+which lists all the homework assignments that have
+been assigned to you.  Links allow you to go to any assignment
+you want to work on.  
+$PAR
+Links to your homework assignments are also listed in the ${LQ}Sets${RQ} 
+panel so you can quickly switch to another assignment.
+
+$PAR
+The data in the panel at the top of the page tells you where you
+are in WeBWorK's hierarchy of pages, but you can ignore that for the
+most part.  There is an additional logout button at the far right,
+however, that you will need to use when you are done using $WW (don't
+press it yet).  Also to the left is the boxed angle bracket that
+collapses and uncollapses the ${LQ}MAIN MENU${RQ}.
+
+$PAR
+The main information on this page is located in the large panel
+to the left.  It shows the status of the problems in this assignment,
+and your score on the set so far.  Since you haven't yet tried any of
+the problems, your score is zero, but after you work on some of them,
+the number of attempts and the score will reflect the work you have
+done.
+
+$PAR
+Near the bottom is a link that allows you to download a pdf ${LQ}hardcopy${RQ}
+version of your 
+whole assignment which you can print out.  This allows you to work on 
+the assignment without having to be connected to $WW.
+$PAR
+Also near the bottom of this and every $WW page there is an 
+${LQ}Email instructor${RQ} link that you can use to send email to your instructor.  That email, in addition to what ever you write, will 
+contain information on whatever page you are on so, e.g. if you are 
+working on a problem, your instructor will know what problem it is.
+
+$PAR
+Each problem number is a link to that problem in the homework set.
+You can click on one to get to any specific problem.  To begin the
+orientation assignment, click on the link for Problem 1.  When you are
+done working, be sure to dismiss your connection to the server by
+clicking on ${LQ}Log Out${RQ}, so that no one else can gain access to
+your account.
+$PAR
+
+
+END_TEXT
+
+}
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

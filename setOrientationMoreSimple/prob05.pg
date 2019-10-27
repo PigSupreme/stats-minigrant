@@ -1,0 +1,67 @@
+## DBsubject(WeBWorK)
+## DBchapter(WeBWorK tutorial)
+## DBsection(WeBWorK tutorial)
+## Level(1)
+## Author(Michael J. Dancs)
+## Institution(Clayton State University)
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "MathObjects.pl",
+  "PGunion.pl",
+  "parserOrientation.pl",
+  "PGcourse.pl",
+  "PGML.pl"
+);
+
+$showPartialCorrectAnswers = 1;
+
+TEXT(beginproblem);
+
+Title("Algebraic Expressions");
+
+##############################################
+$a = random(1,5);
+$b = random($a+1,9);
+
+BEGIN_PGML
+
+[$WW] was originally designed for single-variable Calculus courses, so [`x`] (lowercase) is the default variable, unless a problem says otherwise. Fill in the blanks below exactly as instructed:
+
+* Type "x+1" (without the quotes) in the blank: [_______]{"x+1"}
+* Type "t+2" (without the quotes) in the blank: [_______]{"x+2"}
+
+Now press "Preview My Answers" at the bottom of the page.
+
+You should get a Message to the effect that the variable [`t`] is not defined. Go back to the second answer and change the variable to [`x`].
+
+[$WW] is cASe-SeNSiTIVe (UPPER- and lower-case letters are not identical), so don't use the capital letter "X" in place of the lower-case letter "x".
+
+---
+As in standard algebraic notation, [$WW] will interpret an expression such as [`2x`] as multiplication, so typing 2x will give the same result as 2*x. You can even do things like 2(x+1) and (x+3)(x-2), although [$WW] will not generally expand/FOIL such products.
+
+For fractions with more than one term in a numerator and/or denominator, it's a good idea to enclose each in its own set of parentheses. Compare the following: 
+
+* Enter "(x+1)/(x+2)" in the blank:
+[_________________]{"(x+1)/(x+2)"}
+* Enter "x+1/x+2" in the blank:
+[_________________]{"x+1/x+2"}
+
+Preview the answers to see the difference. Don't forgot to "Submit Answers" in order to receive credit.
+---
+More recent versions of [$WW] will show a small 3x3 grid on the right side of each answer blank. You can click this grid to bring up an equation editor. The editor contains various templates for common mathmatical expressions. Use the Operators menu to get different sets of choices.
+
+Try entering the following expression:  
+
+[``\frac{x+[$a]}{x^2+[$b]}``] = [_____________________]{"(x+$a)/(x^2+$b)"}
+
+
+
+END_PGML
+
+##############################################
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

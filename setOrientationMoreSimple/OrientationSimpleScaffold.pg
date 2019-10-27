@@ -1,0 +1,89 @@
+## DBsubject(WeBWorK)
+## DBchapter(WeBWorK tutorial)
+## DBsection(WeBWorK tutorial)
+## Level(1)
+## Author(Michael J. Dancs)
+## Institution(Clayton State University)
+## KEYWORDS('orientation', 'scaffold')
+
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",     # Standard macros for PG language
+   "PGunion.pl",
+   "MathObjects.pl",
+   "scaffold.pl",
+   "PGML.pl",
+);
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+Title("Scaffolded Questions");
+
+# Show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 1;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+$global_x = 2;
+$s = sqrt($global_x);
+$ans = int($s);
+
+##############################################################
+#
+#  Text
+#
+#
+BEGIN_PGML
+Some WeBWorK problems, like this one, have multiple sections that are displayed in sequence rather than all at once. This is called a scaffold, since you must usually complete one section before moving on to the next. Available sections can be shown or hidden by clicking on their title bar; try this below.  
+
+END_PGML
+Scaffold::Begin();
+Section::Begin("Part 1");
+
+BEGIN_PGML
+Enter a positive integer (whole number) that is not a multiple of 5: [__________]
+
+Once you submit a correct answer for this section, the next will open automatically.
+END_PGML
+
+ANS(Real("$global_x")->cmp(
+     checker => sub {
+       my ($correct,$student,$ansHash) = @_;
+       # If correct, update the values and answers for part 2 below.
+       if (($student > 0) && ($student % 5 != 0)) {
+         $global_x = $student;
+         $ans = 5*(1+int($student/5));
+         return 1
+       } else {
+         return 0
+       }
+     }
+   ));
+
+Section::End();
+
+####################
+Section::Begin("Part 2");
+BEGIN_PGML
+What is the smallest multiple of 5 that is greater than [$global_x]? [_______]{$ans}
+END_PGML
+
+Section::End();
+
+Section::Begin("Additional notes");
+BEGIN_PGML
+This problem uses a clever trick to update Part 2 once you've correctly answered Part 1. If you have Part 2 correct but change your answer in Part 1, this may affect Part 2.
+END_PGML
+Section::End();
+
+Scaffold::End();
+ENDDOCUMENT();     
