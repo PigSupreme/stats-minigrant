@@ -195,7 +195,7 @@ The standard error of [`\bar{x}`] is [`[$sigma]/\sqrt{[$n]}`] = [$stderr_round].
 
 Keep this value to at least three decimal places, or you may get a rounding error when computing the test statistic.
 
-Assuming the Null Hypothesis is true, the values of [$x] (for all samples of size [$n]) have a mean of [$mu]. We do not know the population's standard deviation, so we must use a Student-T distribution with df = [$df].
+Assuming the Null Hypothesis is true, the values of [`\bar{x}`] (for all samples of size [$n]) have a mean of [$mu]. We do not know the population's standard deviation, so we must use a Student-T distribution with df = [$df].
 
 Compute the t-score as usual (like a z-score, but use Standard Error in the denominator):  
 
