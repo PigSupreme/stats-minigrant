@@ -51,7 +51,7 @@ $pv2 = $pv[1-$index];
 
 
 $mc = new_checkbox_multiple_choice();
-$mc->qa("Select the true statement(s) below. There may be more than one correct answer",
+$mc->qa("Select the true statement(s) below. There may be more than one correct answer, you must have all correct answers in order to receive credit.",
   "The $lo researcher would reject the null hypothesis.",
   "The $lo researcher's sample provides stronger evidence against the null hypothesis.",
   "The $hi researcher would fail to reject the null hypothesis."
@@ -80,8 +80,6 @@ Two researchers, working independently, conduct the same hypothesis test with di
 
 
 END_PGML
-
-Context()->normalStrings;
 
 ##############################################################
 #
