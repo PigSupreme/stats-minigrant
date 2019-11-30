@@ -28,7 +28,7 @@ TEXT(&beginproblem);
 $abstol = 0.000051;
 Context("Numeric");
 Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
-
+Context()->strings->remove("infinity","inf");
 #####
 
 # Use exact degrees of freedom (Aspin-Welch)
@@ -86,16 +86,16 @@ END_PGML
 $ans_pright = Real($pright)->with(tolType=>'absolute', tolerance=>$abstol);
 ANS($ans_pright->cmp->withPostFilter(AnswerHints(
 sub{
-     my ($correct,$student,$ans)=@_;
+     my ($correct,$student,$ans) = @_;
      return (abs($student - (1 - $correct)) <= $abstol);
 } => ["Check the direction of your P-Value."],
 sub{
-     my ($correct,$student,$ans)=@_;
-     return (abs($student - $pright_wdf) <= 10*$abstol) || (abs($student - $pright_wdf1) <= 10*$abstol);
+     my ($correct,$student,$ans) = @_;
+     return (abs($student - $pright_wdf) <= 10*$abstol);
 } => ["Are you using the correct df?"],
 sub{
-     my ($correct,$student,$ans)=@_;
-     return (abs($student - $correct) <= .01);
+     my ($correct,$student,$ans) = @_;
+     return (abs($student - $correct) <= 100*$abstol);
 } => ["Close! Check your computations/rounding."]
 )));
 
@@ -108,11 +108,11 @@ sub{
 } => ["Check the direction of your P-Value."],
 sub{
      my ($correct,$student,$ans)=@_;
-     return (abs($student - $ptwo_wdf) <= 20*$abstol) || (abs($student - $ptwo_wdf) <= 10*$abstol);
+     return abs($student - $ptwo_wdf) <= 20*$abstol;
 } => ["Are you using the correct df?"],
 sub{
      my ($correct,$student,$ans)=@_;
-     return (abs($student - $correct) <= .02);
+     return (abs($student - $correct) <= 200*$abstol);
 } => ["Close! Check your computations/rounding."]
 )));
 ################################################
