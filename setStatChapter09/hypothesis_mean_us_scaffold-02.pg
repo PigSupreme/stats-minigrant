@@ -60,21 +60,21 @@ Let [`\mu`] be the true average completion time for the assignment.
 ";
 
 $mc00 = new_multiple_choice();
-$mc00->qa("The instructor is claiming that:","\(\mu = 90\); this is the Null Hypothesis.");
+$mc00->qa("The instructor is claiming that:","\(\mu = $mu\); this is the Null Hypothesis.");
 $mc00->extra(
-"\(\mu > 90\); this is the Alternative Hypothesis.",
-"\(\mu < 90\); this is the Alternative Hypothesis.",
-"\(\mu < 90\); this is the Null Hypothesis.",
-"\(\mu \leq 90\); this is the Null Hypothesis."
+"\(\mu > $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Null Hypothesis.",
+"\(\mu \leq $mu\); this is the Null Hypothesis."
 );
 
 $mc0 = new_multiple_choice();
-$mc0->qa("The student is claiming that:","\(\mu < 90\); this is the Alternative Hypothesis.");
+$mc0->qa("The student is claiming that:","\(\mu < $mu\); this is the Alternative Hypothesis.");
 $mc0->extra(
-"\(\mu > 90\); this is the Alternative Hypothesis.",
-"\(\mu < 90\); this is the Null Hypothesis.",
-"\(\mu = 90\); this is the Null Hypothesis.",
-"\(\mu \leq 90\); this is the Alternative Hypothesis."
+"\(\mu > $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Null Hypothesis.",
+"\(\mu = $mu\); this is the Null Hypothesis.",
+"\(\mu \leq $mu\); this is the Alternative Hypothesis."
 );
 
 $mc1 = new_multiple_choice();
@@ -205,7 +205,7 @@ Note that you can (and should) use technology to check your results.
 
 *Part 1:*  
 
-The instructor's claim in [`\mu = [$mu]`], which must be the Null Hypothesis. The student claims [`\mu < 90`], which must be the Alternative Hypothesis.
+The instructor's claim in [`\mu = [$mu]`], which must be the Null Hypothesis. The student claims [`\mu < $mu`], which must be the Alternative Hypothesis.
 
 ---
 *Part 2:*  
