@@ -2,8 +2,8 @@
 ##
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
-## DBsection(One sample mean - z)
-## Date(11/08/2017)
+## DBsection(One sample mean - t)
+## Date(11/30/2019)
 ## Institution('Clayton State Univeristy')
 ## Author('Michael J. Dancs')
 ## Level()
@@ -20,8 +20,7 @@
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
-"PG.pl",
-"PGbasicmacros.pl",
+"PGstandard.pl",
 "PGchoicemacros.pl",
 "PGanswermacros.pl",
 "PGnumericalmacros.pl",
@@ -33,30 +32,41 @@ loadMacros(
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
 
+Context("Numeric");
 
-$mu = 6;
-$mutot = $mu;
-$xbar = $mutot + random(0.11,0.99,0.02);
-### TODO: These are t-scores for this problem ###
-$sigma = random(0.25,$xbar-$mutot,.01);
-$n = random(31,47,2);
+$mu = 6; #Hypothesized Mean
+
 $alpha = 0.05;
 $alphap = 100 * $alpha;
-$tstat = ($xbar-$mutot)/($sigma/sqrt($n));
-$tstatans = int(1000*$tstat)/1000;
-$zcrit = tdistr($n-1,$alpha);
-$pval = tprob($n-1,$tstat);
-$pvalans = int(10000*$pval)/10000;
+
+do {
+# Generate our t-statistic so that
+# .01 < Right-sided P-value < .03
+$n = random(31,47,2);
+$t_lo = (int(10000*tdistr($n-1, .03))+1)/10000;
+$t_hi = (int(10000*tdistr($n-1, .01))-1)/10000;
+$tstat = random($t_lo, $t_hi, .0001);
+
+$sd = random(0.25, 0.89, 0.01);
+$xbar = int(100*($tstat*$sd/sqrt($n) + $mu))/100;
+
+$tstatans = int(.5+ 100000*($xbar - $mu)*sqrt($n)/$sd)/100000;
+$pval = tprob($n-1,$tstatans);
+$pvalans = int(.5+10000*$pval)/10000;
+
+# Be sure we can distinguish z vs. t at three decimal places
+$pvalwrong = int(.5+10000*uprob($tstatans))/10000;
+} while (abs($pvalans - $pvalwrong) < .00051);
 
 $mc0 = new_multiple_choice();
-$mc0->qa("If `\mu` is the actual mean hours of sleep per night (among all college students), state appropriate hypotheses for this test.","Null: `\mu=` $mutot; Alternative: `\mu>` $mutot");
-$mc0->extra("Null: `\mu>` $mutot; Alternative: `\mu=` $mutot",
-"Null: `\mu=` $mutot; Alternative: `\mu <` $mutot",
-"Null: `\mu>` $mutot; Alternative: `\mu\leq` $mutot",
-"Null: `\mu<` $mutot; Alternative: `\mu=` $mutot",
-"Null: `\mu\ne` $mutot; Alternative: `\mu=` $mutot",
-"Null: `\mu\ne` $mutot; Alternative: `\mu<` $mutot",
-"Null: `\mu=` $mutot; Alternative: `\mu\ne` $mutot");
+$mc0->qa("If `\mu` is the actual mean hours of sleep per night (among all college students), state appropriate hypotheses for this test.","Null: `\mu=` $mu; Alternative: `\mu>` $mu");
+$mc0->extra("Null: `\mu>` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu <` $mu",
+"Null: `\mu>` $mu; Alternative: `\mu\leq` $mu",
+"Null: `\mu<` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu<` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu\ne` $mu");
 
 $mc = new_multiple_choice();
 @ans = (
@@ -77,11 +87,11 @@ A recent study claims that college students, on average, sleep an average of [$m
 [@ $mc0 ->print_q() @]*
 [@ $mc0 ->print_a() @]*
 
-In a simple random sample of [$n] college students, the mean amount of sleep (hours per night) is [$xbar]. The standard deviation of the sample is [$sigma] (hours per night).
+In a simple random sample of [$n] college students, the mean amount of sleep (hours per night) is [$xbar]. The standard deviation of the sample is [$sd] (hours per night).
 
-The value of the test statistic for this sample (rounded to three decmal places) is [__________].
+The value of the test statistic for this sample (to at least three decmal places) is [__________].
 
-The P-value for this sample (rounded to three decmal places) is [__________].
+The P-value for this sample (to at least three decmal places) is [__________].
 
 [@ $mc ->print_q() @]*
 [@ $mc ->print_a() @]*
