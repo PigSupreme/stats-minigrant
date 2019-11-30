@@ -36,6 +36,7 @@ Context()->flags->set(
   tolerance => $abstol,
   tolType => "absolute",
 );
+Context()->strings->remove("infinity","inf");
 
 while($n1 == $n2) {
   $n1 = random(41,70,1);
