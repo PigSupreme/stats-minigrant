@@ -31,6 +31,7 @@ TEXT(beginproblem());
 #  Setup
 
 Context("Numeric");
+Context()->strings->remove("infinity","inf");
 $abstol = .00011;
 Context()->flags->set(
   tolerance => $abstol,
@@ -221,7 +222,9 @@ The test statistic is:
 
 This problem assumes you are using the exact formula for degrees of freedom, because the author made the effort to figure out how to do that in WebWorK rather than just using pre-existing problems. Use df = [$dfr].
 
-The one-sided P-value is the proportion of t-scores [@ $statr < 0 ? "to the left" : "to the right" @] of t = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
+The one-sided P-value is the proportion of t-scores [@ $statr < 0 ? "to the left" : "to the right" @] of t = [$statr], this is [$pvalr] = [@ 100*$pvalr @]%.
+
+The two-sided P-value is [`2\times[$pvalr]= [@ 2*$pvalr @] = [@ 200*$pvalr @]\%`].
 
 The P-Value is [@ $ptwo < $alpha ? "less than the significance level of $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION

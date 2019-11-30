@@ -31,6 +31,7 @@ TEXT(beginproblem());
 ######################################
 #  Setup
 Context("Numeric");
+Context()->strings->remove("infinity","inf");
 
 $n = random(50,90,10);
 $m = $n-20;

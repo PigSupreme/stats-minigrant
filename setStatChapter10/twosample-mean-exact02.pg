@@ -31,6 +31,7 @@ TEXT(beginproblem());
 #  Setup
 
 Context("Numeric");
+Context()->strings->remove("infinity","inf");
 $abstol = 0.00051;
 Context()->flags->set(
   tolerance => $abstol,

@@ -24,6 +24,8 @@ TEXT(&beginproblem);
 
 ######################################
 #  Setup
+Context("Numeric");
+Context()->strings->remove("infinity","inf");
 
 $zscore = random(1.01, 1.99, 0.01);
 
