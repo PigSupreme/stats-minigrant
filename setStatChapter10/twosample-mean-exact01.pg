@@ -186,7 +186,20 @@ ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_mt)) < 10*$abstol
       } => $err_mt,
+   # Wrong Alternative
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (
+        (abs($student*2 -$correct) < (10*$abstol)) ||
+        (abs(2*(1-$student) - $correct) < (10*$abstol))
+        )
+      } => "Are you using the correct Alternative Hypothesis?",
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval*100)) < 201*$abstol
+      } => "Do not convert to percent.",
    )));
+
 Section::End();
 
 Section::Begin();
