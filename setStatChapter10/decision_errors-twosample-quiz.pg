@@ -1,0 +1,113 @@
+##DESCRIPTION
+##  Interpret Hypothesis Test and Decision Errors
+##ENDDESCRIPTION
+
+##KEYWORDS(''')
+
+## DBsubject('Sample Problems')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('')
+## Institution('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGML.pl"
+);
+
+TEXT(beginproblem());
+
+# Don't show which answers are correct and which ones are incorrect
+$showPartialCorrectAnswers = 0;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+$topmatter = 'It has been suggested that drivers who use a smartphone "at least occasionaly" while driving are more likely to be involved in a serious accident that drivers who "rarely or never" use a smartphone while driving. Suppose we plan to study this using a hypothesis test.';
+
+@mclist = ();
+
+$mc = new_multiple_choice();
+$mc->qa("An appropriate parameter to test would be:","The difference in the true proportions of drivers that are involved in a serious accident, comparing drivers who use a smartphone at least occasionally versus drivers who are rarely or never use a smartphone.");
+$mc->extra(
+  "The true proportion of all drivers who are involved in a serious accident.",
+  "The true proportion of all drivers who are use a smartphone at least occasionally while driving.",
+  "The true proportion of all drivers who are rarely or never use a smartphone while driving.",
+   "The difference in the true proportions of drivers who use a smartphone at least occasionally and the true proportion of drivers who are rarely or never use a smartphone."
+);
+push(@mclist, $mc);
+
+
+$hyp_null = "Individuals who use a smartphone at least occasionally while driving are just as likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving.";
+$hyp_alt = "Individuals who use a smartphone at least occasionally while driving are more likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving.";
+@hyp_choices = ($hyp_null, $hyp_alt,
+  "Individuals who use a smartphone at least occasionally while driving are less likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving.",
+  "Individuals who rarely or never use a smartphone while driving are more likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving.",
+    "Individuals who use a smartphone at least occasionally while driving are not equally likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving."
+);
+
+
+$mc = new_multiple_choice();
+$mc->qa("An appropriate Null Hypothesis would be:", $hyp_null);
+$mc->makeLast(@hyp_choices);
+push(@mclist, $mc);
+
+$mc = new_multiple_choice();
+$mc->qa("An appropriate Alternative Hypothesis would be:", $hyp_alt);
+$mc->makeLast(@hyp_choices);
+push(@mclist, $mc);
+
+$mc = new_multiple_choice();
+$mc->qa("Experimental data suggests that individuals who use a smartphone at least occasionaly while driving are not more likely to be involved in a serious accident than individuals who rarely or never use a smartphone while driving. If this conclusion turns out to be incorrect, we have made:",
+  "A Type II Error, failing to reject the Null Hypothesis when it was actually false.");
+$mc->extra("A Type II Error, rejecting the Null Hypothesis when it was actually true.",
+"A Type I Error, failing to reject the Null Hypothesis when it was actually false.",
+"A Type I Error, rejecting the Null Hypothesis when it was actually true.",
+"A Type I Error, accepting the Null Hypothesis as true.",
+"A Type II Error, accepting the Null Hypothesis as true."
+);
+push(@mclist, $mc);
+
+
+##############################################################
+#
+#  Text
+#
+#
+BEGIN_PGML
+[$topmatter]
+---
+END_PGML
+
+foreach my $mcq (@mclist){
+  $mc = $mcq; # Needed for some arcane reaason
+  BEGIN_PGML
+  [@ $mc->print_q() @]*  
+  [@ $mc->print_a() @]*  
+  
+  END_PGML
+  }
+
+
+##############################################################
+#
+#  Answers
+#
+#
+foreach my $mc (@mclist) {
+  ANS(radio_cmp($mc->correct_ans))
+  }
+
+ENDDOCUMENT();        

@@ -49,26 +49,29 @@ $mc->extra(
 );
 push(@mclist, $mc);
 
-$mc = new_multiple_choice();
-$mc->qa("START HERE: An appropriate Null Hypothesis would be:","Individuals who send text messages at least occasionally while driving are not more likely to be involved in a serious accident.");
-$mc->extra("Individuals who send text messages at least occasionally while driving are more likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are less likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are more likely to be involved in a serious accident.",
-"Individuals who send text messages at least occasionally while driving are less likely to be involved in a serious accident."
+
+$hyp_null = "Individuals who send text messages at least occasionally while driving are just as likely to be involved in a serious accident than individuals who rarely or never send text messages while driving.";
+$hyp_alt = "Individuals who send text messages at least occasionally while driving are more likely to be involved in a serious accident than individuals who rarely or never send text messages while driving.";
+@hyp_choices = ($hyp_null, $hyp_alt,
+  "Individuals who send text messages at least occasionally while driving are less likely to be involved in a serious accident than individuals who rarely or never send text messages while driving.",
+  "Individuals who rarely or never send text messages while driving are more likely to be involved in a serious accident than individuals who rarely or never send text messages while driving.",
+    "Individuals who send text messages at least occasionally while driving are not equally likely to be involved in a serious accident than individuals who rarely or never send text messages while driving."
 );
+
+
+$mc = new_multiple_choice();
+$mc->qa("An appropriate Null Hypothesis would be:", $hyp_null);
+$mc->makeLast(@hyp_choices);
 push(@mclist, $mc);
 
 $mc = new_multiple_choice();
-$mc->qa("An appropriate Alternative Hypothesis would be:","Individuals who send text messages at least occasionaly while driving are more likely to be involved in a serious accident.");
-$mc->extra("Individuals who send text messages at least occasionally while driving are not more likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are less likely to be involved in a serious accident.",
-"Individuals who never send text messages while driving are more likely to be involved in a serious accident.",
-"Individuals who send text messages at least occasionaly while driving are less likely to be involved in a serious accident."
-);
+$mc->qa("An appropriate Alternative Hypothesis would be:", $hyp_alt);
+$mc->makeLast(@hyp_choices);
 push(@mclist, $mc);
 
 $mc = new_multiple_choice();
-$mc->qa("We conclude from sample data that individuals who send text messages at least occasionaly while driving do not appear to be more likely to be involved in a serious accident. If this conclusion turns out to be inccorect, we have made:","A Type II Error, failing to reject the Null Hypothesis when it was actually false.");
+$mc->qa("Experimental data suggests that individuals who send text messages at least occasionaly while driving are not more likely to be involved in a serious accident than individuals who rarely or never send text messages while driving. If this conclusion turns out to be incorrect, we have made:",
+  "A Type II Error, failing to reject the Null Hypothesis when it was actually false.");
 $mc->extra("A Type II Error, rejecting the Null Hypothesis when it was actually true.",
 "A Type I Error, failing to reject the Null Hypothesis when it was actually false.",
 "A Type I Error, rejecting the Null Hypothesis when it was actually true.",
