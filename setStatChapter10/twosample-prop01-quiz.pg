@@ -68,7 +68,7 @@ We wish to determine if a two sections of the same introductory course have sign
 
 Each section has [$n] students. Among the early morning section, [$x1] receive an A, B, or C. Among the late afternoon section, [$x2] receive an A, B, or C.. Assume these can be treated as independent simple random samples from their respective populations.
 
-Use this sample data to test the claim [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) \ne 0`], using a significance level of [$alphap]%.
+Let [`p_1`] and [`p_2`] be the success rates for the morning and afternoon sections, respectively. Use this sample data to test the claim [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) \ne 0`], using a significance level of [$alphap]%.
 
 The value of the test statistic is [`z = `] [___________] (round to at least four decimal places).
 END_PGML
