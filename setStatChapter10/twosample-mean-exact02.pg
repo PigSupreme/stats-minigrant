@@ -112,6 +112,12 @@ $tolcheck = sub{
   ($correct, $student, $anshash) = @_;
   return (abs($student - $correct) < 10*$abstol)
   };
+$percheck = sub {
+  ($correct, $student, $hash) = @_;
+  return (abs($student - $pval*100)) < 500*$abstol
+  };
+$pererr = "Do not convert to percent.",
+
 
 ######################################
 #  Main text
@@ -164,10 +170,11 @@ $p_mt = tprob($df_mt, $test);
 $err_o2 = "You appear to be using df = (smaller sample size) - 1. Use technology to find the exact df.";
 $err_mt = "You might be using rounded df (Minitab, for example). Ask your instructor for help.";
 ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
+   # Two-sided P-Value
    sub {
       ($correct, $student, $hash) = @_;
-      return (abs($student - $pval*100)) < 500*$abstol
-      } => "Do not convert to percent.",
+      return (abs($student - $correct*2)) < 20*$abstol
+      } => "You seem to have computed a two-sided P-Value.",
    sub {
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_o2)) < 10*$abstol
@@ -177,6 +184,7 @@ ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
       return (abs($student - $p_mt)) < 10*$abstol
       } => $err_mt,
    $tolcheck=>$tolerr,
+   $percheck=>$pererr
    )));
 Section::End();
 
