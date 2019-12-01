@@ -70,6 +70,8 @@ $mc -> extra($ans[1-$tag],"Reject the null hypothesis, and conclude that both dr
 BEGIN_PGML
 A large pharmaceutical company advertises that its newly-deleveloped drug is "more effective" at curing a certain disease than the existing drug of its leading competitor. To test this claim, we can compare the proportions of patients who are cured of the disease, depending on which drug they are using for treatment.
 
+Let [`p_1`] be the true proportion of patients who would be successfully cured if treated with the new drug, and [`p_2`] be the true proportion of patients who would be successfully cured if treated with the existing drug.
+
 In a simple random sample of [$n] patients being treated with the newly-developed drug, [$x1] patients were successfully cured of the disease. In an independent simple random sample of [$n] patients being treated with the existing drug, [$x2] patients were successfully cured of the disease.  
 
 Use the sample data to test the hypotheses [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) > 0`], using a significance level of [$alpha]%.

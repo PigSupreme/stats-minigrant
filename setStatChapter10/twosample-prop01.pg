@@ -69,7 +69,7 @@ We wish to determine if two instructors teaching the same introductory course ha
 
 Each instructor teaches [$n] students. Among the first instructor's students, [$x1] receive a D or F. Among the second instructor's students, [$x2] receive a D or F. Assume these can be treated as independent simple random samples from their respective populations.
 
-Use this sample data to test the claim [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) \ne 0`], using a significance level of [$alphap]%.
+Let [`p_1`] and [`p_2`] be the theoretical DF rates for the respective instructors. Use this sample data to test the claim [`H_0: (p_1 - p_2) = 0`] against [`H_A: (p_1 - p_2) \ne 0`], using a significance level of [$alphap]%.
 
 END_PGML
 
