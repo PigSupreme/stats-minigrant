@@ -47,7 +47,7 @@ $test = int(10000*(.00005 + $test_raw))/10000;
 $p_val = 2* uprob($test_raw);
 
 # WebWorK doesn't behave when P is close to zero
-if ($pval < .0001) {$pval = 0};
+if ($pval < .0005) {$pval = 0};
 
 $alpha = .05;
 $alphap = 100*$alpha;
@@ -129,20 +129,20 @@ BEGIN_PGML_SOLUTION
 It is assumed that you will be using technology to perform this computations. If not....
 
 The difference in sample proportions is:  
-[``\frac{[$x1]}{[$n]} - \frac{[$x2]}{[$n]} = [$p1r] - [$p2r] = [$pdiffr]``]
+[``\hat{p}_1 - \hat{p}_2 = \frac{[$x1]}{[$n]} - \frac{[$x2]}{[$n]} = [$p1r] - [$p2r] = [$pdiffr]``]
 
 The pooled sample proportion is:  
-[``\frac{[$x1]+[$x2]}{[$n]+[$n]} = [$phatr]``]
+[``\bar{p} = \frac{x_1+x_2}{n_1+n_2} = \frac{[$x1]+[$x2]}{[$n]+[$n]} = [$phatr]``]
 
 Use this to compute the standard error (approximate standard deviation) of the difference in sample proportions:  
-[``\sqrt{[$phatr](1-[$phatr])\left(\frac{1}{[$n]}+\frac{1}{[$n]}\right)}=[$sdr]``]
+[``\sqrt{\bar{p}(1-\bar{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)} =[$sdr]...``]
 
 The test statistic is:  
 [``z = \frac{[$pdiffr]}{[$sdr]} = [$test]...``]
 
 The one-sided P-value is the proportion of z-scores (in the Standard Normal Distribution) to the [@ $test<0 ? "left of z = -" : "right of z = " @][$test], this is [@ $pvalr @].
 
-We want the two-sided P-value, so multiply by 2 to get [@ 2*$pvalr @] = [@ 200*$pvalr @]%. This is [@ $p_val < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
+We want the two-sided P-value, so multiply by 2 to get [@ 2*$pvalr @] = [@ 200*$pvalr @]%. This is [@ $p_val < $alpha ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
