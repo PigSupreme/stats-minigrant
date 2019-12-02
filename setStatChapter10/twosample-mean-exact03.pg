@@ -232,25 +232,35 @@ $dfr = int(.5+$df_true*1000000)/1000000;
 $pvalr = int(.5+$pval*100000)/100000;
 $alphap = 100*$alpha;
 
+##############
+### Solutions
+
+$mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
+$sdr = int(.5+1000000*sqrt($vard))/1000000;
+$statr = int(.5+10000*$test)/10000;
+$dfr = int(.5+$df_true*10000)/10000;
+$pvalr = int(.5+$pval*10000)/10000;
+$alphap = 100*$alpha;
+
 BEGIN_PGML_SOLUTION
-It is assumed that you will be using technology to perform this computations. If not....
+It is assumed that you will be using technology to perform these computations. If not....
 
 The difference in sample means is:  
-[``[$mean1]- [$mean2] = [$mdiffr]``]
+[``\mu_1-\mu_2 = [$mean1]- [$mean2] = [$mdiffr]``]
 
 The standard error (approximate standard deviation) of the difference in sample means is :  
-[``\sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]``]
+[``\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}} = \sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]...``]
 
 The test statistic is:  
 [``t = \frac{[$mdiffr]}{[$sdr]} = [$statr]...``]
 
-This problem assumes you are using the exact formula for degrees of freedom, because the author made the effort to figure out how to do that in WebWorK rather than just using pre-existing problems. Use df = [$dfr].
+This problem assumes you are using the exact formula for degrees of freedom (Welch's T-Test), with df = [$dfr]....
 
 The one-sided P-value is the proportion of t-scores to the left of t = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
 
 The P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-ENDDOCUMENT();        # This should be the last executable line in the problem.
-
 COMMENT("Uses Aspin-Welch formula (for df) and exact P-Value.");
+ENDDOCUMENT();
+

@@ -227,6 +227,4 @@ The P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than 
 END_PGML_SOLUTION
 
 COMMENT("Uses Aspin-Welch formula (for df) and exact P-Value.");
-ENDDOCUMENT();        # This should be the last executable line in the problem.
-
-
+ENDDOCUMENT();
