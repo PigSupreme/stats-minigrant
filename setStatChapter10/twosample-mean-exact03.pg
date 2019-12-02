@@ -110,10 +110,6 @@ $mc2->extra(@anse[1-$tag],
 ######################################
 #  Main text
 
-#df = [$df]  
-#T = [$test]  
-#P-Value = [$pright]  
-
 BEGIN_PGML
 A recent study claims that the average human attention span (how long your brain can concentrate on a given task in the presence of potential distractions) has become significantly shorter since the introduction of smartphones. This claim can be evaulated using a hypothesis test.
 
@@ -159,17 +155,22 @@ The EXACT df = [_______] (round to four decimal places)
 The P-Value is [_______] (round to four decimal places)
 END_PGML
 $showPartialCorrectAnswers = 1;
+
+##################
 # Generic check for answers that are almost within tolerance
 if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
 $tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
 $tolcheck = sub{
   ($correct, $student, $anshash) = @_;
-  return (abs($student - $correct) < 20*$abstol)
+  return (abs($student - $correct) < 10*$abstol)
   };
+$percheck = sub {
+  ($correct, $student, $hash) = @_;
+  return (abs($student - $pval*100)) < 500*$abstol
+  };
+$pererr = "Do not convert to percent.",
 
 ANS(Real($test)->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr)));
-
-ANS(Real($df_true)->cmp()->withPostFilter(AnswerHints($tolcheck=>$tolerr)));
 
 # For feedback with conservative df
 $df_o2 = min($n1, $n2) - 1;
@@ -180,9 +181,24 @@ $p_mt = tprob($df_mt, -$test);
 
 # Hints for alternative df
 $err_o2 = "You appear to be using df = (smaller sample size) - 1. Use technology to find the exact df.";
-$err_mt = "You might be using rounded df (Minitab, for example). Ask your instructor for help.";
+$err_mt = "Your technology might be using rounded df (Minitab, for example). Ask your instructor what to do.";
+
+ANS(Real($df_true)->cmp()->withPostFilter(AnswerHints(
+  # Conservative Option 2
+  sub {
+   ($correct, $student, $hash) = @_;
+   return ($student == $df_o2)
+   } => $err_o2,
+  # Exact df rounded to a nearby integer
+  sub {
+   ($correct, $student, $hash) = @_;
+   return ($student == $df_mt) || ($student  == ($df_mt + 1))
+   } => $err_mt,
+  $tolcheck=>$tolerr
+)));
+
+
 ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
-   $tolcheck=>$tolerr,
    sub {
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_o2)) < 10*$abstol
@@ -191,6 +207,8 @@ ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_mt)) < 10*$abstol
       } => $err_mt,
+   $tolcheck=>$tolerr,
+   $percheck=>$pererr
    )));
 Section::End();
 
@@ -214,25 +232,35 @@ $dfr = int(.5+$df_true*1000000)/1000000;
 $pvalr = int(.5+$pval*100000)/100000;
 $alphap = 100*$alpha;
 
+##############
+### Solutions
+
+$mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
+$sdr = int(.5+1000000*sqrt($vard))/1000000;
+$statr = int(.5+10000*$test)/10000;
+$dfr = int(.5+$df_true*10000)/10000;
+$pvalr = int(.5+$pval*10000)/10000;
+$alphap = 100*$alpha;
+
 BEGIN_PGML_SOLUTION
-It is assumed that you will be using technology to perform this computations. If not....
+It is assumed that you will be using technology to perform these computations. If not....
 
 The difference in sample means is:  
-[``[$mean1]- [$mean2] = [$mdiffr]``]
+[``\mu_1-\mu_2 = [$mean1]- [$mean2] = [$mdiffr]``]
 
 The standard error (approximate standard deviation) of the difference in sample means is :  
-[``\sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]``]
+[``\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}} = \sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]...``]
 
 The test statistic is:  
 [``t = \frac{[$mdiffr]}{[$sdr]} = [$statr]...``]
 
-This problem assumes you are using the exact formula for degrees of freedom, because the author made the effort to figure out how to do that in WebWorK rather than just using pre-existing problems. Use df = [$dfr].
+This problem assumes you are using the exact formula for degrees of freedom (Welch's T-Test), with df = [$dfr]....
 
 The one-sided P-value is the proportion of t-scores to the left of t = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
 
 The P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-ENDDOCUMENT();        # This should be the last executable line in the problem.
-
 COMMENT("Uses Aspin-Welch formula (for df) and exact P-Value.");
+ENDDOCUMENT();
+

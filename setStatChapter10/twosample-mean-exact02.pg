@@ -81,7 +81,7 @@ $ptwo = 2*min($pleft,$pright);
 # Use this P-value for the answer
 $pval = $pright;
 # WebWorK doesn't behave when P is close to zero
-if ($pval < .0001) {$pval = 0};
+if ($pval < .00005) {$pval = 0};
 
 $mc0 = new_multiple_choice();
 $mc0->qa("An appropriate alternative hypothesis is:",'\(\mu_1-\mu_2>0\)');
@@ -112,16 +112,19 @@ $tolcheck = sub{
   ($correct, $student, $anshash) = @_;
   return (abs($student - $correct) < 10*$abstol)
   };
+$percheck = sub {
+  ($correct, $student, $hash) = @_;
+  return (abs($student - $pval*100)) < 500*$abstol
+  };
+$pererr = "Do not convert to percent.",
+
 
 ######################################
 #  Main text
 
-#df = [$df]  
-#T = [$test]  
-#P-Value = [$pright]  
-
 BEGIN_PGML
 A statistics professor believes that the mean final exam score among students who are "rarely absent" is higher than the mean final exam score among students who are "frequently absent." He plans to conduct a hypothesis test, using a [$alphaPercent]% significance level.
+
 END_PGML
 
 Scaffold::Begin(
@@ -167,11 +170,11 @@ $p_mt = tprob($df_mt, $test);
 $err_o2 = "You appear to be using df = (smaller sample size) - 1. Use technology to find the exact df.";
 $err_mt = "You might be using rounded df (Minitab, for example). Ask your instructor for help.";
 ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
-   $tolcheck=>$tolerr,
+   # Two-sided P-Value
    sub {
       ($correct, $student, $hash) = @_;
-      return (abs($student - $pval*100)) < 500*$abstol
-      } => "Do not convert to percent.",
+      return (abs($student - $correct*2)) < 20*$abstol
+      } => "You seem to have computed a two-sided P-Value.",
    sub {
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_o2)) < 10*$abstol
@@ -180,6 +183,8 @@ ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
       ($correct, $student, $hash) = @_;
       return (abs($student - $p_mt)) < 10*$abstol
       } => $err_mt,
+   $tolcheck=>$tolerr,
+   $percheck=>$pererr
    )));
 Section::End();
 
@@ -198,29 +203,28 @@ Scaffold::End();
 $mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
 $sdr = int(.5+1000000*sqrt($vard))/1000000;
 $statr = int(.5+10000*$test)/10000;
-$dfr = int(.5+$df_true*1000000)/1000000;
-$pvalr = int(.5+$pval*100000)/100000;
+$dfr = int(.5+$df_true*10000)/10000;
+$pvalr = int(.5+$pval*10000)/10000;
 $alphap = 100*$alpha;
 
 BEGIN_PGML_SOLUTION
-It is assumed that you will be using technology to perform this computations. If not....
+It is assumed that you will be using technology to perform these computations. If not....
 
 The difference in sample means is:  
-[``[$mean1]- [$mean2] = [$mdiffr]``]
+[``\mu_1-\mu_2 = [$mean1]- [$mean2] = [$mdiffr]``]
 
 The standard error (approximate standard deviation) of the difference in sample means is :  
-[``\sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]``]
+[``\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}} = \sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]...``]
 
 The test statistic is:  
 [``t = \frac{[$mdiffr]}{[$sdr]} = [$statr]...``]
 
-This problem assumes you are using the exact formula for degrees of freedom, because the author made the effort to figure out how to do that in WebWorK rather than just using pre-existing problems. Use df = [$dfr].
+This problem assumes you are using the exact formula for degrees of freedom (Welch's T-Test), with df = [$dfr]....
 
 The one-sided P-value is the proportion of t-scores to the right of t = [$statr], this is [@ $pvalr @] = [@ 100*$pvalr @]%.
 
 The P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-ENDDOCUMENT();        # This should be the last executable line in the problem.
-
 COMMENT("Uses Aspin-Welch formula (for df) and exact P-Value.");
+ENDDOCUMENT();

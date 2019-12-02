@@ -1,0 +1,108 @@
+##DESCRIPTION
+##  Drop-menu select Problem Template
+##ENDDESCRIPTION
+
+##KEYWORDS('template','PGML','select')
+
+## DBsubject('Sample Problems')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('')
+## Institution('')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+########################################################################
+
+DOCUMENT();      
+
+loadMacros(
+   "PGstandard.pl",
+   "MathObjects.pl",
+   "PGML.pl",
+   "PGchoicemacros.pl",  # REQUIRED For drop-down select questions
+);
+
+# Print problem number and point value (weight) for the problem
+TEXT(beginproblem());
+
+# Doesn't seem to work in this problem....
+$showPartialCorrectAnswers = 1;
+
+##############################################################
+#
+#  Setup
+#
+#
+Context("Numeric");
+
+# Choices presented to students
+$tfbank = new_select_list();
+ $tfbank->rf_print_q(~~&pop_up_list_print_q);
+$tfbank-> ra_pop_up_list( [
+ No_answer => "Select an Answer",
+ RS => "Right-sided",
+ LS => "Left-sided",
+ TS => "Two-sided"
+ ]
+ );
+
+# Questions and correct answers
+$dsp = random(40,65);
+$isp = random(20,31);
+$rsp = 100 - $dsp -$isp;
+$asdir = list_random("more","less");
+$asdir_ah = $asdir eq "more" ? "RS" : "LS";
+$asgpa = random(2.8,3.4,.1);
+$ascoll = list_random("Arts and Sciences","Business","Health","Information and Mathematical Sciences");
+do {
+$ascoll2 = list_random("Arts and Sciences","Business","Health","Information and Mathematical Sciences");
+} while $ascoll eq $ascoll2;
+$cimsdir = list_random("more","less");
+$cimsdir_ah = $cimsdir eq "more" ? "RS" : "LS";
+$cimsgpa = random(2.1,2.9,.1);
+$cimscoll = list_random("Arts and Sciences","Business","Health","Information and Mathematical Sciences");
+$histate = list_random("California", "New York", "Virginia", "Illinois");
+$lostate = list_random("Georgia", "Texas", "Arkansas", "Wyoming");
+$schooltype = ("high schools","middle schools","colleges");
+$schoolcomp = ("the same","different");
+
+$tfbank -> qa(
+"The average GPA in the College of $ascoll is $asdir than $asgpa. You know the standard deivation for the population.", $asdir_ah,
+"The average GPA in the College of $cimscoll is $cimsdir than $cimsgpa. You do not know the standard deivation for the population.", $cimsdir_ah,
+"The average price per gallon of gasoline is lower in $lostate than in $histate.", "LS",
+"The five-year graduation rate (what percent of students graduate in five years or less) for majors in the College of $ascoll2 is different than the five-year graduation rate for majors in the College of $ascoll.", "TS",
+"The amount of time you spend eating breakfast each day is less than the amount of time you spend eating lunch on the same day.","LS",
+);
+# Number of questions to pick
+$tfbank->choose(5);
+
+##############################################################
+#
+#  Text
+#
+#
+BEGIN_PGML
+In each scenario, choose the appropriate direction for the Alternative Hypothesis.
+[@ $tfbank->print_q() @]*
+
+END_PGML
+
+##############################################################
+#
+#  Answers
+#
+#
+
+#  All or nothing grader
+install_problem_grader(~~&std_problem_grader);
+
+ANS( str_cmp( $tfbank->ra_correct_ans() ) );
+
+COMMENT("Means/proportions only; an expanded version exists for Chi-Squared.");
+
+ENDDOCUMENT();        

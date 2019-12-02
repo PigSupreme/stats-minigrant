@@ -33,7 +33,7 @@ $zscore = random(1.01, 1.99, 0.01);
 #  Main text
 
 BEGIN_PGML
-In a hypothesis test comparing two population proportions, sample data gives a test statistic of [` z = [$zscore] `]. In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
+In a hypothesis test comparing two population proportions, sample data gives a test statistic of z = [$zscore]. In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
 
 a. With a right-sided alternative hypothesis, the P-Value for this sample is [_______________].
 
@@ -48,36 +48,47 @@ $abstol = 0.00051;
 Context("Numeric");
 Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
 
-$rightpval = int(10000*(.00005 + uprob(abs($zscore))))/10000;              
 # Assumes the z-score is positive
+$rightpval = int(.5 + 10000*uprob($zscore))/10000;  
+$leftpval = 1 - $rightpval;
 $pvaltwo = 2*$rightpval;
+
+# Generic tolerance checker
+$tolcheck = sub{
+  my ($correct,$student,$ans) = @_;
+  return abs($student - $correct) <= 20*$abstol;
+  };
+$tolerror = "You are close. Be sure you are rounding exactly as asked.";
+
+# Generic percentage checker
+$percheck = sub{
+  my ($correct,$student,$ans) = @_;
+  return abs($student/100 - $correct) <= 20*$abstol;
+  };
+$pererror = "Do not convert to percent!";
 
 $ans_a = Real($rightpval);
 ANS($ans_a->cmp->withPostFilter(AnswerHints(
     sub{
         my ($correct,$student,$ans) = @_;
-        return abs((1-$correct)-$student) <= $abstol;
+        return abs($student - $leftpval) <= $abstol;
        } => ["Check the direction of your P-Value.", score => 0],
     sub{
         my ($correct,$student,$ans) = @_;
-        return abs(2*$correct-$student) <= 2*$abstol;
-       } => ["Your answer appears to be the two-sided P-Value.", score => 0],
-    sub{
-        my ($correct,$student,$ans) = @_;
-        return abs($correct-$student) <= 10*$abstol;
-       } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+        return abs($student - $pvaltwo) <= 2*$abstol;
+       } => ["Your answer appears to be a two-sided P-Value.", score => 0],
+    $tolcheck => $tolerror,
+    $percheck => $pererror
 )));
 
 $ans_b = Real($pvaltwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
 ANS($ans_b->cmp->withPostFilter(AnswerHints(
     sub{
         my ($correct,$student,$ans) = @_;
-        return abs(.5*$correct-$student) <= $abstol;
-       } => ["Your answer appears to be the one-sided P-value.", score => 0],
-sub{
-        my ($correct,$student,$ans) = @_;
-        return abs($correct-$student) <= 20*$abstol;
-       } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+        return (min(abs($student - $rightpval), abs($student- $leftpval)) < $abstol);
+       } => ["Your answer appears to be a one-sided P-value.", score => 0],
+    $tolcheck => $tolerror,
+    $percheck => $pererror
 )));
 ################################################
 ### Solutions

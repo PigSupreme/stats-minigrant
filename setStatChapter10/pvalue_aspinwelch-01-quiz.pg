@@ -28,7 +28,7 @@ TEXT(&beginproblem);
 $abstol = 0.000051;
 Context("Numeric");
 Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
-Context()->strings->remove("infinity","inf");
+
 #####
 
 # Use exact degrees of freedom (Aspin-Welch)
@@ -64,56 +64,37 @@ $pleft = 1 - $pright;
 $ptwo = 2*min($pleft,$pright);
 
 
-#####
-$pright_wdf = tprob(int($df_true), abs($test));
-$ptwo_wdf = 2*$pright_wdf;
-
 ######################################
 #  Main text
 
 BEGIN_PGML
 A hypothesis test comparing two population means has a test statistic of t = [$test] with df = [$df_true].
 
-a. With a right-sided alternative hypothesis, the P-Value for this sample is [_____] (round to at least four decimal places).
+a. With a left-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
 
-a. With a two-sided alternative hypothesis, the P-Value for this sample is
+a. With a right-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
+
+a. With a two-sided alternative hypothesis, the _P_-Value for this sample is
 [_____] (round to at least four decimal places).
 
 END_PGML
 ######################################
 #  Answers
 
-# Generic tolerance checker
-$tolcheck = sub{
-  my ($correct,$student,$ans) = @_;
-  return abs($student - $correct) <= 20*$abstol;
-  };
-$tolerror = "You are close. Be sure you are rounding exactly as asked.";
-
-# Generic percentage checker
-$percheck = sub{
-  my ($correct,$student,$ans) = @_;
-  return abs($student/100 - $correct) <= 20*$abstol;
-  };
-$pererror = "Do not convert to percent!";
-
+$ans_pleft = Real($pleft)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_pleft->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $correct) <= .01);
+} => ["Close! Check your computations/rounding."]
+)));
 
 $ans_pright = Real($pright)->with(tolType=>'absolute', tolerance=>$abstol);
 ANS($ans_pright->cmp->withPostFilter(AnswerHints(
 sub{
-     my ($correct,$student,$ans) = @_;
-     return (abs($student - (1 - $correct)) <= $abstol);
-} => ["Check the direction of your P-Value."],
-sub{
-     my ($correct,$student,$ans) = @_;
-     return (abs($student - (2*$correct)) <= 2*$abstol);
-} => ["Are you using a two-sided P-Value?"],
-sub{
-     my ($correct,$student,$ans) = @_;
-     return (abs($student - $pright_wdf) <= 10*$abstol);
-} => ["Are you using the correct df?"],
-    $tolcheck => $tolerror,
-    $percheck => $pererror
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $correct) <= .01);
+} => ["Close! Check your computations/rounding."]
 )));
 
 
@@ -121,27 +102,12 @@ $ans_ptwo = Real($ptwo)->with(tolType=>'absolute', tolerance=>2*$abstol);
 ANS($ans_ptwo->cmp->withPostFilter(AnswerHints(
 sub{
      my ($correct,$student,$ans)=@_;
-     return (abs($student - (1 - $correct)) <= 2*$abstol);
-} => ["Check the direction of your P-Value."],
-sub{
-     my ($correct,$student,$ans) = @_;
-     return (abs($student - (2*$correct)) <= 2*$abstol);
-} => ["Are you using a two-sided P-Value?"],
-sub{
-     my ($correct,$student,$ans)=@_;
-     return abs($student - $ptwo_wdf) <= 20*$abstol;
-} => ["Are you using the correct df?"],
-    $tolcheck => $tolerror,
-    $percheck => $pererror
+     return (abs($student - $correct) <= .02);
+} => ["Close! Check your computations/rounding."]
 )));
-
 ################################################
 ### Solutions
-BEGIN_PGML_SOLUTION
-a. The right-sided P-Value is the proportion/area to the right of t = [$test]. Make sure you are using df = [$df]. If your technology is limited to whole number df's, speak with your instructor.
 
-a. Since the test statistic was positive, the two-sided P-value is twice the right-sided P-Value (found in part a). You can enter 2*[@ int(.5+$pright*10000)/10000 @] and let WebWorK do the arithmetic.
-END_PGML_SOLUTION
 
 COMMENT('Use a t distribution to get the exact P-Value');
 
