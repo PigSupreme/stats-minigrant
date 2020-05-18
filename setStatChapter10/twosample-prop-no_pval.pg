@@ -198,5 +198,5 @@ The P-value is the proportion of z-scores (in the Standard Normal Distribution) 
 The P-Value is [@ $p_val < $alphap/100 ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-COMMENT('Will always reject the Null Hypothesis');
+COMMENT('Critical region method. Will always reject the Null Hypothesis');
 ENDDOCUMENT();
