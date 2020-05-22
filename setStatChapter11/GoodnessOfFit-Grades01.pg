@@ -84,20 +84,26 @@ for (my $i=0; $i<$k; $i++) {
 
 # Confidence Level
 $alpha = .05;
+$alphap = 100*$alpha;
 
 # Critical value and P-Value for Goodness-of-Fit
 $crit = chisqrdistr($k-1,$alpha);
 $pval = chisqrprob($k-1,$stat);
+$pvalp = int(.5+10000*$pval)/100;
 
 # Final Conclusions...
 $mc = new_multiple_choice();
 @ans = ('We can reject the claim that the actual grade distribution fits the suggested distribution.',
 	'It is not unreasonable to assume the actual grade distribution fits the suggested distribution.');
 
-if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+$tag = ($stat > $crit) ? 0 : 1;
 
 $mc -> qa('Based on the above results:', $ans[$tag]);
 $mc -> extra($ans[1-$tag]);
+$mc_soln = (
+"The Null Hypothesis says that grades in the sample come from the expected distribution. Since our P-value of $pvalp% is less than the $alphap% significance level, reject the null.", 
+"The Null Hypothesis says that grades in the sample come from the expected distribution. Since our P-value of $pvalp% is not less than the $alphap% significance level, this is a reasonable assumption (but not guaranteed to be true).", 
+)[$tag];
 
 BEGIN_PGML
 Some instructors (but not the author of this problem!) "grade on the bell curve" when assigning final letter grades. This means that a certain percentage of students are expected to receive each grade, and these percentages are consistent with a Normal Distribution. A suggested distribution might look like this:
@@ -175,6 +181,29 @@ END_PGML
 ANS(radio_cmp($mc->correct_ans));
 Section::End();
 Scaffold::End();
+
+$statround = int(.5+10000*$stat)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1:  
+
+Convert each expected percent to decimal, and multiply by the total sample size ([$n]). You can enter something like [`[$eprops[0]]\times [$n]`] and let WeBWorK handle the arithmetic.
+---
+#### Part 2:  
+
+Compute the [`\chi^2`] statistic using technology. There are [$k] results/categories/values, thus df = [$k] - 1.
+---
+#### Part 3:  
+
+A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k -1 @]).
+---
+#### Part 4:  
+
+[$mc_soln]
+
+END_PGML_SOLUTION
+
+
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
 

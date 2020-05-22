@@ -89,6 +89,7 @@ $alphap = 100*$alpha;
 # Critical value and P-Value for Goodness-of-Fit
 $crit = chisqrdistr($k-1,$alpha);
 $pval = chisqrprob($k-1,$stat);
+$pvalp = int(.5+10000*$pval)/100;
 
 # Final Conclusions...
 $mc = new_multiple_choice();
@@ -98,13 +99,17 @@ $mc = new_multiple_choice();
   'We may conclude (at the '.$alphap.'% significance level) that the die is fair.'
 );
 
-if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+$tag = ($stat > $crit) ? 0 : 1;
 
 $mc -> qa('Based on the above results:', $ans[$tag]);
 $mc -> extra($ans[1-$tag], @ans_wrong);
+$mc_soln = (
+"The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is less than the $alphap% significance level, reject the null and conclude that the die is unfair.", 
+"The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is not less than the $alphap% significance level, there is insufficient evidence that the die is unfair.", 
+)[$tag];
 
 BEGIN_PGML
-An ordinary [$k]-sided die is "fair" if each of the [$k] numbers has an equal probability. This can be tested by physically rolling the die a large number of times, and using a Goodness-of-Fit test to see if the observed rolls fit a distribution with all outcomes equally likely.
+An ordinary [$k]-sided die is "fair" if each of the [$k] sides occurs with equal probability. This can be tested by physically rolling the die a large number of times, and using a Goodness-of-Fit test to see if the observed rolls fit a distribution with all outcomes equally likely.
 
 We will do this using a Goodness-of-Fit test at the [@ $alpha*100 @]% significance level.
 
@@ -155,6 +160,29 @@ END_PGML
 ANS(radio_cmp($mc->correct_ans));
 Section::End();
 Scaffold::End();
+
+$statround = int(.5+10000*$stat)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1:  
+
+Since each number has the same probability (1/[$k]), the expected count is the total number of rolls multiplied by that probability: [$n] x(1/[$k]).
+---
+#### Part 2:  
+
+Compute the [`\chi^2`] statistic using technology. There are [$k] results/categories/values, thus df = [$k] - 1.
+---
+#### Part 3:  
+
+A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k - 1 @]).
+---
+#### Part 4:  
+
+[$mc_soln]
+
+END_PGML_SOLUTION
+
+
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
 

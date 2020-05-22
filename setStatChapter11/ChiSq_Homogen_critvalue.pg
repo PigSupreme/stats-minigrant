@@ -20,7 +20,7 @@
 ## KEYWORDS("Hypothesis Test", "Chi-Squared", "Homogeneity" )
 
 
-DOCUMENT();        # This should be the first executable line in the problem.
+DOCUMENT();
 
 loadMacros(
   "PGstandard.pl",
@@ -33,6 +33,7 @@ loadMacros(
 );
 
 TEXT(beginproblem());
+COMMENT("Critical Value Version.");
 
 ######################################
 #  Setup
@@ -115,9 +116,11 @@ endtable();
 
 ### Part 4 ###
 #Critical values for right-tailed chi-squared
+
 @alphap_list = (1, 2, 5, 10);
 $numcats = scalar(@alphap_list)-1;
 $df = 4;
+$cval = chisqrdistr($df, $alpha);
 $pval = chisqrprob($df, $chisq);
 
 $mc_tag = 0;
@@ -136,7 +139,7 @@ $mc->makeLast(@mc_choices);
 
 ### Part 5 ###
 $pval = chisqrprob($df, $chisq);
-#$mcc_right = ($pval < $alpha) ? "reject" : "fail";
+#$mcc_right = ($chisq > $cval) ? "reject" : "fail";
 $mcc = new_multiple_choice();
 
 %mcc_autoright = (
@@ -156,9 +159,11 @@ $mcc->qa(
 $mcc->makeLast(@cchoices);
 
 # [Reject, Fail to Reject]
+$chisq_rnd = int(.5 + 1000*$chisq)/1000;
+$cval_rnd = int(.5 + 1000*$cval)/1000;
 $mc_soln = (
-"Since the P-Value is less than the $alphap% significance level, we conclude that there is a statistically significant difference between the grade distributions.",
-"Since the P-Value is not less than the $alphap% significance level, the difference between the grade distributions is not statistically significant."
+"Since the sample \(\chi^2\) = $chisq_rnd is greater than the $alphap% critical value ($cval_rnd), we conclude that the two instructors have different grade distributions.",
+"Since the sample \(\chi^2\) = $chisq_rnd is not greater than the $alphap% critical value ($cval_rnd), we cannot conclude that the two instructors have different grade distributions."
 )[($pval<$alpha)?0:1];
 
 $showPartialCorrectAnswers = 1;
@@ -202,7 +207,7 @@ END_PGML
 Section::End();
 Section::Begin();
 BEGIN_PGML
-Compute the test statistic for the above sample data under the Null Hypothesis that the grade distribution (in the overall popuation) is the same for both instructors. Give your answer to at least two decimal places.
+Compute the test statistic for the above sample data under the Null Hypothesis that the grade distribution (in the overall popuation) is the same for both instructors. Give your answer to at least three decimal places.
 
 [`\chi^2 =`] [___________].
 
@@ -211,21 +216,28 @@ END_PGML
 ANS(Real("$chisq")->cmp->withPostFilter(AnswerHints(
      sub {
          my ($correct,$student,$anshash) = @_;
-         return abs($student-$correct) < .05;
+         return abs($student-$correct) < 20*$abstol;
          } => ["Your answer is close. Check your computations."]
 )));
 
 Section::End();
 Section::Begin();
 BEGIN_PGML
-The degrees of freedom for this test statistic is [________]{"2*2"}.
+The degrees of freedom for this test statistic is [________]{"($nrow-1)*($ncol-1)"}.
 
-The P-Value for this sample is:
-[@ $mc->print_a() @]*
+The critical [`\chi^2`] value for the [$alphap]% significance level is [__________] (give this answer to at least three decimal places).
+
+[%The P-Value for this sample is:%]
+[%[@ $mc->print_a() @]*%]
 
 END_PGML
-
-ANS(radio_cmp($mc->correct_ans()));
+ANS(Real("$cval")->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$anshash) = @_;
+         return abs($student-$correct) < 20*$abstol;
+         } => ["Your answer is close. Check your computations."]
+)));
+#ANS(radio_cmp($mc->correct_ans()));
 Section::End();
 Section::Begin();
 BEGIN_PGML
@@ -278,13 +290,12 @@ endtable()
 
 There are 2 possible values of the row factor (instructor) and 5 possible values of the column factor (grade), so df = ([$nrow]-1)x([$ncol]-1).
 
-The Chi-Squared test of independence/homogeneity is always right-sided. Use technology to compute [`P(\chi^2\geq[$chisqround]) = [@ int(.5+$pval*10000)/100 @]%`].
+The Chi-Squared test of independence/homogeneity is always right-sided. Use technology to compute the critical value (the cutoff score for the top [$alphap]%) or look up the value in a table.
 
 ### Part 5
 
 [$mc_soln]
 
 END_PGML_SOLUTION
-
 
 ENDDOCUMENT();

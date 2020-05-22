@@ -33,6 +33,7 @@ loadMacros(
 );
 
 TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
 
 ######################################
 #  Setup
@@ -90,7 +91,9 @@ foreach my $i (0..2) {
 }
 
 ### Part 4 ###
-#Critical values for right-tailed chi-squared
+# Critical values for right-tailed chi-squared
+# We use some trickery to choose a significance level...
+# ...at which we can reject the null.
 @alphap_list = (1, 2, 5, 10);
 $numcats = scalar(@alphap_list)-1;
 $df = 2*2;
@@ -116,7 +119,7 @@ $mcc->qa(
 );
 $mcc->extra("No.","The sample is inconclusive."); 
 
-$showPartialCorrectAnswers = 1;
+
 ######################################
 #  Main text
 BEGIN_PGML
@@ -196,6 +199,42 @@ Section::End();
 Scaffold::End();
 
 ######################################
-#  Answers
+#  Solutions
+
+$chisqround = int(.5 + 10000*$chisq)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1
+
+Assuming the sample is representative of the overall population, the relative frequency of [$rfac[$ri]]s in the sample (equal to [$samp[$ri][3]]/[$total]) should be close the proportion of [$rfac[$ri]]s in the entire population. If we select a random individual from the population, the probability that we select a [$rfac[$ri]] is equal to this proportion.
+
+The same idea applies to the probability of selecting a [$cfac[$ci]].
+
+#### Part 2
+
+If the two events were independent, their probabilities satisfy:
+
+P([$rfac[$ri]] AND [$cfac[$ci]]) = P([$rfac[$ri]]) x P([$cfac[$ci]]).
+
+The values on the right are close to ([$samp[$ri][3]]/[$total]) and ([$samp[3][$ci]]/[$total]), from Part 1.
+
+We expect the count of "[$rfac[$ri]] AND [$cfac[$ci]]" in the sample to be close to its probability (which is close to ([$samp[$ri][3]]/[$total]) x ([$samp[3][$ci]]/[$total])) multiplied by the total sample size of [$total].
+
+### Part 3
+
+You should be using technology for this.
+
+### Part 4
+
+There are 3 possible values of the row factor and 3 possible values of the column factor, so df = (3-1)x(3-1).
+
+The Chi-Squared test of independence is always right-sided. Use technology to compute [`P(\chi^2)\geq[$chisqround]`].
+
+### Part 5
+
+The P-Value is less than the [$alphap]% significance level, so reject the Null Hypothesis. Based on this sample, we conclude that political affiliation does vary with age.
+
+END_PGML_SOLUTION
+
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.

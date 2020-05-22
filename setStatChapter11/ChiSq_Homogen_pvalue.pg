@@ -33,6 +33,7 @@ loadMacros(
 );
 
 TEXT(beginproblem());
+COMMENT("Uses ranges of P-Values (for those still using a table).");
 
 ######################################
 #  Setup
@@ -285,6 +286,5 @@ The Chi-Squared test of independence/homogeneity is always right-sided. Use tech
 [$mc_soln]
 
 END_PGML_SOLUTION
-
 
 ENDDOCUMENT();
