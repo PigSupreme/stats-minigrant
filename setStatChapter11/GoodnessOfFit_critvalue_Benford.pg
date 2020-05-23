@@ -32,7 +32,7 @@ loadMacros(
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-COMMENT("Will almost always reject the Null Hypothesis.");
+COMMENT("Critical value method. Will almost always reject the Null Hypothesis.");
 
 Context('Numeric');
 $abstol = .00051;
@@ -90,7 +90,7 @@ $alpha = .05;
 $alphap = 100*$alpha;
 
 # Critical value and P-Value for Goodness-of-Fit
-$crit = chisqrdistr($k-1,$alpha);
+$cval = chisqrdistr($k-1,$alpha);
 $pval = chisqrprob($k-1,$stat);
 if ($pval < $abstol) {$pval = 0}
 
@@ -99,7 +99,7 @@ $mc = new_multiple_choice();
 @ans = ("Reject the Null Hypothesis. The financial records do not appear to follow Benford's Law.",
 	"Fail to Reject the Null Hypothesis. The financial records appear to be  consistent with Benford's Law.");
 
-if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+if ($stat > $cval) { $tag = 0; } else { $tag = 1; }
 
 $mc -> qa("Using a $alphap% significance level", $ans[$tag]);
 $mc -> extra($ans[1-$tag],
@@ -158,7 +158,7 @@ Section::End();
 
 Section::Begin();
 BEGIN_PGML
-The P-Value for this sample is [_______]{$pval} (do not convert to percent).
+The Critical [`\chi^2`] Value (at the [$alphap]% significance level) is [_______]{$cval} (round to at least three decimal places).
 END_PGML
 Section::End();
 
