@@ -5,7 +5,7 @@
 ## DBsubject('Statistics')
 ## DBchapter('Hypothesis tests')
 ## DBsection('Chi-squared test for goodness of fit')
-## Date('4/7/2019')
+## Date('4/7/2020')
 ## Author('Michael J. Dancs')
 ## Institution('Clayton State University')
 ## TitleText1('')
@@ -19,7 +19,7 @@
 ## DBsection(Chi-squared test for goodness of fit)
 ##KEYWORDS('GOAT')
 
-DOCUMENT();        # This should be the first executable line in the problem.
+DOCUMENT();        
 
 loadMacros(
 "PGstandard.pl",
@@ -31,6 +31,7 @@ loadMacros(
 );
 
 TEXT(beginproblem());
+COMMENT("P-Value version.");
 $showPartialCorrectAnswers = 1;
 
 Context('Numeric');
@@ -66,7 +67,7 @@ $n = $count + $obs[$k-1];
 # so that expected counts come out nicely.
 $tofill = $k - ($n % $k);
 for (my $i=0; $i<$tofill; $i++) {
-  $obs[$i % $k]++;
+  $obs[$i%$k]++;
   $n++;
   }
 #####################################
@@ -93,20 +94,24 @@ $pvalp = int(.5+10000*$pval)/100;
 
 # Final Conclusions...
 $mc = new_multiple_choice();
-@ans = ('We may conclude (at the '.$alphap.'% significance level) that the die is unfair.',
-	'We fail to conclude (at the '.$alphap.'% significance level) that the die is unfair.');
+@ans = ("We may conclude (at the $alphap% significance level) that the die is unfair.",
+	"We fail to conclude (at the $alphap significance level) that the die is unfair.");
 @ans_wrong = (
-  'We may conclude (at the '.$alphap.'% significance level) that the die is fair.'
+  "We may conclude (at the $alphap% significance level) that the die is fair."
 );
 
 $tag = ($stat > $crit) ? 0 : 1;
 
 $mc -> qa('Based on the above results:', $ans[$tag]);
 $mc -> extra($ans[1-$tag], @ans_wrong);
-$mc_soln = (
-"The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is less than the $alphap% significance level, reject the null and conclude that the die is unfair.", 
-"The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is not less than the $alphap% significance level, there is insufficient evidence that the die is unfair.", 
-)[$tag];
+
+# For PGML_SOLUTIONS
+$statround = int(.5+$stat*10000)/10000;
+$pvalround = int(.5+$pval*10000)/100;
+%mc_soln = (
+  reject => "The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is less than the $alphap% significance level, reject the null and conclude that the die is unfair.", 
+  fail => "The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is not less than the $alphap% significance level, there is insufficient evidence that the die is unfair.", 
+);
 
 BEGIN_PGML
 An ordinary [$k]-sided die is "fair" if each of the [$k] sides occurs with equal probability. This can be tested by physically rolling the die a large number of times, and using a Goodness-of-Fit test to see if the observed rolls fit a distribution with all outcomes equally likely.
@@ -116,28 +121,30 @@ We will do this using a Goodness-of-Fit test at the [@ $alpha*100 @]% significan
 END_PGML
 
 Scaffold::Begin();
+
 Section::Begin();
 BEGIN_PGML
 Suppose the die is rolled [$n] times, with each roll independent of the others. If all [$k] numbers are equally likely on any given roll:
-a. For each number from 1 to [$k], what is probability (on any given roll) that the result is that number?  
+
+For each number from 1 to [$k], what is probability (on any given roll) that the result is that number?  
 [______]{"1/$k"}
 
-a. For each number from 1 to [$k], what the expected number of times that number is rolled?  
+For each number from 1 to [$k], what the expected number of times that number is rolled?  
 [______]{Real("$n/$k")}
 END_PGML
 Section::End();
 
 Section::Begin();
-BEGIN_TEXT
-Here are the Expected Counts (from above) and the Observed Counts in a series of $n independent rolls:$BR
-$PAR
-\{begintable(6)\}
-\{row('Result',(1..$k))\}
-\{row('Observed Count', @obs)\}
-\{row('Expected Count', @ecounts)\}
-\{endtable()\}$BR
-END_TEXT
 BEGIN_PGML
+Here are the Expected Counts (from above) and the Observed Counts in a series of [$n] independent rolls:
+
+[@ begintable(5) .
+row('Result',(1..$k)) .
+row('Observed Count', @obs) .
+row('Expected Count', @ecounts) .
+endtable()
+@]*
+
 Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
 
 The degrees of freedom for this test statistic is [_______]{$k-1}.
@@ -174,15 +181,13 @@ Compute the [`\chi^2`] statistic using technology. There are [$k] results/catego
 ---
 #### Part 3:  
 
-A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k - 1 @]).
+A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k - 1 @]). If you are using Critical Value tables, a [$alphap]% significance level uses [@ int(.5+$crit*1000)/1000 @].
 ---
 #### Part 4:  
 
-[$mc_soln]
+[@ $mc_soln{$pval < $alpha ? "reject" : "fail"} @]
 
 END_PGML_SOLUTION
-
-
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
 
