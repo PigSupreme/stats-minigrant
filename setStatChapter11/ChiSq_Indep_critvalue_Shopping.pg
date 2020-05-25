@@ -34,7 +34,7 @@ loadMacros(
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-COMMENT("GENERIC VERSION");
+COMMENT("Critical Value version.");
 
 ######################################
 #  Setup
@@ -44,30 +44,36 @@ Context()->flags->set(
   tolType => "absolute",
 );
 
-$alpha = .05;
-$alphap = 100*$alpha;
+# List of significance levels in percent. This is used to
+# automatically set up answers; make sure the values are
+# in increasing order or the problem will break!
+@alphap_list = (1, 2, 5, 10, 20);
+
+# Choose a value from the list above
+$alphap = list_random(@alphap_list);
+$alpha = $alphap/100;
 # Choose critvalue or pvalue here
 $version = "critvalue";
 
 # Non-marginal Column and Row Labels
-$colcat = "political affiliation";
-$rowcat = "generation";
-@cfac = ('Liberal','Moderate','Conservative'); # Columns
-@rfac = ('Baby Boomer','Generation X','Millennial'); # Rows
+$colcat = "age category";
+$rowcat = "online shopping habits";
+@cfac = ('13 to 35','36 to 64','65 and older'); # Columns
+@rfac = ('Rarely/Never','Occassionally','Frequently'); # Rows
 
-# Boomers (row 1)
+# Row 1
 $a = random(30,80);
 $b = $a + random(20,40);
 $c = $a + $b + random(10,50);
 $samp[0] = [$a, $b, $c, $a+$b+$c];
 
-# Gen X (row 2)
+# Row 2
 $d = random(30,80);
 $f = $d - random(-15,15,2);
 $e = $d + $f - random(5,20);
 $samp[1] = [$d, $e, $f, $d+$e+$f];
 
-# Millenials (row 3)
+# Row 3
 $i = random(30,80);
 $h = $i + random(20,40);
 $g = $i + $h + random(10,50);
@@ -88,7 +94,7 @@ $total = $samp[$nrow][$ncol];
 
 
 ### Part 1 ###
-$ri = list_random(0,2); # Avoid bad grammar with GenX (index 1)
+$ri = random(1,2); # Avoid cumbersome wording (index 0)
 $ci = random(0,2);
 
 $prob1a = Compute("$samp[$ri][$ncol]/$total");
@@ -147,10 +153,6 @@ $df = 4;
 $pval = chisqrprob($df, $chisqstat);
 $cval = chisqrdistr($df, $alpha);
 
-# Those using critical value tables can still find a range of P-Values
-# Make sure these are in increasing order for multiple choice to work!
-@alphap_list = (1, 2, 5, 10);
-
 $mc = new_multiple_choice();
 
 ## Set-up the chosen version
@@ -188,7 +190,7 @@ $mcc = new_multiple_choice();
 );
 @cchoices = (
    $mcc_autoright{reject}, $mcc_autoright{fail}, # These are required
-   "In the overall population, there is definitely no association between $rowcat and $colcat, because I read that in this one blog post somewhere on the Internet."
+   "In the overall population, there is definitely an association between $rowcat and $colcat, because I saw somebody say that in an online video."
 );
 $mcc->qa(
   "Using a(n) $alphap% significance level, we can conclude that...",
@@ -216,12 +218,11 @@ if ($version eq "pvalue") {
 ######################################
 #  Main text
 BEGIN_PGML
-It is widely believed and reported that political affiliation varies with age: younger adults tend to be more liberal, and older adults tend to be more conservative. We can test this using sample data, which we assume to be a Simple Random Sample from a large population of adults.
-
-In a survey of [$total] people, the following data were obtained relating
-generation to political affiliation:
+A survey asked [$total] U.S. adults how often they shopped online. Respondents were sorted by age category, as shown in the table below. 
 
 [$samp_table]*
+
+Assuming the above data comes from a Simple Random Sample of all U.S. adults, conduct a Hypothesis Test to determine if online shopping frequency and age category are independent factors in the entire population. Give answers to at least three decimal places.
 
 END_PGML
 
@@ -230,21 +231,21 @@ Section::Begin();
 BEGIN_PGML
 If the sample data were representative of the overall population:
 
-a. We would expect the probabilty that a randomly-selected individual (from the population) was a [$rfac[$ri]] to be close to [__________________]{$prob1a}.
+a. We would expect the probabilty that a randomly-selected individual (from the population) [$rfac[$ri]] shopped online to be close to [__________________]{$prob1a}.
 
-a. We would expect the probabilty that a randomly-selected individual (from the population) was politically [$cfac[$ci]] to be close to [__________________]{$prob1b}.
+a. We would expect the probabilty that a randomly-selected individual (from the population) was age [$cfac[$ci]] to be close to [__________________]{$prob1b}.
 
-a. We would expect the probability that a randomly-selected individual (from the population) was both a [$rfac[$ri]] and politically [$cfac[$ci]] to be to close to [__________________]{$prob1c}.
+a. We would expect the probability that a randomly-selected individual (from the population) [$rfac[$ri]] shopped online and was age [$cfac[$ci]] to be to close to [__________________]{$prob1c}.
 
 END_PGML
 Section::End();
 Section::Begin();
 BEGIN_PGML
-If the sample data were representative of the overall population, and (in the overall population) being a [$rfac[$ri]] was independent of being politically [$cfac[$ci]]:
+If the sample data were representative of the overall population, and (in the overall population) [$rfac[$ri]] shopping online was independent of being age [$cfac[$ci]]:
 
-a. We would expect the probability that a randomly-selected individual *from the overall population* is both a [$rfac[$ri]] and politically [$cfac[$ci]] to be to close to [__________________]{$probindep}
+a. We would expect the probability that a randomly-selected individual *from the overall population* [$rfac[$ri]] shopped online and was age [$cfac[$ci]] to be to close to [__________________]{$probindep}.
 
-a. We would expect the number of individuals in the sample who are both [$rfac[$ri]] and [$cfac[$ci]] to be to close to [__________________]{$countindep}
+a. We would expect the number of individuals in the sample who [$rfac[$ri]] shopped online and were age [$cfac[$ci]] to be to close to [__________________]{$countindep}.
 END_PGML
 Section::End();
 Section::Begin();
@@ -294,9 +295,9 @@ $chisqstatr = int(.5 + 10000*$chisqstat)/10000;
 BEGIN_PGML_SOLUTION
 #### Part 1
 
-Assuming the sample is representative of the overall population, the relative frequency of [$rfac[$ri]]s in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of [$rfac[$ri]]s in the entire population. If we select a random individual from the population, the probability that we select a [$rfac[$ri]] is equal to this proportion.
+Assuming the sample is representative of the overall population, the relative frequency of those who [$rfac[$ri]] shop online in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of those who [$rfac[$ri]] shop online in the entire population. If we select a random individual from the population, the probability that we select an individual who [$rfac[$ri]] shops online is equal to this proportion.
 
-The same idea applies to the probability of selecting someone who is politically [$cfac[$ci]].
+The same idea applies to the probability of selecting someone who is age [$cfac[$ci]].
 
 #### Part 2
 

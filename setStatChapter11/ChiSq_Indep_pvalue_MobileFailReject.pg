@@ -34,7 +34,7 @@ loadMacros(
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-COMMENT("GENERIC VERSION. Factors are likely to be independent.");
+COMMENT("P-value version. Factors are likely to be independent.");
 
 ######################################
 #  Setup

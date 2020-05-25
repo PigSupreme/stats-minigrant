@@ -34,7 +34,7 @@ loadMacros(
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-COMMENT("GENERIC VERSION");
+COMMENT("Critical Value version.");
 
 ######################################
 #  Setup
@@ -53,7 +53,7 @@ Context()->flags->set(
 $alphap = 10;#list_random(@alphap_list);
 $alpha = $alphap/100;
 # Choose critvalue or pvalue here
-$version = "pvalue";
+$version = "critvalue";
 
 # Non-marginal Column and Row Labels
 $colcat = "type of community";

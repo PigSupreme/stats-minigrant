@@ -34,7 +34,7 @@ loadMacros(
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-COMMENT("GENERIC VERSION");
+COMMENT("P-Value version.");
 
 ######################################
 #  Setup
@@ -47,19 +47,19 @@ Context()->flags->set(
 # List of significance levels in percent. This is used to
 # automatically set up answers; make sure the values are
 # in increasing order or the problem will break!
-@alphap_list = (1, 2, 5, 10, 20);
+@alphap_list = (1, 5, 10);
 
 # Choose a value from the list above
-$alphap = list_random(@alphap_list);
+$alphap = 10;#list_random(@alphap_list);
 $alpha = $alphap/100;
 # Choose critvalue or pvalue here
 $version = "pvalue";
 
 # Non-marginal Column and Row Labels
-$colcat = "age category";
-$rowcat = "online shopping habits";
-@cfac = ('13 to 35','36 to 64','65 and older'); # Columns
-@rfac = ('Rarely/Never','Occassionally','Frequently'); # Rows
+$colcat = "type of community";
+$rowcat = "type of mobile device";
+@cfac = ('Urban','Suburban','Rural'); # Columns
+@rfac = ('No Mobile','Cellphone','Smartphone'); # Rows
 
 # Row 1
 $a = random(30,80);
@@ -185,15 +185,16 @@ if ($version eq "pvalue") {
 $mcc = new_multiple_choice();
 
 %mcc_autoright = (
-  reject => "In the overall population, it is very likely that there is an association between $rowcat and $colcat.",
-  fail => "In the overall population, it is not likely that there is an association between $rowcat and $colcat.",
+  reject => "We reject the Null Hypothesis. The sample data provides sufficient evidence that $rowcat and $colcat are not independent.",
+  fail => "We cannot reject the Null Hypothesis. The sample data fails to provide sufficient evidence that $rowcat and $colcat are not independent."
 );
 @cchoices = (
    $mcc_autoright{reject}, $mcc_autoright{fail}, # These are required
-   "In the overall population, there is definitely an association between $rowcat and $colcat, because I saw somebody say that in an online video."
+   "We cannot reject the Null Hypothesis. The sample data provides sufficient evidence that $rowcat and $colcat are not independent.",
+   "We reject the Null Hypothesis. The sample data fails to provides sufficient evidence that $rowcat and $colcat are not independent."
 );
 $mcc->qa(
-  "Using a(n) $alphap% significance level, we can conclude that...",
+  "Using a(n) $alphap% significance level:",
   $mcc_autoright{($pval < $alpha) ? "reject" : "fail"}
 );
 
@@ -218,11 +219,11 @@ if ($version eq "pvalue") {
 ######################################
 #  Main text
 BEGIN_PGML
-A survey asked [$total] U.S. adults how often they shopped online. Respondents were sorted by age category, as shown in the table below. 
+Is mobile device ownership affected by the type of community in which people live? A survey of [$total] people produced the counts shown in the table below (for the purpose of this survey, "cellphone" means a mobile device that is not a smartphone).
 
 [$samp_table]*
 
-Assuming the above data comes from a Simple Random Sample of all U.S. adults, conduct a Hypothesis Test to determine if online shopping frequency and age category are independent factors in the entire population. Give answers to at least three decimal places.
+Assuming the above data comes from a Simple Random Sample, conduct a Hypothesis Test to determine if there is an association between device ownership and type of community in the entire population.
 
 END_PGML
 
@@ -231,21 +232,21 @@ Section::Begin();
 BEGIN_PGML
 If the sample data were representative of the overall population:
 
-a. We would expect the probabilty that a randomly-selected individual (from the population) [$rfac[$ri]] shopped online to be close to [__________________]{$prob1a}.
+a. We would expect the probabilty that a randomly-selected individual (from the population) owns [$rfac[$ri]] be close to [__________________]{$prob1a}.
 
-a. We would expect the probabilty that a randomly-selected individual (from the population) was age [$cfac[$ci]] to be close to [__________________]{$prob1b}.
+a. We would expect the probabilty that a randomly-selected individual (from the population) lived in a(n) [$cfac[$ci]] community to be close to [__________________]{$prob1b}.
 
-a. We would expect the probability that a randomly-selected individual (from the population) [$rfac[$ri]] shopped online and was age [$cfac[$ci]] to be to close to [__________________]{$prob1c}.
+a. We would expect the probability that a randomly-selected individual (from the population) owns a [$rfac[$ri]] and lives in a(n) [$cfac[$ci]] community to be to close to [__________________]{$prob1c}.
 
 END_PGML
 Section::End();
 Section::Begin();
 BEGIN_PGML
-If the sample data were representative of the overall population, and (in the overall population) [$rfac[$ri]] shopping online was independent of being age [$cfac[$ci]]:
+If the sample data were representative of the overall population, and (in the overall population) owning a [$rfac[$ri]] was independent of living in a(n) [$cfac[$ci]] community:
 
-a. We would expect the probability that a randomly-selected individual *from the overall population* [$rfac[$ri]] shopped online and was age [$cfac[$ci]] to be to close to [__________________]{$probindep}.
+a. We would expect the probability that a randomly-selected individual (in the overall population) owns a [$rfac[$ri]] and lives in a(n) [$cfac[$ci]] community to be to close to [__________________]{$probindep}.
 
-a. We would expect the number of individuals in the sample who [$rfac[$ri]] shopped online and were age [$cfac[$ci]] to be to close to [__________________]{$countindep}.
+a. We would expect the number of individuals in the sample who own a [$rfac[$ri]] and live in a(n) [$cfac[$ci]] community to be to close to [__________________]{$countindep}.
 END_PGML
 Section::End();
 Section::Begin();
@@ -295,9 +296,9 @@ $chisqstatr = int(.5 + 10000*$chisqstat)/10000;
 BEGIN_PGML_SOLUTION
 #### Part 1
 
-Assuming the sample is representative of the overall population, the relative frequency of those who [$rfac[$ri]] shop online in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of those who [$rfac[$ri]] shop online in the entire population. If we select a random individual from the population, the probability that we select an individual who [$rfac[$ri]] shops online is equal to this proportion.
+Assuming the sample is representative of the overall population, the relative frequency of those who own a [$rfac[$ri]] in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of those who own a [$rfac[$ri]] in the entire population. If we select a random individual from the population, the probability that we select an individual who owns a [$rfac[$ri]] is equal to this proportion.
 
-The same idea applies to the probability of selecting someone who is age [$cfac[$ci]].
+The same idea applies to the probability of selecting someone who lives in a(n) [$cfac[$ci]] community.
 
 #### Part 2
 

@@ -1,0 +1,341 @@
+##DESCRIPTION
+##  Chi-Squared Test for Independence
+##ENDDESCRIPTION
+
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for independence)
+## KEYWORDS("Chi", "Chi-Squared", "Independence")
+
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+COMMENT("Critical Value version.");
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.0051,
+  tolType => "absolute",
+);
+
+$alpha = .05;
+$alphap = 100*$alpha;
+# Choose critvalue or pvalue here
+$version = "critvalue";
+
+# Non-marginal Column and Row Labels
+$colcat = "political affiliation";
+$rowcat = "generation";
+@cfac = ('Liberal','Moderate','Conservative'); # Columns
+@rfac = ('Baby Boomer','Generation X','Millennial'); # Rows
+
+# Boomers (row 1)
+$a = random(30,80);
+$b = $a + random(20,40);
+$c = $a + $b + random(10,50);
+$samp[0] = [$a, $b, $c, $a+$b+$c];
+
+# Gen X (row 2)
+$d = random(30,80);
+$f = $d - random(-15,15,2);
+$e = $d + $f - random(5,20);
+$samp[1] = [$d, $e, $f, $d+$e+$f];
+
+# Millenials (row 3)
+$i = random(30,80);
+$h = $i + random(20,40);
+$g = $i + $h + random(10,50);
+$samp[2] = [$g,$h,$i,$g+$h+$i];
+
+# Number of rows and columns
+$ncol = scalar(@cfac);
+$nrow = scalar(@rfac);
+
+# Compute marginal totals for each Column
+foreach my $j (0..$ncol) {
+  $samp[$nrow][$j] = 0;
+  foreach my $i (0..$nrow-1) {
+    $samp[$nrow][$j] = $samp[$nrow][$j] + $samp[$i][$j]
+  }
+}
+$total = $samp[$nrow][$ncol];
+
+
+### Part 1 ###
+$ri = list_random(0,2); # Avoid bad grammar with GenX (index 1)
+$ci = random(0,2);
+
+$prob1a = Compute("$samp[$ri][$ncol]/$total");
+$prob1b = Compute("$samp[$nrow][$ci]/$total");
+$prob1c = Compute("$samp[$ri][$ci]/$total");
+
+### Part 2 ###
+$probindep = Compute("($samp[$ri][$ncol]/$total)*($samp[$nrow][$ci]/$total)");
+$countindep = Compute("($samp[$ri][$ncol]*$samp[$nrow][$ci])/$total");
+
+### Part 3 ###
+# Compute Chi-Squared Test Stat and expected counts
+# With tables for nice feedback
+$chisqstat = 0;
+$expected_counts_ok = 1;
+$exsamp = [[]]; # Expected counts for each cell (for solutions)
+$cssamp = [[]]; # Chi-Squared contribution for each cell (for solutions)
+foreach my $i (0..($nrow-1)) {
+  foreach my $j (0..($ncol-1)) {
+    my $exp = $samp[$i][$ncol]*$samp[$nrow][$j]/$total;
+    if ($exp < 5) {$expected_counts_ok = 0}
+    my $chisqcon = (($samp[$i][$j] - $exp)**2)/$exp;
+    $chisqstat += $chisqcon;
+    $exsamp[$i][$j] = int(.5 + 100*$exp)/100;
+    $cssamp[$i][$j] = int(.5 + 10000*$chisqcon)/10000;
+  }
+}
+
+# For main display
+$samp_table = begintable(5).
+row(" ", @cfac, "TOTAL" ) .
+row($rfac[0], @{@samp[0]} ) .
+row($rfac[1], @{@samp[1]} ) .
+row($rfac[2], @{@samp[2]} ) .
+row("TOTAL", @{@samp[3]} ) .
+endtable();
+
+# For solutions
+$exp_table = begintable(5) .
+row(" Expected ", @cfac ) .
+row($rfac[0], @{@exsamp[0]}) .
+row($rfac[1], @{@exsamp[1]}) .
+row($rfac[2], @{@exsamp[2]}) .
+endtable();
+
+$csc_table = begintable(5) .
+row(" \(\chi^2\) Contribution ", @cfac ) .
+row($rfac[0], @{@cssamp[0]}) .
+row($rfac[1], @{@cssamp[1]}) .
+row($rfac[2], @{@cssamp[2]}) .
+endtable();
+
+### Part 4 ###
+# The actual P-Value and critical value
+$df = 4;
+$pval = chisqrprob($df, $chisqstat);
+$cval = chisqrdistr($df, $alpha);
+
+# Those using critical value tables can still find a range of P-Values
+# Make sure these are in increasing order for multiple choice to work!
+@alphap_list = (1, 2, 5, 10);
+
+$mc = new_multiple_choice();
+
+## Set-up the chosen version
+if ($version eq "pvalue") {
+  # Approximate P-Value version
+  $numcats = scalar(@alphap_list)-1;
+  $mc_tag = 0;
+  @mc_choices = ("less than $alphap_list[0]%.");
+  foreach my $i (0..$numcats) {
+    push(@mc_choices, "between $alphap_list[$i]% and $alphap_list[$i+1]%.");
+    if (100*$pval > $alphap_list[$i]) {$mc_tag = $i + 1}
+    }
+  $mc_choices[$numcats+1] = "greater than $alphap_list[$numcats]%.";
+  $mc->qa('The P-Value for this sample is:', $mc_choices[$mc_tag]);
+  $mc->makeLast(@mc_choices);
+
+} elsif ($version eq "critvalue") {
+  # Critical Value version
+  @mc_choices = ();
+  foreach my $aperc (@alphap_list) {
+    $this_cval = int(.5+chisqrdistr($df, $aperc/100)*1000)/1000;
+    push(@mc_choices, $this_cval);
+    if ($alphap == $aperc) {$mc_ans = $this_cval}
+  }
+  $mc->qa("The $alphap% critical value is:", $mc_ans);
+  $mc->makeLast(@mc_choices);
+}
+
+### Part 5 ###
+$mcc = new_multiple_choice();
+
+%mcc_autoright = (
+  reject => "In the overall population, it is very likely that there is an association between $rowcat and $colcat.",
+  fail => "In the overall population, it is not likely that there is an association between $rowcat and $colcat.",
+);
+@cchoices = (
+   $mcc_autoright{reject}, $mcc_autoright{fail}, # These are required
+   "In the overall population, there is definitely no association between $rowcat and $colcat, because I read that in this one blog post somewhere on the Internet."
+);
+$mcc->qa(
+  "Using a(n) $alphap% significance level, we can conclude that...",
+  $mcc_autoright{($pval < $alpha) ? "reject" : "fail"}
+);
+
+# Scramble choices manually because of how we populated cchoices above.
+$k = scalar(@cchoices);
+$mcc->makeLast(@cchoices[NchooseK($k,$k)]);
+
+# For Solutions/Feedback
+if ($version eq "pvalue") {
+%mc_soln = (
+  reject => "Since the P-Value is less than the $alphap% significance level, we reject the Null Hypothesis, and conclude that there is an association between $rowcat and $colcat.",
+  fail => "Since the P-Value is not less than the $alphap% significance level, we fail to reject the Null Hypothesis, and cannot conclude that there is an association between $rowcat and $colcat."
+);
+} elsif ($version eq "critvalue") {
+%mc_soln = (
+  reject => "Since the \(\chi^2\) statistic is greater than the $alphap% critical value, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between $rowcat and $colcat.",
+  fail => "Since the \(\chi^2\) statistic is not greater than the $alphap% critical value, we fail to reject the Null Hypothesis, and cannot conclude that there is an association between $rowcat and $colcat."
+);
+}
+
+
+######################################
+#  Main text
+BEGIN_PGML
+It is widely believed and reported that political affiliation varies with age: younger adults tend to be more liberal, and older adults tend to be more conservative. We can test this using sample data, which we assume to be a Simple Random Sample from a large population of adults.
+
+In a survey of [$total] people, the following data were obtained relating
+generation to political affiliation:
+
+[$samp_table]*
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+If the sample data were representative of the overall population:
+
+a. We would expect the probabilty that a randomly-selected individual (from the population) was a [$rfac[$ri]] to be close to [__________________]{$prob1a}.
+
+a. We would expect the probabilty that a randomly-selected individual (from the population) was politically [$cfac[$ci]] to be close to [__________________]{$prob1b}.
+
+a. We would expect the probability that a randomly-selected individual (from the population) was both a [$rfac[$ri]] and politically [$cfac[$ci]] to be to close to [__________________]{$prob1c}.
+
+END_PGML
+Section::End();
+Section::Begin();
+BEGIN_PGML
+If the sample data were representative of the overall population, and (in the overall population) being a [$rfac[$ri]] was independent of being politically [$cfac[$ci]]:
+
+a. We would expect the probability that a randomly-selected individual *from the overall population* is both a [$rfac[$ri]] and politically [$cfac[$ci]] to be to close to [__________________]{$probindep}
+
+a. We would expect the number of individuals in the sample who are both [$rfac[$ri]] and [$cfac[$ci]] to be to close to [__________________]{$countindep}
+END_PGML
+Section::End();
+Section::Begin();
+BEGIN_PGML
+Compute the test statistic for the above sample data under the Null Hypothesis that [$rowcat] and [$colcat] are independent factors. Give your answer to at least two decimal places.
+
+[`\chi^2 =`] [___________].
+
+END_PGML
+
+ANS(Real("$chisqstat")->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$anshash) = @_;
+         return abs($student-$correct) < .05;
+         } => ["Your answer is close. Check your computations."]
+)));
+
+Section::End();
+Section::Begin();
+BEGIN_PGML
+The degrees of freedom for this test statistic is [________]{"($nrow-1)($ncol-1)"}.
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans()));
+Section::End();
+Section::Begin();
+BEGIN_PGML
+[@ $mcc->print_q() @]*
+[@ $mcc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mcc->correct_ans()));
+Section::End();
+
+Scaffold::End();
+
+######################################
+#  Solutions
+
+$chisqstatr = int(.5 + 10000*$chisqstat)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1
+
+Assuming the sample is representative of the overall population, the relative frequency of [$rfac[$ri]]s in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of [$rfac[$ri]]s in the entire population. If we select a random individual from the population, the probability that we select a [$rfac[$ri]] is equal to this proportion.
+
+The same idea applies to the probability of selecting someone who is politically [$cfac[$ci]].
+
+#### Part 2
+
+If the two events were independent, their probabilities satisfy:
+
+P([$rfac[$ri]] AND [$cfac[$ci]]) = P([$rfac[$ri]]) x P([$cfac[$ci]]).
+
+The values on the right are close to ([$samp[$ri][$ncol]]/[$total]) and ([$samp[$nrow][$ci]]/[$total]), from Part 1.
+
+We expect the count of "[$rfac[$ri]] AND [$cfac[$ci]]" in the sample to be close to its probability (which is close to ([$samp[$ri][$ncol]]/[$total]) x ([$samp[2][$ci]]/[$total])) multiplied by the total sample size of [$total].
+
+### Part 3
+
+You should probably be using technology, but here are the expected counts for each cell in the table:
+
+[$exp_table]*
+
+[@ $expected_counts_ok
+  ? "Each expected count is 5 or more, so it is reasonable to conduct the test."
+  : "Note that at least one expected count is less than 5, so the test may  be inaccurate."
+@]
+
+---
+
+The [`\chi^2`] contributions for each cell are [`\frac{(\text{Observed Count } - \text{ Expected Count})^2}{\text{Expected Count}}`], shown below:
+
+[$csc_table]*
+
+Add these to get the value of the test statistic: [`\chi^2 = [$chisqstatr]`]
+
+### Part 4
+
+There are [$nrow] possible values of the row factor ([$rowcat]) and [$ncol] possible values of the column factor ([$colcat]), so df = ([$nrow]-1)x([$ncol]-1) = [$df].
+
+The Chi-Squared test of independence/homogeneity is always right-sided. Use technology to compute [`P(\chi^2\geq[$chisqstatr]) = [@ int(.5+$pval*10000)/100 @]%`], or find the critical [`\chi^2`] value ([$cval]) from a table.
+
+### Part 5
+
+[@ $mc_soln{($pval < $alpha) ? "reject" : "fail"} @]
+
+END_PGML_SOLUTION
+ENDDOCUMENT();       # This should be the last executable line in the problem.
