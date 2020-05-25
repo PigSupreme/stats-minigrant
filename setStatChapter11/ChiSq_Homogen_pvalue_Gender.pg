@@ -50,24 +50,22 @@ $alphap = 100*$alpha;
 $version = "pvalue";
 
 # Non-marginal Column and Row Labels
-@cfac = ('A','B','C','D','F'); # Columns
-@rfac = ('Dr. Kairphree','Dr. Phroogul'); # Rows
+@cfac = ('Dormitory', 'Apartment', 'At Home'); # Columns
+@rfac = ('Female','Male'); # Rows
 
 # Row 1 Data (including marginal total)
-$a1 = random(10,20);
-$b1 = random($a1, 30);
-$c1 = $b1 + random(11,19);
-$d1 = random($a1, $b1);
-$f1 = random(7,$a1);
-$samp[0] = [$a1, $b1, $c1, $d1, $f1, $a1+$b1+$c1+$d1+$f1];
+$t1 = 10*random(11,19);
+$a1 = int(.45*$t1) + random(-9,9);
+$b1 = int(.40*$t1) + random(-9,9);
+$c1 = $t1 - $a1 - $b1;
+$samp[0] = [$a1, $b1, $c1, $t1];
 
 # Row 2 Data (including marginal total)
-$a2 = int($a1/2);
-$b2 = $b1 - random(4,9);
-$c2 = $c1 + 2 + int($a1/2);
-$d2 = $d1 + random(2,3) + int($a1/2);
-$f2 = $f1 + random(7,9);
-$samp[1] = [$a2, $b2, $c2, $d2, $f2, $a2+$b2+$c2+$d2+$f2];
+$t2 = $t1 - 10*random(2,4);
+$a2 = int(.45*$t2) + random(-9,9);
+$b2 = int(.40*$t2) + random(-9,9);
+$c2 = $t2 - $a2 - $b2;
+$samp[1] = [$a2, $b2, $c2, $t2];
 
 # Number of rows and columns
 $ncol = scalar(@cfac);
@@ -82,20 +80,7 @@ foreach my $j (0..$ncol) {
 }
 $total = $samp[$nrow][$ncol];
 
-# Random row/column pair
-$ri = list_random(0,1);
-$ci = random(0,2); # Yes there are 5, but DEI folks like positivity, so we limit grades to A, B, or C.
-
 ### Part 1 ###
-$prob1a = Compute("$samp[$ri][$ncol]/$total");
-$prob1b = Compute("$samp[$nrow][$ci]/$total");
-$prob1c = Compute("$samp[$ri][$ci]/$total");
-
-### Part 2 ###
-$probindep = Compute("($samp[$ri][$ncol]/$total)*($samp[$nrow][$ci]/$total)");
-$countindep = Compute("($samp[$ri][$ncol]*$samp[$nrow][$ci])/$total");
-
-### Part 3 ###
 # Compute Chi-Squared Test Stat and expected counts
 # With tables for nice feedback
 $chisqstat = 0;
@@ -120,8 +105,7 @@ row($rfac[0], @{@exsamp[0]}) .
 row($rfac[1], @{@exsamp[1]}) .
 endtable();
 
-
-### Part 4 ###
+### Part 2 ###
 # The actual P-Value and critical value
 $df = 4;
 $pval = chisqrprob($df, $chisqstat);
@@ -160,18 +144,16 @@ if ($version eq "pvalue") {
 }
 
 
-### Part 5 ###
+### Part 3 ###
 $mcc = new_multiple_choice();
 
 %mcc_autoright = (
-  reject => "There is a statistically significant difference between the grade distributions of $rfac[0] and $rfac[1].",
-  fail => "The difference between the grade distributions of $rfac[0] and $rfac[1] is not statistically significant."
+  reject => "There is a statistically significant difference in the distributions of living arrangements between by gender.",
+  fail => "The difference in the distribution of living arrangements by gender is not statistically significant."
 );
 @cchoices = (
    $mcc_autoright{reject}, $mcc_autoright{fail}, # These are required
-  "In the overall student population, the grade distributions of $rfac[0] and $rfac[1] are most likely identical.",
-  "In the overall student population, the grade distributions of $rfac[1] is more strict than that of $rfac[0].",
-  "In the overall student population, the grade distributions of $rfac[0] and $rfac[1] are definitely identical.",
+  "In the overall population, the distributions of living arrangements by gender are identical.",
 );
 $mcc->qa(
   "Using a(n) $alphap% significance level, we can conclude that...",
@@ -185,13 +167,13 @@ $mcc->makeLast(@cchoices[NchooseK($k,$k)]);
 # For Solutions/Feedback
 if ($version eq "pvalue") {
 %mc_soln = (
-  reject => "Since the P-Value is less than the $alphap% significance level, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the grade distributions.",
-  fail => "Since the P-Value is not less than the $alphap% significance level, we fail to reject the Null Hypothesis, and conclude that the differences between  grade distributions is not statisically significant."
+  reject => "Since the P-Value is less than the $alphap% significance level, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the two distributions.",
+  fail => "Since the P-Value is not less than the $alphap% significance level, we fail to reject the Null Hypothesis, and conclude that the differences between the two distributions is not statisically significant."
 );
 } elsif ($version eq "critvalue") {
 %mc_soln = (
-  reject => "Since the \(\chi^2\) statistic is greater than the $alphap% critical value, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the grade distributions.",
-  fail => "Since the \(\chi^2\) statistic is not greater than the $alphap% critical value, we fail to reject the Null Hypothesis, and conclude that the differences between grade distributions is not statisically significant."
+  reject => "Since the \(\chi^2\) statistic is greater than the $alphap% critical value, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the two distributions.",
+  fail => "Since the \(\chi^2\) statistic is not greater than the $alphap% critical value, we fail to reject the Null Hypothesis, and conclude that the differences between the two distributions is not statisically significant."
 );
 }
 
@@ -199,9 +181,7 @@ if ($version eq "pvalue") {
 ######################################
 #  Main text
 BEGIN_PGML
-[$rfac[0]] and [$rfac[1]] both teach an introductory statistics course, but students belive that [$rfac[1]] is more harsh when assigning final letter grades.  
-
-A simple random sample of [$total] students from both instructors produced the following data:
+Do male and female college students have the same distribution of living arrangements? Suppose that [$samp[0][$ncol]] randomly-selected female college students and [$samp[1][$ncol]] randomly-selected male college students were asked about their living arrangements (dormitory, apartment, or at home with relatives). The results are shown in the table below:
 
 [@ begintable(5) .
 row(" ", @cfac, "TOTAL" ) .
@@ -213,32 +193,14 @@ endtable() @]*
 END_PGML
 
 Scaffold::Begin();
+
 Section::Begin();
 BEGIN_PGML
-If these sample data were representative of the overall student population:
-
-a. We would expect the probabilty that a randomly-selected individual (from the population) was in [$rfac[$ri]]'s class to be close to [__________________]{$prob1a}.
-
-a. We would expect the probabilty that a randomly-selected individual (from the population) earned a grade of [$cfac[$ci]] to be close to [__________________]{$prob1b}.
-
-a. We would expect the probability that a randomly-selected individual (from the population) was both in [$rfac[$ri]]'s class and earned a grade of [$cfac[$ci]] to be to close to [__________________]{$prob1c}.
-
-END_PGML
-Section::End();
-Section::Begin();
-BEGIN_PGML
-If the sample data were representative of the overall population, and (in the overall population) being in [$rfac[$ri]]'s class was independent of earning a grade of [$cfac[$ci]]:
-
-a. We would expect the probability that a randomly-selected individual *from the overall population* was both in [$rfac[$ri]]'s class and earned a grade of [$cfac[$ci]] to be to close to [__________________]{$probindep}.
-
-a. We would expect the number of individuals in the sample who are both in [$rfac[$ri]]'s class and earned a grade of [$cfac[$ci]] to be to close to [__________________]{$countindep}.
-END_PGML
-Section::End();
-Section::Begin();
-BEGIN_PGML
-Compute the test statistic for the above sample data under the Null Hypothesis that the grade distribution (in the overall popuation) is the same for both instructors. Give your answer to at least two decimal places.
+Assuming the data is from a Simple Random Sample, compute the [`\chi^2`] test statistic in a test of independence/homogeneity. Give your answer to at least two decimal places.
 
 [`\chi^2 =`] [___________].
+
+The degrees of freedom for this test statistic is [________]{"($nrow-1)*($ncol-1)"}.
 
 END_PGML
 
@@ -252,7 +214,7 @@ ANS(Real("$chisqstat")->cmp->withPostFilter(AnswerHints(
 Section::End();
 Section::Begin();
 BEGIN_PGML
-The degrees of freedom for this test statistic is [________]{"($nrow-1)*($ncol-1)"}.
+
 
 [@ $mc->print_q() @]*
 [@ $mc->print_a() @]*
@@ -279,23 +241,7 @@ Scaffold::End();
 $chisqstatr = int(.5 + 10000*$chisqstat)/10000;
 
 BEGIN_PGML_SOLUTION
-#### Part 1
-
-Assuming the sample is representative of the overall population, the relative frequency of [$rfac[$ri]]'s students in the sample ([$samp[$ri][$ncol]]/[$total]) should be close to the proportion of [$rfac[$ri]]'s students in the entire population. If we select a random individual from the population, the probability that we select one of [$rfac[$ri]]'s students is equal to this proportion.
-
-The same idea applies to the probability of selecting a student who received a grade of [$cfac[$ci]].
-
-#### Part 2
-
-If the two events were independent, their probabilities satisfy:
-
-P([$rfac[$ri]] AND [$cfac[$ci]]) = P([$rfac[$ri]]) x P([$cfac[$ci]]).
-
-The values on the right are close to ([$samp[$ri][$ncol]]/[$total]) and ([$samp[$nrow][$ci]]/[$total]), from Part 1.
-
-We expect the count of "[$rfac[$ri]] AND [$cfac[$ci]]" in the sample to be close to its probability (which is close to ([$samp[$ri][$ncol]]/[$total]) x ([$samp[$now][$ci]]/[$total])) multiplied by the total sample size of [$total].
-
-### Part 3
+### Part 1
 
 You should probably be using technology, but here are the expected counts for each cell in the table:
 
@@ -319,13 +265,13 @@ endtable()
 
 Add these to get the value of the test statistic: [`\chi^2 = [$chisqstatr]`]
 
-### Part 4
+### Part 2
 
-There are [$nrow] possible values of the row factor (instructor) and [$ncol] possible values of the column factor (grade), so df = ([$nrow]-1)x([$ncol]-1) = [$df].
+There are [$nrow] possible values of the row factor (gender) and [$ncol] possible values of the column factor (living arrangements), so df = ([$nrow]-1)x([$ncol]-1) = [$df].
 
 The Chi-Squared test of independence/homogeneity is always right-sided. Use technology to compute [`P(\chi^2\geq[$chisqstatr]) = [@ int(.5+$pval*10000)/100 @]%`], or find the critical [`\chi^2`] value ([$cval]) from a table.
 
-### Part 5
+### Part 3
 
 [@ $mc_soln{($pval < $alpha) ? "reject" : "fail"} @]
 
