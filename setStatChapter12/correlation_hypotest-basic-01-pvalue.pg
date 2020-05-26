@@ -1,0 +1,214 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple Linear Regression)
+## DBsection(Hypothesis Test for Correlation)
+## Date(04/23/2020)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(3)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'regression', 'correlation, 'hypothesis testing')
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "scaffold.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+COMMENT('P-Value version.');
+
+######################################
+#  Setup
+
+Context("Numeric");
+$abstol = .00051;
+Context()->flags->set(tolType=>'absolute', tolerance=>$abstol);
+
+$n = 8;
+$df = $n - 2;
+for($i=0; $i<$n; $i++) {
+	$x[$i] = random(2,9,1);
+	$y[$i] = random(1,9,1);
+}
+
+$r_true = sample_correlation(~~@x,~~@y);
+$r = int(.5+10000*abs($r_true))/10000;
+if ($r_true<0) {$r=-$r};
+
+$tstat_true = $r_true*sqrt(($n-2)/(1-$r_true*$r_true));
+$tstat_mostly_true  = round(10000*$tstat_true)/10000;
+$tstat = ($r*sqrt(($n-2)/(1-$r*$r))*10000)/10000;
+
+$pval_true = tprob($n-2,abs($tstat_true))*2;
+$pval_mostly_true = round(10000*$pval_true)/10000;
+$pval_raw = tprob($n-2,abs($tstat_mostly_true))*2;
+$pval = round(10000*$pval_raw)/10000;
+
+$test = $tstat;
+$alpha = list_random(.01,.05, .10);
+$alphaper = 100*$alpha;
+$tcrit = tdistr($n-2,($alpha/2));
+
+$trat = $tcrit*$tcrit/($n-2);
+$rcrit = sqrt($trat/(1+$trat));
+
+$mc = new_multiple_choice();
+@ans = ("We can reject the null hypothesis that \( \rho = 0\) and accept that \( \rho \ne 0\). ",
+        "There is insufficient evidence to reject the null hypothesis that \( \rho = 0\). ");
+
+$tag = (abs($test) > $tcrit) ? 0 : 1;
+$mc -> qa('The final conclusion is', $ans[$tag]);
+$mc -> extra($ans[1-$tag]);
+	
+BEGIN_TEXT
+Consider the paired data shown below; assumed to from be a Simple Random Sample of size $n from some large population. $PAR
+\{begintable(7)\}
+\{row("x", @x)\}
+\{row("y", @y)\}
+\{endtable()\} $BR
+
+END_TEXT
+
+BEGIN_PGML
+For a hypothesis test of correlation [`H_0:\rho = 0`] versus [`H_A:\rho \ne 0`], using a [$alphaper]% significance level, find the following values. Round each answer to at least four decimal places.
+
+END_PGML
+
+Scaffold::Begin();
+#################################################
+Section::Begin();
+BEGIN_PGML
+The sample correlation: r = [________]
+END_PGML
+
+$ans_a = Compute($r)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+   sub {
+     my ($correct,$student,$anshash) = @_;
+     return abs($student-$correct) < 20*$abstol;
+     } => ["Your answer is close; check your compuations and rounding."]
+     )));
+Section::End();
+
+#################################################
+Section::Begin();
+BEGIN_PGML
+The test statistic: t = [________]
+END_PGML
+
+$ttol = $abstol*10;
+$ans_b_check = sub {
+     my ($correct,$student,$anshash) = @_;
+     if (abs($student - $tstat_true) < $ttol) {return 1;}
+     if (abs($student - $tstat_mostly_true) < $ttol) {return 1;}
+     if (abs($student - $tstat) < $ttol) {return 1;}
+     return 0;
+     };
+     
+ANS(Real("$tstat_true")->cmp(checker=>$ans_b_check)->withPostFilter(AnswerHints(
+   sub {
+     my ($correct,$student,$anshash) = @_;
+     return abs($student-$correct) < 20*$ttol;
+     } => ["Your answer is close; check your compuations and rounding."]
+     )));
+Section::End();
+
+#################################################
+Section::Begin();
+BEGIN_PGML
+The degrees of freedom: df = [________]
+END_PGML
+
+ANS(Compute("$n-2")->with(tolType=>'absolute',tolerance=>'.00000001')->cmp);
+Section::End();
+
+#################################################
+Section::Begin();
+BEGIN_PGML
+Using a value of [`t=[$tstat_mostly_true]`] for the test statistic, the P-Value for this sample is [________]. Do not convert to percent.
+
+END_PGML
+
+$ans_p= Compute($pval)->with(tolType=>'absolute', tolerance=>$ttol);
+ANS($ans_p->cmp->withPostFilter(AnswerHints(
+   sub {
+     my ($correct,$student,$anshash) = @_;
+     return abs($student-($pval/2)) < 10*$ttol;
+     } => ["You should be finding a two-sided P-Value. Multiply by 2."],
+   sub {
+     my ($correct,$student,$anshash) = @_;
+     return abs($student-(1-$pval/2)) < 10*$ttol;
+     } => ["You've computed a one-sided P-Value, in the wrong direction!"],
+   sub {
+     my ($correct,$student,$anshash) = @_;
+     return abs($student-(2-$pval)) < 10*$ttol;
+     } => ["You've used the wrong direction on your one-sided P-Value. A P-Value cannot be greater than 1!"],   
+)));
+Section::End();
+
+#################################################
+Section::Begin();
+BEGIN_PGML
+Based on the above information: 
+[@ $mc->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+$tcritr = int(.5 + $tcrit*10000)/10000;
+$rcritr = int(.5 + $rcrit*10000)/10000;
+
+BEGIN_PGML_SOLUTION
+
+### Parts 1, 2, and 3:
+
+Use technology to find the sample correlation: _r_ = [$r].
+
+The test statistic is:  
+[``t = r\cdot\sqrt{\frac{n-2}{1-r^2}} = [$r]\cdot\sqrt{\frac{[$n]-2}{1-([$r])^2}} = [$tstat_mostly_true]``]  
+
+---
+
+### Parts 4 and 5:
+
+#### P-Value Method
+
+Use a Student T distribuition with df = [$df] (sample size minus 2) to find the P-Value.
+
+The one-sided P-Value is the area/proportion to the [@ ($tstat_mostly_true < 0) ? "left" : "right" @] of [`t = [$tstat_mostly_true]`], this is [@ $pval/2 @].
+
+Multiply by 2 to find the two-sided P-Value: [$pval] = [@ 100*$pval @]%.
+
+This is [@ $pval < 0.05 ? "less than" : "not less than" @] 5%, so we [@ $pval < 0.05 ? "" : "fail to" @] reject the Null Hypothesis, and conclude that there [@ $pval < 0.05 ? "is a" : "is no" @] significant linear relationship in the larger population.
+
+#### Critical Value Method (t-score)
+
+Using df = [@ $n-2 @], the [$alphaper]% two-sided critical t-value is [$tcritr].
+
+The critical region is [`\lvert t\rvert > [$tcritr]`]. Since the test statistic (t = [$tstat_mostly_true]) is [@ abs($tstat_mostly_true) > $tcritr ? "in" : "not in" @] this region, we [@ abs($tstat_mostly_true) > $tcritr ? "" : "fail to" @] reject the Null Hypothesis, and conclude that there [@ abs($tstat_mostly_true) > $tcritr ? "is a" : "is no" @] significant linear relationship in the larger population.
+
+#### Critical Value Method (of correlation coefficient)
+
+Using df = [@ $n-2 @], the [$alphaper]% two-sided critical value for correlation is [$rcritr].
+
+The critical region is [`\lvert r\rvert > [$rcritr]`]. Since the sample correlation (r = [$r]) is [@ abs($r) > $rcritr ? "in" : "not in" @] this region, we [@ abs($r) > $rcritr ? "" : "fail to" @] reject the Null Hypothesis, and conclude that there [@ abs($r) > $rcritr ? "is a" : "is no" @] significant linear relationship in the larger population.
+END_PGML_SOLUTION
+
+ENDDOCUMENT();
