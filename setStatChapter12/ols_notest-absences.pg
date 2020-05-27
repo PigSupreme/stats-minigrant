@@ -31,15 +31,17 @@ Context("Numeric");
 $abstol = 0.0051;
 Context()->flags->set(tolerance=>$abstol, tolType=> 'absolute');
 
-$xvar = "lean body mass";
-$yvar = "metabolic rate";
+$xvar = "Number of Absences";
+$yvar = "Overall Grade";
 
-$n = 12;
+$n = 9;
+$m_approx = -3.14;
+$b_approx = 93.21;
 for($i=0; $i<$n; $i++) {
-$x[$i] = random(36,55,0.1);
-$y[$i] = random(900,1600,10);
+$x[$i] = random(0,6);
+$yi = ($x[$i] + random(-1.49, 1.49, .01))*$m_approx + $b_approx;
+$y[$i] = int(.5+$yi*10)/10
 } 
-
 for($i=0; $i<$n; $i++) {
 $sum_x += $x[$i];
 $sum_y += $y[$i];
@@ -71,7 +73,7 @@ $rround = int(.5+$r*1000)/1000;
 #  Main text
 
 BEGIN_PGML
-The follow data shows the lean body mass and resting metabolic rate for 12 individuals who are subjects in a study of dieting. Lean body mass, given in kilograms, is a person's weight leaving out all fat. Metabolic rate, in calories burned per 24 hours, is the rate at which the body consumes energy.
+A statistics instructor has the follow data relating the number of absences (over the course of one semester) and overall course grade for [$n] randomly-selected students.
 
 [@begintable(13) .
 row($xvar, @x) .
@@ -85,6 +87,8 @@ r = [________]
 Find the least-squares regression line for predicting [$yvar] from [$xvar] (enter the entire right-hand side of the equation, using _x_ as the explanatory variable).  
 [`\hat{y} = `] [______________________]
 
+The predicted mean overall grades among students with no absences is: [__________]
+
 END_PGML
 
 ######################################
@@ -96,6 +100,8 @@ $ans_r = Real($r)->with(tolType=>'absolute', tolerance=>.00051);
 ANS($ans_r->cmp());
 $ans_yhat = Formula("$b1*x + $b0")->with(tolType=>'relative', tolerance=>0.01);
 ANS($ans_yhat->cmp());
+$ans_b0 = Real($b0)->with(tolType=>'absolute', tolerance=>.0051);
+ANS($ans_b0->cmp());
 
 ######################################
 

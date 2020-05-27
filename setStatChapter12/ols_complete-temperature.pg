@@ -24,38 +24,41 @@ TEXT(beginproblem());
 #  Set-up
 Context("Numeric");
 $abstol = 0.00051;
-#Context()->flags->set(
-#  tolerance => $abstol,
-#  tolType => "absolute",
-#);
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
 $showPartialCorrectAnswers = 1;
 
-# Fairly strong negative correlation
-$mval = random(-1.5,-1.1,.01);
-$bval = random(81,89);
-$jittermax = 5;
+# Somewhat strong positive correlation
+$hilo = list_random("High", "Low");
+$mval = random(2.5, 4.5,.01);
+$bval = ($hilo eq "Low") ? random(30, 40, .1) : random(60, 70,.1);
+$jittermax = 3;
 $n = 10;
 for($i=0; $i<$n; $i++){
-	$x[$i] = random(0,6,1);
-	$y[$i] = int($mval*$x[$i] + $bval + $jittermax*random(-1,1,.1));
+	$x[$i] = random(0,9);
+	$y = ($mval*($x[$i]) + $bval + $jittermax*random(-4,4,.1));
+    $y[$i] = min(int(.5+$y*10)/10, 99-random(1,5,.1));
 }
 $r = sample_correlation(~~@x,~~@y);
 ($b1, $b0, $var, $ssx) = linear_regression(~~@x, ~~@y);
-do{
-$choose = random(0,9,1);  #Pick a residual to calculate
-} while ($x[$choose]==0);
+
+$tcrit5 = tdistr($n-2, 0.025);
+$rcrit5 = sqrt($tcrit5**2/($tcrit5**2 + $n - 2));
 
 #################################################
 #  Main
 
 BEGIN_TEXT
-In order to study a possible relationship between student absences and course grades, we randomly selected 10 students from a single course with a large number of students. Each student's number of absences and final course grade (out of 100 points) are shown below.
+
+In a large statistics class, the instructor claims he can predict the outdoor $hilo temperature on a given class day by counting the number of students who are absent from class on that day. Here are data for $n randomly-selected days.
 $PAR
 $BCENTER
 \{begintable(11)\}
-\{row('$BBOLD Student $EBOLD $SPACE',(1..$n))\}
-\{row('$BBOLD Absences $EBOLD $SPACE ',@x)\}
-\{row('$BBOLD Grade $EBOLD $SPACE ',@y)\}
+\{row('$BBOLD Day $EBOLD $SPACE',(1..$n))\}
+\{row('$BBOLD Number Absent $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD $hilo Temperature $EBOLD $SPACE ',@y)\}
 \{endtable()\}
 $ECENTER
 $PAR
@@ -106,41 +109,46 @@ $ans_d = Real("$b + $m*$x[$choose]")->with(tolType=>'absolute', tolerance=>'0.01
 BEGIN_PGML
 Using the regression line [`\hat{y} = [$m]x+[$b]`]:
 
-a. The predicted mean grade for a student with [$x[$choose]] absences is:  
-[___]{width=>10}
-
-a. The residual for Student [@ 1+$choose @] is:  
-[___]{width=>15} 
+The outdoor [$hilo] temperature on a day where [$x[$choose]] students are absent is predicted to be, on average, about [___]{width=>10} degrees.
 END_PGML
 
-ANS($ans_d->cmp);
-
-$ans_e = Compute($y[$choose] - ($b + $m*$x[$choose]))->with(tolType=>'absolute', tolerance=>'0.01');
-ANS($ans_e->cmp->withPostFilter(AnswerHints(
-    sub {
+ANS($ans_d->cmp->withPostFilter(AnswerHints(
+   sub {
          my ($correct,$student,$ansHash) = @_;
-         return abs(-1*$correct-$student) <= .02;
-         } => ["The Residual is (Observed Value - Predicted Value); order matters in subtraction", score => 0],
-     sub {
-
-         my ($correct,$student,$ansHash) = @_;
-         return abs($correct-$student) <= .6;
+         return abs($correct-$student) <= 20*$abstol;
          } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
 )));
 Section::End();
+
+$rround = int(.5+$r*1000)/1000;
+if ($r<0) {$rround = -$rround}
+$tag = (abs($rround) > $rcrit5) ? 0 : 1;
+@mc_ans = ("Yes, the sample correlation is sufficiently far from zero.",
+  "No, the sample correlation is not sufficiently far from zero.");
+
+$mc = new_multiple_choice();
+$mc->qa("At the 5% level, does the sample correlation (r = $rround) give sufficient evidence of a linear relationship between the number of students absent and the daily $hilo temperature?",
+  $mc_ans[$tag]
+);
+$mc->extra($mc_ans[1-$tag],
+  "No, the sample correlation is sufficiently far from zero.",
+  "Yes, the sample correlation is not sufficiently far from zero."
+);
+
+Section::Begin();
+
+BEGIN_PGML
+[@ $mc->print_q() @]*  
+[@ $mc->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+
 Scaffold::End();
 
 #################################################
 #  Answers
 
-
-BEGIN_PGML_SOLUTION
-You should be using technology for Parts 1 and 2.
-
-In Part 3:
-a. Substitute x = [$x[$choose]] into the given equation.
-
-a. Student [@ 1+$choose @] has [$x[$choose]] absences, so use the predicted grade from above. The residual is the actual value for that student ([$y[$choose]]) minus the predicted value.
-END_PGML_SOLUTION
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.

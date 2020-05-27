@@ -31,15 +31,17 @@ Context("Numeric");
 $abstol = 0.0051;
 Context()->flags->set(tolerance=>$abstol, tolType=> 'absolute');
 
-$xvar = "lean body mass";
-$yvar = "metabolic rate";
+$xvar = "customer count";
+$yvar = "gross receipts";
 
-$n = 12;
+$n = 7;
+$m_approx = 17.29;
+$b_approx = 5.61;
 for($i=0; $i<$n; $i++) {
-$x[$i] = random(36,55,0.1);
-$y[$i] = random(900,1600,10);
+$x[$i] = random(51,99);
+$yi = ($x[$i] + random(-0.49, 0.49, .01))*$m_approx + $b_approx;
+$y[$i] = int(.5+$yi)
 } 
-
 for($i=0; $i<$n; $i++) {
 $sum_x += $x[$i];
 $sum_y += $y[$i];
@@ -71,7 +73,7 @@ $rround = int(.5+$r*1000)/1000;
 #  Main text
 
 BEGIN_PGML
-The follow data shows the lean body mass and resting metabolic rate for 12 individuals who are subjects in a study of dieting. Lean body mass, given in kilograms, is a person's weight leaving out all fat. Metabolic rate, in calories burned per 24 hours, is the rate at which the body consumes energy.
+A restaurant has the follow data relating the number of customers and gross receipts (rounded to the nearest dollar) for [$n] randomly-selected hours during a given week.
 
 [@begintable(13) .
 row($xvar, @x) .

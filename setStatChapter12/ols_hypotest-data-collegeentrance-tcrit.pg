@@ -17,7 +17,6 @@ loadMacros(
 "MathObjects.pl",
 "PGchoicemacros.pl",
 "PGanswermacros.pl",
-"PGgraphmacros.pl",
 "PGnumericalmacros.pl",
 "PGstatisticsmacros.pl",
 "PGML.pl",
@@ -35,28 +34,48 @@ Context()->flags->set(
 
 $n=10;
 $alpha = 0.05;
+$alphap = 100*$alpha;
 
-# Make sure the sample indicates a significant correlation
-$tcritsq = tdistr($n-2,$alpha/2)**2;
+# Make sure the sample indicates a significant positive correlation
+$tcrit = tdistr($n-2,$alpha/2);
+$tcritsq = $tcrit**2;
+$tcritr = int(.5 + $tcrit*1000)/1000;
+$tcritsqr = int(.5 + $tcritsq*1000)/1000;
+
 $rcrit = sqrt($tcritsq/($tcritsq+($n-2)));
+$rcritr = int(.5 + $rcrit*1000)/1000;
+
+$dev = 8;
+$b0 = random(5,9,.1);
 do {
+  $dev = $dev/2;
   for($i=0; $i<$n; $i++){
     $x[$i] = random(25,80,1);
-  	$y[$i] = int(1.2*$x[$i] + random(-4,4));
+  	do {
+      $y[$i] = int(1.2*$x[$i] + random(-$dev,$dev,.01))+$b0
+      } while $y[$i] > 100;
   }
 $r = sample_correlation(~~@x, ~~@y);
 } while abs($r)<$rcrit;
 
 ($b1, $b0, $var, $ssx) = linear_regression(~~@x, ~~@y);
 
+
+
 $mcr = new_multiple_choice();
-$mcr->qa("Does this sample indicate a significant correlation in the overall population?","Yes.");
-$mcr->makeLast("No.","Yes.");
+$mcr->qa("Does the sample data indicate a significant correlation (at the $alphap% level) in the overall population?",
+  "Yes, because the test statistic for this sample satisfies \(\lvert t\rvert > $tcritr\)."
+  );
+$mcr->extra(
+  "No, because the test statistic for this sample satisfies \(\lvert t\rvert > $tcritr\).",
+  "Yes, because the test statistic for this sample satisfies \(\lvert t\rvert > $tcritsqr\).",
+  "No, because the test statistic for this sample satisfies \(\lvert t\rvert > $tcritsqr\)."
+);
 
 # Pick a score not in the data set
 $xhat = random(40,49);
-$pcheck = 1;
 do{
+$pcheck = 1;
 $xhat+=1;
 foreach my $i (1..$n-1) {$pcheck*=($xhat-$x[$i])};
 } while ($pcheck==0);
@@ -115,7 +134,7 @@ Section::Begin();
 BEGIN_PGML
 Find the ordinary least squares regression line, using Verbal Score as the explantory (x) variable. Give each value to at least three decimal places.  
 
-[`\hat{y} = `] [__________]{"$b1"}[`x +`] [__________]{"$b0"}
+[`\hat{y} = `] [__________]{Formula("$b1*x +$b0")}
 END_PGML
 Section::End();
 

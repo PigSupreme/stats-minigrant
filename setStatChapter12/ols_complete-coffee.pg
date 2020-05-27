@@ -24,15 +24,15 @@ TEXT(beginproblem());
 #  Set-up
 Context("Numeric");
 $abstol = 0.00051;
-#Context()->flags->set(
-#  tolerance => $abstol,
-#  tolType => "absolute",
-#);
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
 $showPartialCorrectAnswers = 1;
 
 # Fairly strong negative correlation
 $mval = random(-1.5,-1.1,.01);
-$bval = random(81,89);
+$bval = random(350, 450);
 $jittermax = 5;
 $n = 10;
 for($i=0; $i<$n; $i++){
@@ -49,13 +49,13 @@ $choose = random(0,9,1);  #Pick a residual to calculate
 #  Main
 
 BEGIN_TEXT
-In order to study a possible relationship between student absences and course grades, we randomly selected 10 students from a single course with a large number of students. Each student's number of absences and final course grade (out of 100 points) are shown below.
+A statistics instructor wishes to test whether there is a linear relationship between the amount of coffee consumed in a given day versus the amount of sleep on the following night. Here are data for $n randomly-selected days.
 $PAR
 $BCENTER
 \{begintable(11)\}
-\{row('$BBOLD Student $EBOLD $SPACE',(1..$n))\}
-\{row('$BBOLD Absences $EBOLD $SPACE ',@x)\}
-\{row('$BBOLD Grade $EBOLD $SPACE ',@y)\}
+\{row('$BBOLD Day $EBOLD $SPACE',(1..$n))\}
+\{row('$BBOLD Cups of Coffee $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD Minutes of Sleep $EBOLD $SPACE ',@y)\}
 \{endtable()\}
 $ECENTER
 $PAR
@@ -106,25 +106,13 @@ $ans_d = Real("$b + $m*$x[$choose]")->with(tolType=>'absolute', tolerance=>'0.01
 BEGIN_PGML
 Using the regression line [`\hat{y} = [$m]x+[$b]`]:
 
-a. The predicted mean grade for a student with [$x[$choose]] absences is:  
-[___]{width=>10}
-
-a. The residual for Student [@ 1+$choose @] is:  
-[___]{width=>15} 
+The predicted mean amount of sleep on a given night following [$x[$choose]] cups of coffee is [___]{width=>10} minutes.
 END_PGML
 
-ANS($ans_d->cmp);
-
-$ans_e = Compute($y[$choose] - ($b + $m*$x[$choose]))->with(tolType=>'absolute', tolerance=>'0.01');
-ANS($ans_e->cmp->withPostFilter(AnswerHints(
-    sub {
+ANS($ans_d->cmp->withPostFilter(AnswerHints(
+   sub {
          my ($correct,$student,$ansHash) = @_;
-         return abs(-1*$correct-$student) <= .02;
-         } => ["The Residual is (Observed Value - Predicted Value); order matters in subtraction", score => 0],
-     sub {
-
-         my ($correct,$student,$ansHash) = @_;
-         return abs($correct-$student) <= .6;
+         return abs($correct-$student) <= 20*$abstol;
          } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
 )));
 Section::End();
@@ -133,14 +121,5 @@ Scaffold::End();
 #################################################
 #  Answers
 
-
-BEGIN_PGML_SOLUTION
-You should be using technology for Parts 1 and 2.
-
-In Part 3:
-a. Substitute x = [$x[$choose]] into the given equation.
-
-a. Student [@ 1+$choose @] has [$x[$choose]] absences, so use the predicted grade from above. The residual is the actual value for that student ([$y[$choose]]) minus the predicted value.
-END_PGML_SOLUTION
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
