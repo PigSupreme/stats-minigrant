@@ -163,16 +163,6 @@ att_to_open_children = 0
 problem_end
 problem_start
 problem_id = 16
-source_file = setStatChapter10/twosample-mean-pooled01.pg
-value = 1
-max_attempts = -1
-showMeAnother = -1
-prPeriod = -1
-counts_parent_grade = 0
-att_to_open_children = 0 
-problem_end
-problem_start
-problem_id = 17
 source_file = setStatChapter10/twosample-mean-unequal_variance00.pg
 value = 1
 max_attempts = -1
@@ -182,7 +172,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 18
+problem_id = 17
 source_file = setStatChapter10/twosample-mean-unequal_variance-critregion00.pg
 value = 1
 max_attempts = -1
@@ -192,27 +182,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 19
-source_file = setStatChapter10/twosample-mean-pooled00.pg
-value = 1
-max_attempts = -1
-showMeAnother = -1
-prPeriod = -1
-counts_parent_grade = 0
-att_to_open_children = 0 
-problem_end
-problem_start
-problem_id = 20
-source_file = setStatChapter10/twosample-mean-pooled00-critregion.pg
-value = 1
-max_attempts = -1
-showMeAnother = -1
-prPeriod = -1
-counts_parent_grade = 0
-att_to_open_children = 0 
-problem_end
-problem_start
-problem_id = 21
+problem_id = 18
 source_file = setStatChapter10/twosample-prop01-quiz.pg
 value = 1
 max_attempts = -1
@@ -222,7 +192,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 22
+problem_id = 19
 source_file = setStatChapter10/two-sample-prop/critregion00.pg
 value = 1
 max_attempts = -1
@@ -232,7 +202,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 23
+problem_id = 20
 source_file = setStatChapter10/two-sample-prop/critregion01.pg
 value = 1
 max_attempts = -1
@@ -242,7 +212,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 24
+problem_id = 21
 source_file = setStatChapter10/two-sample-prop/critregion02.pg
 value = 1
 max_attempts = -1
@@ -252,7 +222,7 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 25
+problem_id = 22
 source_file = setStatChapter10/two-sample-prop/critregion03.pg
 value = 1
 max_attempts = -1
@@ -262,8 +232,148 @@ counts_parent_grade = 0
 att_to_open_children = 0 
 problem_end
 problem_start
-problem_id = 26
+problem_id = 23
 source_file = setStatChapter10/two-sample-prop/critregion04.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 24
+source_file = setStatChapter10/two-sample-prop/pvalue00.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 25
+source_file = setStatChapter10/two-sample-prop/pvalue01.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 26
+source_file = setStatChapter10/two-sample-prop/pvalue02.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 27
+source_file = setStatChapter10/two-sample-prop/pvalue03.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 28
+source_file = setStatChapter10/two-sample-prop/pvalue04.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 29
+source_file = setStatChapter10/two-sample-mean/pvalue01.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 30
+source_file = setStatChapter10/two-sample-mean/pvalue01-df_exact.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 31
+source_file = setStatChapter10/two-sample-mean/pvalue01-df_exact_int.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 32
+source_file = setStatChapter10/two-sample-mean/pvalue01-df_conservative.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 33
+source_file = setStatChapter10/two-sample-mean/critregion01-df_exact_int.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 34
+source_file = setStatChapter10/two-sample-mean/critregion01-df_conservative.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 35
+source_file = setStatChapter10/two-sample-mean/pooled01-pvalue.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 36
+source_file = setStatChapter10/two-sample-mean/pooled01-critregion.pg
+value = 1
+max_attempts = -1
+showMeAnother = -1
+prPeriod = -1
+counts_parent_grade = 0
+att_to_open_children = 0 
+problem_end
+problem_start
+problem_id = 37
+source_file = setStatChapter10/two-sample-mean/pvalue02.pg
 value = 1
 max_attempts = -1
 showMeAnother = -1
