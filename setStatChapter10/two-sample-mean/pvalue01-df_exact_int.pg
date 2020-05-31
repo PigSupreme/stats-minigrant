@@ -135,8 +135,10 @@ $urint = simpson($urref,0,$xlim,steps=>30000); #Def. Integral
 # the identity Beta(a,1/2) = Beta(a,3/2)*(2a+1)
 $rgref = sub {return ($_[0]**$ae)*sqrt(1-$_[0])};
 $rgint = simpson($rgref,0,1,steps=>30000)*($df_true+1);
-# Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
-$pvalhash{EXACT_DF}{right} = $urint/(2*$rgint);
+# If $test > 0, Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
+$pright = $urint/(2*$rgint);
+if ($test < 0) {$pright = 1 - $pright}
+$pvalhash{EXACT_DF}{right} = $pright;
 $pvalhash{EXACT_DF}{df} = $df_true;
 
 #####################################################################
