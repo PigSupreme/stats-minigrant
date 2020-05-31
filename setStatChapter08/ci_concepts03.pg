@@ -33,6 +33,7 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
+$showPartialCorrectAnswers = 0;
 
 $n = random(1210,1590,10);
 $cl = random(91,99,2)."%";
