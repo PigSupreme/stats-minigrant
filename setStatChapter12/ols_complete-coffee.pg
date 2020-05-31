@@ -1,0 +1,125 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple linear regression)
+## DBsection(Residuals)
+## Institution(Clayton State Univeristy)
+## Author(Michael J. Dancs)
+## KEYWORDS('statistic', 'regression','correlation')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "answerHints.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+#################################################
+#  Set-up
+Context("Numeric");
+$abstol = 0.00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+$showPartialCorrectAnswers = 1;
+
+# Fairly strong negative correlation
+$mval = random(-1.5,-1.1,.01);
+$bval = random(350, 450);
+$jittermax = 5;
+$n = 10;
+for($i=0; $i<$n; $i++){
+	$x[$i] = random(0,6,1);
+	$y[$i] = int($mval*$x[$i] + $bval + $jittermax*random(-1,1,.1));
+}
+$r = sample_correlation(~~@x,~~@y);
+($b1, $b0, $var, $ssx) = linear_regression(~~@x, ~~@y);
+do{
+$choose = random(0,9,1);  #Pick a residual to calculate
+} while ($x[$choose]==0);
+
+#################################################
+#  Main
+
+BEGIN_TEXT
+A statistics instructor wishes to test whether there is a linear relationship between the amount of coffee consumed in a given day versus the amount of sleep on the following night. Here are data for $n randomly-selected days.
+$PAR
+$BCENTER
+\{begintable(11)\}
+\{row('$BBOLD Day $EBOLD $SPACE',(1..$n))\}
+\{row('$BBOLD Cups of Coffee $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD Minutes of Sleep $EBOLD $SPACE ',@y)\}
+\{endtable()\}
+$ECENTER
+$PAR
+Use the data above to compute the following (give answers to at least four decimal places).
+END_TEXT
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+a. Compute the linear correlation coefficient for this sample.  
+[`r =`] [___]{width=>10} 
+END_PGML
+$ans_a = Compute($r)->with(tolType=>'absolute', tolerance=>'0.00051');
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= .02;
+         } => ["Close! Give your answer to at least four decimal places.", score => 0]
+
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+a. Find the equation of the least squares regression line (enter the entire right-hand side of the equation).  
+[`\hat{y} = `] [___]{width=>30} 
+
+a. Compute the coefficient of determination for this regression line (do not convert to percent):  
+[`r^2 = `] [___]{width=>10} 
+
+END_PGML
+$ans_b = Formula("$b1 x + $b0");
+ANS($ans_b->cmp(tolType=>'absolute', tolerance=>'0.0051'));
+
+$ans_c = Compute($r*$r)->with(tolType=>'absolute', tolerance=>'0.00051');
+ANS($ans_c->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= .02;
+         } => ["Close! Give your answer to at least four decimal places.", score => 0])));
+Section::End();
+
+Section::Begin();
+$m = -int(.5+abs($b1)*10000)/10000;
+$b = int(.5+abs($b0)*10000)/10000;
+$ans_d = Real("$b + $m*$x[$choose]")->with(tolType=>'absolute', tolerance=>'0.01');
+
+BEGIN_PGML
+Using the regression line [`\hat{y} = [$m]x+[$b]`]:
+
+The predicted mean amount of sleep on a given night following [$x[$choose]] cups of coffee is [___]{width=>10} minutes.
+END_PGML
+
+ANS($ans_d->cmp->withPostFilter(AnswerHints(
+   sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= 20*$abstol;
+         } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+)));
+Section::End();
+Scaffold::End();
+
+#################################################
+#  Answers
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
