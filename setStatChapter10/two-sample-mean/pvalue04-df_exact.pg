@@ -32,17 +32,13 @@ TEXT(beginproblem());
 
 Context("Numeric");
 Context()->strings->remove("infinity","inf");  # For Geogebra user errors
-$abstol = .000051;
+$abstol = .00051;
 Context()->flags->set(
   tolerance => $abstol,
   tolType => "absolute",
 );
 
 # Non-mathematical flavour here
-$m = random(0,4);
-$name = ("Nahmin", "Skylar", "Nwabudike", "Euniqua", "Bunty")[$m];
-$Pronoun = "She";
-if ($m==2) {$Pronoun = "He";}
 
 # Alterntative hypothesis ("left", "two", "right):
 $tails = "two";
@@ -57,17 +53,15 @@ $hypo_template = '\(\mu_1 SIGN \mu_2\)';
 $nullsign = '=';
 
 # Text for reject and fail to reject; correct answer chosen automatically
-$decision_text = "Using a(n) $alphap% significance level, $name would conclude:";
+$decision_text = "At the $alphap% significance level:";
 %decision = (
-  reject => "The difference in life expectancies is statistically significant.  The data seem to indicate that people living in rural
-communities have a different life expectancy than those in urban communities.",
-  fail => "The difference in life expectancies is not statistically significant. There is not sufficient evidence to show that life expectancies are different for rural and urban communities."
-  );
+  reject => 'The sample provides sufficient evidence of a difference in average usage by gender.',
+  fail => 'The difference in usage by gender is not statistically significant.'
+);
 # Extra incorrect answers for reject/fail
-@decisions_wrong = ();
-#  'Yes, because the P-value is not less than the given significance level.',
-#  'No, because the P-value is less than the given significance level.'
-#);
+@decisions_wrong = (
+  'The sample provides sufficient evidence that there is no difference in average usage by gender.'
+);
 
 
 # Set option for df here
@@ -75,7 +69,7 @@ communities have a different life expectancy than those in urban communities.",
 $df_method = "EXACT_DF";
 #$df_method = "EXACT_DF_ROUNDED";
 #$df_method = "CONSERVATIVE_DF";
-#$df_method = "POOLED_SAMPLE";   # Might not work in this problem
+#$df_method = "POOLED_DF";   # Won't work here; feedback only!
 
 %method_directions = (
   "EXACT_DF" => "the exact formula for degrees of freedom (Welch's T-test)",
@@ -90,14 +84,14 @@ $df_method = "EXACT_DF";
 # * Positive difference in sample means
 # * Unequal sample StdDevs
 while($n1 == $n2) {
-  $n1 = random(41,60,1);
-  $n2 = random(41,60,1);
+  $n1 = random(31,50,1);
+  $n2 = random(31,50,1);
   }
-$mean1 = random(68,85,.1);
-$mean2 = $mean1 - random(1.3, 0.1);
+$mean1 = 60*random(0,8) + random(98.1,185.1,.2);
+$mean2 = $mean1 - random(2.1,4.1,.2);
 while($s1 == $s2) {
-  $s1 = random(5,8, 0.01);
-  $s2 = random(5,8, 0.01);
+  $s1 = random(5,10,.01);
+  $s2 = random(5,10,.01);
   }
 
 # For storing P-Values and df [left, two, right, df]
@@ -135,8 +129,10 @@ $urint = simpson($urref,0,$xlim,steps=>30000); #Def. Integral
 # the identity Beta(a,1/2) = Beta(a,3/2)*(2a+1)
 $rgref = sub {return ($_[0]**$ae)*sqrt(1-$_[0])};
 $rgint = simpson($rgref,0,1,steps=>30000)*($df_true+1);
-# Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
-$pvalhash{EXACT_DF}{right} = $urint/(2*$rgint);
+# If $test > 0, Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
+$pright = $urint/(2*$rgint);
+if ($test < 0) {$pright = 1 - $pright}
+$pvalhash{EXACT_DF}{right} = $pright;
 $pvalhash{EXACT_DF}{df} = $df_true;
 
 #####################################################################
@@ -212,12 +208,9 @@ $mc_stat->extra("z score", "\(\chi^2\) statistic", "P-Value");
 #  Main text
 
 BEGIN_PGML
-[$name] thinks that there is a difference in quality of life between rural and urban living. [$Pronoun] collects information from obituaries in newspapers from urban and rural areas in Georgia to see if there is a difference in life expectancy.
+A social media platform wants to determine if there is a significant difference between the average weekly usage (number of minutes spent on the site per week) of female users and male users, and plans to conduct a Hypothesis Test at the [$alphap]% significance level.
 
-A sample of [$n1] people from rural towns has a mean life expectancy of [$mean1] years with a sample standard deviation of [$s1] years. A sample of [$n2] people from urban areas has a mean of [$mean2] years with a standard deviation of [$s2] years. Does this provide evidence that people living in rural Georgia communities have a different life expectancy than those in urban communities?
-
-Assume that this data can be treated as independent Simple Random Samples from the respective populations, and use a [$alphap]% significance level. Let [`\mu_1`] be the true mean life expectancy in rural towns and [`\mu_2`] be the true mean life expectancy in urban areas.
-
+Let [`\mu_1`] be the average weekly usage among all male users, and [`\mu_2`] be the average daily usage among all female users.
 END_PGML
 
 Scaffold::Begin(
@@ -239,13 +232,18 @@ Section::End();
 
 Section::Begin();
 BEGIN_PGML
+Use the following sample data to answer the remaining questions. Assume these are independent Simple Random Samples.
 
-[@ $mc_stat->print_q() @]*
-[@ $mc_stat->print_a() @]*  
+[@ begintable(4) .
+row(' ','\(\bar{x}\) (minutes)','\(s\) (minutes)','\(\quad n\quad\)') .
+row('Male',$mean1, $s1, $n1) .
+row('Female',$mean2, $s2, $n2) .
+endtable()
+@]*  
 
 The value of the test statistic is [_________] (round to four decimal places)
 END_PGML
-ANS(radio_cmp($mc_stat->correct_ans() ));
+
 ##################
 # Generic check for answers that are almost within tolerance
 if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
@@ -256,12 +254,12 @@ $tolcheck = sub{
   };
 
 ANS(Real($test)->cmp()->withPostFilter(AnswerHints(
-   $tolcheck=>$tolerr,
    # Used pooled samples
    sub {
-      ($correct, $student, $hash) = @_;
-      return (abs($student - $testpooled)) < 10*$abstol
-      } => "Do not use pooled samples (equal population variances) for this problem."
+     ($correct, $student, $hash) = @_;
+     return (abs($student - $testpooled)) < 10*$abstol
+     } => "Do not use pooled samples (equal population variances) for this problem.",
+   $tolcheck=>$tolerr
    )));
 Section::End();
 
@@ -374,5 +372,5 @@ With df = [$df_cons] (smaller sample size, minus 1), the [$tails]-sided P-Value 
 This problem uses [@ $method_directions{$df_method} @] to compute the P-Value, giving a [$tails]-sided value of [@ int(.5+$pval*10000)/100 @]%. This P-Value is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-COMMENT("Equal variances not assumed; P-Value method with several options. Gives useful feedback for common errors, including wrong df.");
+COMMENT("Equal variances not assumed; P-Value method using exact df. Gives useful feedback for common errors, including wrong df.");
 ENDDOCUMENT();

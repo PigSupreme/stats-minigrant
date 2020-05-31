@@ -1,0 +1,307 @@
+## DESCRIPTION
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Independent samples - t')
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'two sample', 'hypothesis', 't score')
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGnumericalmacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "answerHints.pl",
+  "scaffold.pl"
+);
+
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->strings->remove("infinity","inf");  # For Geogebra user errors
+$abstol = .00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+# Non-mathematical flavour here
+
+# Alterntative hypothesis ("left", "two", "right):
+$tails = "two";
+
+# Significance level
+$alpha = list_random(.1, .05, .02, .01);
+$alphap = 100*$alpha;
+
+# Multiple choice text for Null and Alternative
+# SIGN will be replaced in the template by \lt, \neq, and \gt
+$hypo_template = '\(\mu_1 SIGN \mu_2\)';
+$nullsign = '=';
+
+# Text for reject and fail to reject; correct answer chosen automatically
+$decision_text = "At the $alphap% significance level:";
+%decision = (
+  reject => 'The sample provides sufficient evidence of a difference in average usage by gender.',
+  fail => 'The difference in usage by gender is not statistically significant.'
+);
+# Extra incorrect answers for reject/fail
+@decisions_wrong = (
+  'The sample provides sufficient evidence that there is no difference in average usage by gender.'
+);
+
+
+# Set option for df here
+@dfmethodlist = (POOLED_DF, EXACT_DF_ROUNDED, CONSERVATIVE_DF);
+$df_method = "POOLED_DF"; 
+
+%method_directions = (
+  "EXACT_DF_ROUNDED" => "the exact formula for degrees of freedom (Welch's T-test), rounded for using critical value tables",
+  "CONSERVATIVE_DF" => "the conservative option 2 for df",
+  "POOLED_DF" => "a pooled sample"
+);
+
+######################## MATH STARTS HERE ############################
+# Generates summary data with
+# * Unequal sample sizes
+# * Positive difference in sample means
+# * Unequal sample StdDevs
+while($n1 == $n2) {
+  $n1 = random(31,50,1);
+  $n2 = random(31,50,1);
+  }
+$mean1 = 60*random(0,8) + random(98.1,185.1,.2);
+$mean2 = $mean1 - random(2.1,4.1,.2);
+while($s1 == $s2) {
+  $s1 = random(5,10,.01);
+  $s2 = random(5,10,.01);
+  }
+
+# For storing critical values and df [left, two, right, df]
+%crithash = (
+  POOLED_DF => {left => 1, right => 0, two => 0, df =>0},
+  EXACT_DF_ROUNDED => {left => 1, right => 0, two => 0, df => 0},
+  CONSERVATIVE_DF => {left => 1, right => 0, two => 0, df => 0}
+  );
+
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$dfpooled = $n1 + $n2 - 2;
+$varpooled = (($n1-1)*$s1*$s1 + ($n2-1)*$s2*$s2)/$dfpooled;
+$sdpooled = sqrt($varpooled*((1/$n1)+(1/$n2)));
+$df_true = $vard**2 / ( ($s1**4)/($n1**2)/($n1-1) +  ($s2**4)/($n2**2)/($n2-1) );
+$df_o2 = min($n1, $n2) - 1;
+
+# Test statistic and df (pooled)
+$test = ($mean1-$mean2)/$sdpooled;
+# Unpooled test stat (for feedback)
+$test_unpooled = ($mean1-$mean2)/sqrt($vard);
+
+# P-Values with Pooled df
+$pvalhash{POOLED_DF}{right} = tprob($dfpooled, $test);
+$pvalhash{POOLED_DF}{left} = 1 - $pvalhash{POOLED_DF}{right};
+$pvalhash{POOLED_DF}{two} = 2*min($pvalhash{POOLED_DF}{left}, $pvalhash{POOLED_DF}{right});
+
+# Use this P-value for the correct answer
+$pval = $pvalhash{POOLED_DF}{$tails};
+# WebWorK doesn't behave when P is close to zero
+if ($pval <= $abstol) {$pval = 0};
+
+# Critical values with Pooled df
+$cright = tprob($dfpooled, $alpha);
+$cleft = -$pright;
+$ctwo = tdistr($dfpooled, $alpha/2);
+
+# For feedback about various P-value methods
+$pval_mt = $pvalhash{EXACT_DF_ROUNDED}{$tails};
+$pval_cons = $pvalhash{CONSERVATIVE_DF}{$tails};
+
+######################################
+### Reject or fail to reject the Null?
+######################################
+# Use a P-Value in this problem
+$reject = ($pval < $alpha);
+
+# Dynamic hypotheses for multiple choice
+%hypo = (null => ($hypo_template =~ s/SIGN/$nullsign/r));
+$hypo{left}  = ($hypo_template =~ s/SIGN/\lt/r);
+$hypo{two}  = ($hypo_template =~ s/SIGN/\neq/r);
+$hypo{right}  = ($hypo_template =~ s/SIGN/\gt/r);
+
+# Scramble manually here for consistent order in both MC questions
+@hypolist = ($hypo{null}, $hypo{left}, $hypo{right}, $hypo{two})[NchooseK(4,4)];
+
+$mc_null = new_multiple_choice();
+$mc_null->qa('An appropriate Null Hypothesis is:',$hypo{null});
+$mc_null->makeLast(@hypolist);
+
+$mc_alt = new_multiple_choice();
+$mc_alt->qa('An appropriate Alternative Hypothesis is:',$hypo{$tails});
+$mc_alt->makeLast(@hypolist);
+
+$decision_correct = $decision{($reject) ? reject: fail};
+push(@decisions_wrong, $decision{($reject) ? fail : reject});
+$mc_decide = new_multiple_choice();
+$mc_decide->qa('', $decision_correct);
+$mc_decide->extra(@decisions_wrong);
+
+$mc_stat = new_multiple_choice();
+$mc_stat->qa("What type of test statistic should $name use?","t score");
+$mc_stat->extra("z score", "\(\chi^2\) statistic", "P-Value");
+######################################
+#  Main text
+
+BEGIN_PGML
+A social media platform wants to determine if there is a significant difference between the average weekly usage (number of minutes spent on the site per week) of female users and male users, and plans to conduct a Hypothesis Test at the [$alphap]% significance level.
+
+Let [`\mu_1`] be the average weekly usage among all male users, and [`\mu_2`] be the average daily usage among all female users.
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc_alt->print_q() @]*
+[@ $mc_alt->print_a() @]*
+
+[@ $mc_null->print_q() @]*
+[@ $mc_null->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc_alt->correct_ans() ));
+ANS(radio_cmp($mc_null->correct_ans() ));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Use the following sample data to answer the remaining questions. Assume these are independent Simple Random Samples.
+
+[@ begintable(4) .
+row(' ','\(\bar{x}\) (minutes)','\(s\) (minutes)','\(\quad n\quad\)') .
+row('Male',$mean1, $s1, $n1) .
+row('Female',$mean2, $s2, $n2) .
+endtable()
+@]*  
+
+The value of the test statistic is [_________] (round to four decimal places)
+
+The degrees of freedom for this test statistic is [_________].
+END_PGML
+
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+
+ANS(Real($test)->cmp()->withPostFilter(AnswerHints(
+   # Used non-pooled samples
+   sub {
+     ($correct, $student, $anshash) = @_;
+     return (abs($student - $test_unpooled) < 20*$abstol)
+     } => "Use a pooled T-test for this problem.",
+     $tolcheck=>$tolerr
+     )));
+ANS(Compute("$n1+$n2-2")->cmp()->withPostFilter(AnswerHints(
+   sub {
+     ($correct, $student, $anshash) = @_;
+     return (abs($student - $df_true) < min(.5, abs($student - $correct)))
+     } => "Use a pooled T-test for this problem.",
+   (min($n1, $n2)-1) => "You appear to be using df = (smaller sample size) - 1.",
+     )));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Using a pooled T-test, the P-Value for this sample is [_______] (round to four decimal places).
+END_PGML
+
+# For feedback with conservative df
+$df_o2 = min($n1, $n2) - 1;
+$p_o2 = tprob($df_o2, $test);
+if ($tails eq "two") {$p_o2 = 2*min($p_o2, 1-$p_o2)}
+if ($tails eq "left") {$p_o2 = 1 - $p_o2}
+
+# Hints for alternative df
+$err_o2 = "You appear to be using df = (smaller sample size) - 1.";
+ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $p_o2)) < 10*$abstol
+      } => $err_o2,
+   # Wrong Alternative
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (
+        (abs($student*2 -$correct) < (10*$abstol)) ||
+        (abs(2*(1-$student) - $correct) < (10*$abstol))
+        )
+      } => "Are you using the correct Alternative Hypothesis?",
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval*100)) < 20*$abstol
+      } => "Do not convert to percent.",
+#   $tolcheck=>$tolerr
+   )));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[$decision_text]  
+[@ $mc_decide->print_a() @]*  
+END_PGML
+ANS(radio_cmp($mc_decide->correct_ans() ));
+Section::End();
+Scaffold::End();
+
+##############
+### Solutions
+$dfpooled = $n1 + $n2 - 2;
+$varpooled = (($n1-1)*$s1*$s1 + ($n2-1)*$s2*$s2)/$dfpooled;
+$sdpooled = sqrt($varpooled*((1/$n1)+(1/$n2)));
+
+$mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
+$sdr = int(.5+1000000*sqrt($varpooled))/1000000;
+$statr = int(.5+10000*$test)/10000;
+$pvalr = int(.5+$pval*10000)/10000;
+
+BEGIN_PGML_SOLUTION
+It is assumed that you will be using technology to perform these computations. Make sure you are pooling your samples for this problem. If you need to compute things by hand....
+
+The difference in sample means is:  
+
+[``\bar{x}_1-\bar{x}_2 = [$mean1]- [$mean2] = [$mdiffr]``]
+
+The pooled sample standard deviation is:  
+
+[``s_p = \sqrt{\frac{(n_1-1)\,s_1^2 + (n_2-1)\,s_2^2}{n_1+n_2-2}} = [$sdr]...``]
+
+The test statistic is:  
+
+[``t = \frac{\bar{x}_1-\bar{x}_2}{s_p\cdot\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}} = [$statr]...``]
+
+Use a Student T distribution with [`\text{df} = n_1 + n_2 - 2 = [$dfpooled]`] when finding the P-value. The [$tails]-sided value is [@ $pvalr*100 @]%.
+
+This P-value is [@ $pval < $alpha ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+COMMENT("Uses pooled test stat and df with feedback for other methods. P-Value version.");
+ENDDOCUMENT();
