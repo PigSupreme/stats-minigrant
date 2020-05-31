@@ -323,9 +323,7 @@ The test statistic is:
 
 [``t = \frac{\bar{x}_1-\bar{x}_2}{s_p\cdot\sqrt{\frac{1}{n_1}+\frac{1}{n_2}}} = [$statr]...``]
 
-Use a Student T distribution with [`\text{df} = n_1 + n_2 - 2 = [$dfpooled]`] when finding the critical value. The [$tails]-sided value is [$cvalr]. Since this is a [$tails]-sided test, the critical rejection region is [`[$cregion_str]`].
-
-The test statistic for this sample data is [`[$dvar] =[$statr]`]; this is [@ abs($test) > abs($cval) ? "in the critical region, so we" : "NOT in the critical region, so we fail to" @] reject the Null Hypothesis.
+Use a Student T distribution with [`\text{df} = n_1 + n_2 - 2 = [$dfpooled]`] when finding the critical value.
 
 This problem uses [$method_directions{$df_method}]; the critical region is [`[$crithash{region}]`]. The test statistic (t = [$statr]) [@ $reject ? "is" : "is not" @] in the critical region, so we [@ $reject ? "reject" : "fail to reject" @] the Null Hypothesis.
 
