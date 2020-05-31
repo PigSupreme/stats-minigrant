@@ -16,14 +16,13 @@
 ## Section1('')
 ## Problem1('')
 
-
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
   "PGstandard.pl",
   "MathObjects.pl",
-  "answerHints.pl",
   "PGstatisticsmacros.pl",
+  "answerHints.pl",
   "PGML.pl"
   );
 
@@ -32,7 +31,6 @@ TEXT(beginproblem());
 ######################################
 #  Setup
 Context("Numeric");
-$showPartialCorrectAnswers = 1;
 $abstol = .0051;
 Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
 
@@ -76,46 +74,18 @@ $centcheck = sub{
   return (100*$student != round(100*$student)) && abs($student - $correct)<.0051;
   };  
 
-$moe_tol = abs($moe - $moe_z)/2;
 ANS(Real($moe)->cmp->withPostFilter(AnswerHints(
   $centcheck => "Round to the nearest cent.",
-  sub{
-     my ($correct,$student,$ans) = @_;
-     return abs($student - $moe_z) < $moe_tol;
-  } => ["Are you using the correct distribution (z or t)?"],
-  sub{
-     my ($correct,$student,$ans) = @_;
-     return abs($student - $correct) < $moe_tol;
-  } => "You are close. Check your rounding, and make sure you are using the correct distribution."
 )));
 
 ANS(Real($ans1)->cmp->withPostFilter(AnswerHints(
   $centcheck => ["Round to the nearest cent."]
   )));
+
 ANS(Real($ans2)->cmp->withPostFilter(AnswerHints(
   $centcheck => ["Round to the nearest cent."]
   )));
 
-### Solutions ###########################################3
-BEGIN_PGML_SOLUTION
-To find the [$clperc]% confidence interval:
-
-1. The sample statistic (point estimate) is [$mean].  
-1. Since the population standard deviation [`\sigma`] is unknown, the critical value is a t-score, with df = [$n] - 1. Find it using technology or a table: [$tcrit].  
-1. For all samples of size [$n], the standard error (approximate standard deviation) of [`\bar{x}`] is given by  
-[``\frac{s}{\sqrt{n}}= [$s]/\text{sqrt}([$n]) = [@ $s/sqrt($n) @];``]  
-leave this unrounded if possible.  
-1. The Margin of Error (some call this EBM) is the product of the last two values. You can compute it directly as:  
-[``[$tcrit] * [$s]/\text{sqrt}([$n])=[$moe]``].  
-1. The lower limit of the confidence interval is:  
-[``[$mean]  - [$moe]``].  
-1. The upper limit of the confidence interval is:  
-[``[$mean]  + [$moe]``].  
-
-
-If you like memorzing formulas; the one used in the computations above is:
->>[``\bar{x}\pm t_{\alpha/2}\cdot\frac{s}{\sqrt{n}}``]<<
-
-END_PGML_SOLUTION
+COMMENT("Quiz version, no feedback.");
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.

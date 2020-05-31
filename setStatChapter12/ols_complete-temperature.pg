@@ -1,0 +1,154 @@
+## DESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple linear regression)
+## DBsection(Residuals)
+## Institution(Clayton State Univeristy)
+## Author(Michael J. Dancs)
+## KEYWORDS('statistic', 'regression','correlation')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "answerHints.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+#################################################
+#  Set-up
+Context("Numeric");
+$abstol = 0.00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+$showPartialCorrectAnswers = 1;
+
+# Somewhat strong positive correlation
+$hilo = list_random("High", "Low");
+$mval = random(2.5, 4.5,.01);
+$bval = ($hilo eq "Low") ? random(30, 40, .1) : random(60, 70,.1);
+$jittermax = 3;
+$n = 10;
+for($i=0; $i<$n; $i++){
+	$x[$i] = random(0,9);
+	$y = ($mval*($x[$i]) + $bval + $jittermax*random(-4,4,.1));
+    $y[$i] = min(int(.5+$y*10)/10, 99-random(1,5,.1));
+}
+$r = sample_correlation(~~@x,~~@y);
+($b1, $b0, $var, $ssx) = linear_regression(~~@x, ~~@y);
+
+$tcrit5 = tdistr($n-2, 0.025);
+$rcrit5 = sqrt($tcrit5**2/($tcrit5**2 + $n - 2));
+
+#################################################
+#  Main
+
+BEGIN_TEXT
+
+In a large statistics class, the instructor claims he can predict the outdoor $hilo temperature on a given class day by counting the number of students who are absent from class on that day. Here are data for $n randomly-selected days.
+$PAR
+$BCENTER
+\{begintable(11)\}
+\{row('$BBOLD Day $EBOLD $SPACE',(1..$n))\}
+\{row('$BBOLD Number Absent $EBOLD $SPACE ',@x)\}
+\{row('$BBOLD $hilo Temperature $EBOLD $SPACE ',@y)\}
+\{endtable()\}
+$ECENTER
+$PAR
+Use the data above to compute the following (give answers to at least four decimal places).
+END_TEXT
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+a. Compute the linear correlation coefficient for this sample.  
+[`r =`] [___]{width=>10} 
+END_PGML
+$ans_a = Compute($r)->with(tolType=>'absolute', tolerance=>'0.00051');
+ANS($ans_a->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= .02;
+         } => ["Close! Give your answer to at least four decimal places.", score => 0]
+
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+a. Find the equation of the least squares regression line (enter the entire right-hand side of the equation).  
+[`\hat{y} = `] [___]{width=>30} 
+
+a. Compute the coefficient of determination for this regression line (do not convert to percent):  
+[`r^2 = `] [___]{width=>10} 
+
+END_PGML
+$ans_b = Formula("$b1 x + $b0");
+ANS($ans_b->cmp(tolType=>'absolute', tolerance=>'0.0051'));
+
+$ans_c = Compute($r*$r)->with(tolType=>'absolute', tolerance=>'0.00051');
+ANS($ans_c->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= .02;
+         } => ["Close! Give your answer to at least four decimal places.", score => 0])));
+Section::End();
+
+Section::Begin();
+$m = -int(.5+abs($b1)*10000)/10000;
+$b = int(.5+abs($b0)*10000)/10000;
+$ans_d = Real("$b + $m*$x[$choose]")->with(tolType=>'absolute', tolerance=>'0.01');
+
+BEGIN_PGML
+Using the regression line [`\hat{y} = [$m]x+[$b]`]:
+
+The outdoor [$hilo] temperature on a day where [$x[$choose]] students are absent is predicted to be, on average, about [___]{width=>10} degrees.
+END_PGML
+
+ANS($ans_d->cmp->withPostFilter(AnswerHints(
+   sub {
+         my ($correct,$student,$ansHash) = @_;
+         return abs($correct-$student) <= 20*$abstol;
+         } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+)));
+Section::End();
+
+$rround = int(.5+$r*1000)/1000;
+if ($r<0) {$rround = -$rround}
+$tag = (abs($rround) > $rcrit5) ? 0 : 1;
+@mc_ans = ("Yes, the sample correlation is sufficiently far from zero.",
+  "No, the sample correlation is not sufficiently far from zero.");
+
+$mc = new_multiple_choice();
+$mc->qa("At the 5% level, does the sample correlation (r = $rround) give sufficient evidence of a linear relationship between the number of students absent and the daily $hilo temperature?",
+  $mc_ans[$tag]
+);
+$mc->extra($mc_ans[1-$tag],
+  "No, the sample correlation is sufficiently far from zero.",
+  "Yes, the sample correlation is not sufficiently far from zero."
+);
+
+Section::Begin();
+
+BEGIN_PGML
+[@ $mc->print_q() @]*  
+[@ $mc->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+
+Scaffold::End();
+
+#################################################
+#  Answers
+
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

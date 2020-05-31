@@ -1,0 +1,72 @@
+##DESCRIPTION
+##  Critical Values for z-confidence intervals
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'z-score')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('10/10/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "MathObjects.pl",
+  "PGML.pl",
+  "answerHints.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.00051,
+  tolType => "absolute",
+);
+
+@cl = (70, 75, 80, 85, 92, 96, 99);
+@zcrit = (1.0364, 1.1503, 1.2816, 1.4395, 1.7507, 2.0537, 2.5758);
+
+@r = NchooseK(scalar(@cl),5);
+
+@qtext = ("The z-critical value for a 95% confidence level is: ");
+@a = (1.960);
+for my $i (0..4) {
+  $lvl = @cl[$r[$i]];
+  $art = ((80 <= $lvl) && ($lvl < 90)) ? "an" : "a";
+  push(@qtext, "The z-critical value for $art $lvl% confidence level is: ");
+  push(@a, @zcrit[$r[$i]]);
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the critical z-score value for each of the following confidence levels. Give each answer to at least three decimal places.  
+* [$qtext[0]][______]{$a[0]}
+* [$qtext[1]][______]{$a[1]}
+* [$qtext[2]][______]{$a[2]}
+* [$qtext[3]][______]{$a[3]}
+* [$qtext[4]][______]{$a[4]}
+
+END_PGML
+######################################
+#  Answers
+
+COMMENT("Hard-coded values with randomized order.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

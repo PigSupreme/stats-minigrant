@@ -1,0 +1,61 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"answerHints.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+$abstol = .0051;
+#Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+
+$df = random(3,9,1);
+$alpha = list_random(.01, .02, .05, .10, .20);
+$alphap = Real(100*$alpha);
+
+# Critical value and P-Value
+$crit = Real(chisqrdistr($df,$alpha))->with(tolType=>'absolute', tolerance=>.00051);
+$chisq = int(100*$crit)/100 - random(1.01,1.99,.02);
+$pvalp = Real(100*chisqrprob($df,$chisq))->with(tolType=>'absolute', tolerance=>.0051);
+
+BEGIN_PGML
+In a [`\chi^2`] distribution with df = [$df]:  
+
+a. [________]{"$pvalp"}% of all values are greater than [`\chi^2 = [$chisq]`]  
+(give this answer to at least two decimal places).
+
+a. [$alphap]% of all values are greater than [________]{"$crit"}  
+(give this answer to at least three decimal places).
+
+END_PGML
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

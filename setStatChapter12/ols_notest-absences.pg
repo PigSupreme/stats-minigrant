@@ -1,0 +1,109 @@
+##DESCRIPTION
+##  Regression Line, No Hypothesis Test
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Simple Linear Regression)
+## DBsection(Hypothesis Test for Correlation)
+## Date(04/23/2020)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(3)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'regression', 'correlation, 'hypothesis testing')
+
+DOCUMENT();
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+#################################################
+#  Set-up
+Context("Numeric");
+$abstol = 0.0051;
+Context()->flags->set(tolerance=>$abstol, tolType=> 'absolute');
+
+$xvar = "Number of Absences";
+$yvar = "Overall Grade";
+
+$n = 9;
+$m_approx = -3.14;
+$b_approx = 93.21;
+for($i=0; $i<$n; $i++) {
+$x[$i] = random(0,6);
+$yi = ($x[$i] + random(-1.49, 1.49, .01))*$m_approx + $b_approx;
+$y[$i] = int(.5+$yi*10)/10
+} 
+for($i=0; $i<$n; $i++) {
+$sum_x += $x[$i];
+$sum_y += $y[$i];
+}
+
+$mean_x = $sum_x/$n;
+$mean_y = $sum_y/$n;
+
+for ($i=0; $i<$n; $i++) {
+$sx_squared += ($x[$i] - $mean_x)*($x[$i] - $mean_x);}
+
+$sx = sqrt($sx_squared/($n-1));
+
+for ($i=0; $i<$n; $i++) {
+$sy_squared += ($y[$i] - $mean_y)*($y[$i] - $mean_y);}
+
+$sy = sqrt($sy_squared/($n-1));
+
+for ($i=0; $i<$n; $i++) {
+$sum_r += (($x[$i] - $mean_x)/$sx)*(($y[$i] - $mean_y)/$sy);}
+
+$r = $sum_r/($n-1);
+
+$b1 = $r*($sy/$sx);
+$b0 = $mean_y - ($b1*$mean_x); 
+$rround = int(.5+$r*1000)/1000;
+
+######################################
+#  Main text
+
+BEGIN_PGML
+A statistics instructor has the follow data relating the number of absences (over the course of one semester) and overall course grade for [$n] randomly-selected students.
+
+[@begintable(13) .
+row($xvar, @x) .
+row($yvar, @y) .
+endtable()
+@]*
+
+Find the linear correlation coefficient for the above sample data. Give your answer to at least four decimal places.  
+r = [________]
+
+Find the least-squares regression line for predicting [$yvar] from [$xvar] (enter the entire right-hand side of the equation, using _x_ as the explanatory variable).  
+[`\hat{y} = `] [______________________]
+
+The predicted mean overall grades among students with no absences is: [__________]
+
+END_PGML
+
+######################################
+#  Answers
+
+$showPartialCorrectAnswers = 1;
+
+$ans_r = Real($r)->with(tolType=>'absolute', tolerance=>.00051);
+ANS($ans_r->cmp());
+$ans_yhat = Formula("$b1*x + $b0")->with(tolType=>'relative', tolerance=>0.01);
+ANS($ans_yhat->cmp());
+$ans_b0 = Real($b0)->with(tolType=>'absolute', tolerance=>.0051);
+ANS($ans_b0->cmp());
+
+######################################
+
+ENDDOCUMENT(); # This should be the last executable line in the problem.
+

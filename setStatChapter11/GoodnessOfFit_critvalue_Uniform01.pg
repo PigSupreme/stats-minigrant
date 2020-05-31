@@ -1,0 +1,193 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2020')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();       
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"scaffold.pl"
+);
+
+TEXT(beginproblem());
+COMMENT("Critical value version.");
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+Context()->flags->set(tolType=>'absolute',tolerance=>.00051);
+
+
+# Number of Categories and Expected Proportions
+$k = 6;
+@eprops = (1/$k, 1/$k, 1/$k, 1/$k, 1/$k, 1/$k);
+
+# Sample Size
+$n = $k*random(21,99);
+
+# Number of Observations in each Category
+$count = 0;
+for (my $i=0; $i<$k-1; $i++) {
+  $obs[$i] = int($n*($eprops[$i]+random(-0.06, 0.06, 0.001)));
+  if($obs[$i]<5) {$obs[$i]=5}
+  $count = $count + $obs[$i];
+  }
+# Last category
+if ($n -$count > 5) {
+  $obs[$k-1] = $n - $count;
+  } else {
+  $obs[$k-1] += random(5,9);
+  }
+$n = $count + $obs[$k-1];
+
+#####################################
+## Adjust observations here if needed
+#####################################
+# This makes the total number of observations a multiple of 10
+# so that expected counts come out nicely.
+$tofill = $k - ($n % $k);
+for (my $i=0; $i<$tofill; $i++) {
+  $obs[$i%$k]++;
+  $n++;
+  }
+#####################################
+
+# Expected Counts and Test Statistic (Chi-Squared)
+$stat = 0;
+@ecounts = ();
+@ecounts_ans = ();
+for (my $i=0; $i<$k; $i++) {
+  $this_e = $n*$eprops[$i];
+  $stat = $stat + (($obs[$i] - $this_e)**2)/$this_e;
+  push(@ecounts,$this_e);
+  #push(@ecounts_ans,ans_rule(5));
+  }
+
+# Significance Level
+$alpha = .10;
+$alphap = 100*$alpha;
+
+# Critical value and P-Value for Goodness-of-Fit
+$crit = chisqrdistr($k-1,$alpha);
+$pval = chisqrprob($k-1,$stat);
+$pvalp = int(.5+10000*$pval)/100;
+
+# Final Conclusions...
+$mc = new_multiple_choice();
+@ans = ("We may conclude (at the $alphap% significance level) that the die is unfair.",
+	"We fail to conclude (at the $alphap significance level) that the die is unfair.");
+@ans_wrong = (
+  "We may conclude (at the $alphap% significance level) that the die is fair."
+);
+
+$tag = ($stat > $crit) ? 0 : 1;
+
+$mc -> qa('Based on the above results:', $ans[$tag]);
+$mc -> extra($ans[1-$tag], @ans_wrong);
+
+# For PGML_SOLUTIONS
+$statround = int(.5+$stat*10000)/10000;
+$pvalround = int(.5+$pval*10000)/100;
+%mc_soln = (
+  reject => "The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is less than the $alphap% significance level, reject the null and conclude that the die is unfair.", 
+  fail => "The Null Hypothesis says that the rolls follow the expected distribution (i.e.,  that the die is fair). Since our P-value of $pvalp% is not less than the $alphap% significance level, there is insufficient evidence that the die is unfair.", 
+);
+
+BEGIN_PGML
+An ordinary [$k]-sided die is "fair" if each of the [$k] sides occurs with equal probability. This can be tested by physically rolling the die a large number of times, and using a Goodness-of-Fit test to see if the observed rolls fit a distribution with all outcomes equally likely.
+
+We will do this using a Goodness-of-Fit test at the [@ $alpha*100 @]% significance level.
+
+END_PGML
+
+Scaffold::Begin();
+
+Section::Begin();
+BEGIN_PGML
+Suppose the die is rolled [$n] times, with each roll independent of the others. If all [$k] numbers are equally likely on any given roll:
+
+For each number from 1 to [$k], what is probability (on any given roll) that the result is that number?  
+[______]{"1/$k"}
+
+For each number from 1 to [$k], what the expected number of times that number is rolled?  
+[______]{Real("$n/$k")}
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Here are the Expected Counts (from above) and the Observed Counts in a series of [$n] independent rolls:
+
+[@ begintable(5) .
+row('Result',(1..$k)) .
+row('Observed Count', @obs) .
+row('Expected Count', @ecounts) .
+endtable()
+@]*
+
+Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
+
+The degrees of freedom for this test statistic is [_______]{$k-1}.
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The critical [`\chi^2`] value for the [$alphap]% significance level is [_______]{$crit}.
+END_PGML
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans));
+Section::End();
+Scaffold::End();
+
+$statround = int(.5+10000*$stat)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1:  
+
+Since each number has the same probability (1/[$k]), the expected count is the total number of rolls multiplied by that probability: [$n] x(1/[$k]).
+---
+#### Part 2:  
+
+Compute the [`\chi^2`] statistic using technology. There are [$k] results/categories/values, thus df = [$k] - 1.
+---
+#### Part 3:  
+
+A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k - 1 @]). If you are using Critical Value tables, a [$alphap]% significance level uses [@ int(.5+$crit*1000)/1000 @].
+---
+#### Part 4:  
+
+[@ $mc_soln{$pval < $alpha ? "reject" : "fail"} @]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+

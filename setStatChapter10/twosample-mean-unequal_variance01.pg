@@ -1,0 +1,336 @@
+## DESCRIPTION
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Independent samples - t')
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'two sample', 'hypothesis', 't score')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGchoicemacros.pl",
+  "PGnumericalmacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "answerHints.pl",
+  "scaffold.pl",
+  "algCh10.pl"
+);
+
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->strings->remove("infinity","inf");
+$abstol = .000051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+# Set option for df here
+$df_method = "EXACT_DF";
+#$df_method = "EXACT_DF_ROUNDED";
+#$df_method = "CONSERVATIVE_DF";
+
+%method_directions = (
+  "EXACT_DF" => "the exact formula for degrees of freedom (Welch's T-test)",
+  "EXACT_DF_ROUNDED" => "exact df rounded down (Minitab?)",
+  "CONSERVATIVE_DF" => "the conservative option 2 for df"
+);
+
+# For testing various alternative df's
+#$n1 = 4;
+#$n2 = 5;
+#$s1 = 0.5;
+#$s2 = 0.6;
+
+# Blue, blue, blue oyster...
+$m = random(0,4);
+$name = ("Nahmin", "Skylar", "Nikolai", "Euniqua", "Bunty")[$m];
+$Pronoun = "She";
+if ($m==2) {$Pronoun = "He";}
+
+# Right-sided test with positive difference
+while($n1 == $n2) {
+  $n1 = random(41,60,1);
+  $n2 = random(41,60,1);
+  }
+$mean1 = random(68,85,.1);
+$mean2 = $mean1 - random(1.3,.1);
+while($s1 == $s2) {
+  $s1 = random(5,8,.01);
+  $s2 = random(5,8,.01);
+  }
+
+$alpha = list_random(0.1, 0.05, 0.02, 0.01);
+$alphaPercent = $alpha * 100;
+
+#####################################################################
+# Pooled t-test; equal variances assumed (for feedback only)
+$df_pooled = $n1 + $n2 - 2;
+$varpooled = (($n1-1)*$s1*$s1 + ($n2-1)*$s2*$s2)/$df_pooled;
+$sdpooled = sqrt($varpooled*((1/$n1)+(1/$n2)));
+$testpooled = ($mean1-$mean2)/$sdpooled;
+$pright_pooled = tprob($df_pooled, $testpooled);
+
+#####################################################################
+# Exact df (Aspin-Welch); equal variances not assumed
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$test = ($mean1-$mean2)/(sqrt($vard));
+$df_true = $vard**2 / ( ($s1**4)/($n1**2)/($n1-1) +  ($s2**4)/($n2**2)/($n2-1) );
+
+# First exponent for Beta integrands; for easy reading below
+$ae = ($df_true/2)-1;
+# Non-regularized incomplete Beta($xlim, $df/2, 1/2)
+$urref = sub {return ($_[0]**$ae)/sqrt(1-$_[0])};  #Integrand
+$xlim = $df_true/($df_true + $test**2); # Upper limit of integration
+$urint = simpson($urref,0,$xlim,steps=>30000); #Def. Integral  
+# Beta($df/2, 1/2) is improper at x=1, so we comptue via
+# the identity Beta(a,1/2) = Beta(a,3/2)*(2a+1)
+$rgref = sub {return ($_[0]**$ae)*sqrt(1-$_[0])};
+$rgint = simpson($rgref,0,1,steps=>30000)*($df_true+1);
+# Right-sided P = (1/2)*Beta($x,$df/2,1/2)/Beta($df/2,1/2)
+$pright_true = $urint/(2*$rgint);
+
+#####################################################################
+# Lazy exact df (Minitab, for example)
+# These use exact df but round down to avoid the Beta integrand
+# We default to Conservative Option 2 if $df_true doesn't exist
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$test = ($mean1-$mean2)/(sqrt($vard));
+$df_mt = ($df_true > 0) ? int($df_true) : min($n1, $n2)-1;
+$pright_mt = tprob($df_mt, $test);
+
+#####################################################################
+# Conservative "Option 2"; df = (smaller sample size) - 1
+$vard = ($s1**2/$n1)+($s2**2/$n2);
+$test = ($mean1-$mean2)/(sqrt($vard));
+$df_cons = min(($n1, $n2)) - 1;
+$pright_cons = tprob($df_cons, $test);
+
+# Pick the correct df above; defaults to conservative option if invalid
+if ($df_method eq "EXACT_DF") {
+  $df = $df_true;
+  $pright = $pright_true;
+} elsif ($df_method eq "EXACT_DF_ROUNDED") {
+  $df = $df_mt;
+  $pright = $pright_mt;
+} else {
+  $df_method = "CONSERVATIVE_DF";
+  $df = $df_cons;
+  $pright = $pright_cons;
+}
+
+# Left- and two-tailed P-values based on choice above
+$pleft = 1 - $pright;
+$ptwo = 2*min($pleft,$pright);
+
+# Use this P-value for the correct answer
+$pval = $ptwo;
+# WebWorK doesn't behave when P is close to zero (??)
+if ($pval < .00005) {$pval = 0};
+
+# For feedback (assuming two-sided test) with positive difference
+$pval_mt = 2*$pright_mt;
+$pval_cons = 2*$pright_cons;
+$pval_true = 2*$pright_true;
+$pval_pooled = 2*$pright_pooled;
+
+$mc0 = new_multiple_choice();
+$mc0->qa("If \(\mu_1\) is the true mean life expectancy in rural towns and \(\mu_2\) is the true mean life expectancy in urban areas, an appropriate alternative hypothesis is:",'\(\mu_1-\mu_2\neq 0\)');
+$mc0->extra("\(\mu_1-\mu_2> 0\)",
+"\(\mu_1-\mu_2< 0\)",
+"\(\mu_1-\mu_2\leq 0\)",
+"\(\mu_1-\mu_2\geq 0\)"
+);
+
+$mc1 = new_multiple_choice();
+$mc1->qa("An appropriate null hypothesis is:","\(\mu_1-\mu_2= 0\)");
+$mc1->extra("\(\mu_1-\mu_2> 0\)",
+"\(\mu_1-\mu_2< 0\)",
+"\(\mu_1-\mu_2\neq 0\)"
+);
+
+@anse = ("The difference in life expectancies is statistically significant.  The data seem to indicate that people living in rural
+communities have a different life expectancy than those in urban communities.",
+"The difference in life expectancies is not statistically significant. There is not sufficient evidence to show that life expectancies are different for rural and urban communities.");
+if ($pval < $alpha) {$tag = 0;} else {$tag = 1;}
+$mc2 = new_multiple_choice();
+$mc2->qa("Using the above results, $name would conclude:",@anse[$tag]);
+$mc2->extra(@anse[1-$tag]);
+
+$mc3 = new_multiple_choice();
+$mc3->qa("What type of test statistic should $name use?","t score");
+$mc3->extra("z score", "\(\chi^2\) statistic", "P-Value");
+######################################
+#  Main text
+ 
+BEGIN_PGML
+[$name] thinks that there is a difference in quality of life between rural and urban living.
+
+[$Pronoun] collects information from obituaries in newspapers from urban and rural areas in Georgia to see if there is a difference in life expectancy. Assume that this data can be treated as independent Simple Random Samples from the respective populations, and use a [$alphaPercent]% significance level.
+
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+BEGIN_PGML
+[@ $mc0->print_q() @]*
+[@ $mc0->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc0->correct_ans() ));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+A sample of [$n1] people from rural towns has a mean life expectancy of [$mean1] years with a sample standard deviation of [$s1] years. A sample of [$n2] people from urban areas has a mean of [$mean2] years with a standard deviation of [$s2] years. Does this provide evidence that people living in rural Georgia communities have a different life expectancy than those in urban communities?
+
+[@ $mc3->print_q() @]*
+[@ $mc3->print_a() @]*  
+
+The value of the test statistic is [_________] (round to four decimal places)
+END_PGML
+ANS(radio_cmp($mc3->correct_ans() ));
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+
+ANS(Real($test)->cmp()->withPostFilter(AnswerHints(
+   $tolcheck=>$tolerr,
+   # Used pooled samples
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $testpooled)) < 10*$abstol
+      } => "Do not use pooled samples (equal population variances) for this problem."
+   )));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Using [@ $method_directions{$df_method} @]:
+
+The P-Value for this sample data is [_______] (round to four decimal places).
+END_PGML
+
+#### Hints for using alternative df
+$err_cons = "You appear to be using df = (smaller sample size) - 1. Use technology to find the exact df.";
+$err_true = "You appear to be using exact df. This problem wants the conservative option.";
+### In some cases; lazy exact df is ok
+if (abs($pval_mt - $pval_true) < $abstol) {
+  $err_mt = $err_cons
+  } else {
+  $err_mt = "You might be using software that rounds the exact df (Minitab, for example). Ask your instructor for help."
+  }
+
+# TODO: Need to check for simultaneous wrong alternative and incorrect df
+ANS(Real($pval)->cmp()->withPostFilter(AnswerHints(
+   $tolcheck=>$tolerr,
+   sub { # Conservative Options 2
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval_cons)) < 10*$abstol
+      } => $err_cons,
+   sub { # Lazy exact df
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval_mt)) < 10*$abstol
+      } => $err_mt,
+   sub { # Exact df
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval_true)) < 10*$abstol
+      } => $err_true,
+   sub { # Pooled df
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval_pooled)) < 10*$abstol
+      } => "You appear to be using pooled df = $df_pooled.",
+   # Wrong Alternative (with correct method)
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (
+        (abs($student*2 -$correct) < (10*$abstol)) ||
+        (abs(2*(1-$student) - $correct) < (10*$abstol))
+        )
+      } => "Are you using the correct Alternative Hypothesis?",
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval*100)) < 201*$abstol
+      } => "Do not convert to percent.",
+   )));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ $mc2->print_q() @]*  
+[@ $mc2->print_a() @]*  
+END_PGML
+ANS(radio_cmp($mc2->correct_ans() ));
+Section::End();
+Scaffold::End();
+
+##############
+### Solutions
+
+$mdiffr = int(.5+($mean1 - $mean2)*1000)/1000;
+$sdr = int(.5+1000000*sqrt($vard))/1000000;
+$statr = int(.5+10000*$test)/10000;
+$dfr = int(.5+$df_true*10000)/10000;
+$pvalr = int(.5+$pval*10000)/10000;
+$truepr = int(.5+$pright_true*10000)/10000;
+$lazypr = int(.5+tprob(int($df_true),$test)*10000)/10000; # Minitab?
+$conspr = int(.5+tprob(min($n1, $n2)-1,$test)*10000)/10000;
+$alphap = 100*$alpha;
+
+BEGIN_PGML_SOLUTION
+It is assumed that you will be using technology to perform these computations. If not....
+
+The difference in sample means is:  
+[``\bar{x}_1-\bar{x}_2 = [$mean1] - [$mean2] = [$mdiffr]``]
+
+The standard error (approximate standard deviation) of the difference in sample means is :  
+[``\sqrt{\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2}} = \sqrt{\frac{[$s1]^2}{[$n1]}+\frac{[$s2]^2}{[$n2]}} = [$sdr]...``]
+
+The test statistic is:  
+[``t = \frac{[$mdiffr]}{[$sdr]} = [$statr]...``]
+
+The one-sided P-value is the proportion of t-scores to the right of t = [@ abs($statr) @]. There are several options to find this, depending on your available technology. Check with your instructor if you are unsure.
+
+---
+### Exact df (Welch's T-test):
+
+With df = [$dfr], the right-sided P-Value is [@ $truepr @] = [@ 100*$truepr @]%.
+
+### "Exact" df with rounding:
+
+Some software will round the exact df to make computations easier (this is reasonable for larger sample sizes, so there might not be a difference). If you happen to be using such software, you'll see df = [@ int($dfr) @] and a right-sided P-value of [$lazypr] = [@ 100*$lazypr @]%.
+
+### Conservative df:
+
+With df = [$df_cons] (smaller sample size, minus 1), the right-sided P-Value is [@ $conspr @] = [@ 100*$conspr @]%.
+
+---
+
+In any case, multiply the one-sided P-value by 2 to get the two-sided P-Value (you can let WeBWorK do the arithmetic directly in the answer blank).
+
+The P-Value (two-sided, [@ $pvalr*100 @]%) is [@ $pval < $alpha ? "less than $alphap%, so we" : "not less than $alphap%, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+COMMENT("Equal variances not assumed; P-Value method with several options.");
+ENDDOCUMENT();

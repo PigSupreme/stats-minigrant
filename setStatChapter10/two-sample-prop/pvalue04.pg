@@ -1,0 +1,320 @@
+##DESCRIPTION
+##  Hypothesis test for two proportions, two-sided, critical value.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Two sample proportion)
+## Date(04/08/2020)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'hypothesis testing', 'proportion', 'two-sample')
+
+DOCUMENT(); 
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->strings->remove("infinity","inf");
+$abstol = .000051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+# Alterntative hypothesis ("left", "two", "right):
+$tails = "two";
+
+# Significance level
+$alpha = list_random(.1, .05, .02, .01);
+$alphap = 100*$alpha;
+
+# Multiple choice text for Null and Alternative
+# SIGN will be replaced in the template by \lt, \neq, and \gt
+$hypo_template = '\(p_1 SIGN p_2\)';
+$nullsign = '=';
+
+# Text for reject and fail to reject; correct answer chosen automatically
+%decision = (
+  reject => 'Yes, because the P-value is less than the given significance level.',
+  fail => 'No, because the P-value is not less than the given significance level.'
+  );
+# Extra incorrect answers for reject/fail
+@decisions_wrong = (
+  'Yes, because the P-value is not less than the given significance level.',
+  'No, because the P-value is less than the given significance level.'
+);
+
+# Sample data (two proportions); each around 85%, not too close
+$n1 = random(810,990,20);
+do {
+  do {
+     $n2 = random(810, 990, 20)
+  } while ($n1 == $n2);
+  $x1 = int(.85*$n1) + random(-7,7,2);
+  $x2 = int(.85*$n1) + random(-7,7,2);
+} while (($x1/$n1 - $x2/$n2) < .015);
+
+# Sample statistics for difference in proportions
+$p1 = $x1/$n1;
+$q1 = 1-$p1;
+$p2 = $x2/$n2;
+$q2 = 1-$p2;
+$p = ($x1+$x2)/($n1+$n2);
+$q = 1-$p;
+$sd = sqrt($p*$q/$n1 + $p*$q/$n2);
+$stat = ($p1-$p2)/$sd;
+# Pooled proportion (for feedback)
+$pbar = $p;
+
+# P-Values
+%pvalhash;
+$pvalhash{right} = uprob($stat);
+$pvalhash{left} = 1 - $pvalhash{right};
+$pvalhash{two} = 2*min($pvalhash{left}, $pvalhash{right});
+$pval = $pvalhash{$tails};
+
+# Critical values
+%crithash;
+$crithash{right} = udistr($alpha);
+$crithash{left} = -$crithash{right};
+$crithash{two} = udistr($alpha/2);
+$cval = $crithash{$tails};
+
+# Feeback for critical region
+$dvar = "z";
+$cvalr = int(.5+$cval*10000)/10000;
+if ($tails eq "left") {$crithash{region} = "$dvar\lt $cvalr"}
+if ($tails eq "right") {$crithash{region} = "$dvar\gt $cvalr"}
+if ($tails eq "two") {$crithash{region} = "\lvert $dvar\rvert\gt $cvalr"}
+
+######################################
+### Reject or fail to reject the Null?
+######################################
+# Use a P-Value if we computed it:
+if ($pval) {
+  $reject = ($pval < $alpha)
+# Otherwise, use the critical value:
+} else {
+  if ($tails eq "left") {$reject = ($stat < $cval)};
+  if ($tails eq "right") {$reject = ($stat > $cval)};
+  if ($tails eq "two") {$reject = (abs($stat) > abs($cval))};
+}
+
+%hypo = (null => ($hypo_template =~ s/SIGN/$nullsign/r));
+$hypo{left}  = ($hypo_template =~ s/SIGN/\lt/r);
+$hypo{two}  = ($hypo_template =~ s/SIGN/\neq/r);
+$hypo{right}  = ($hypo_template =~ s/SIGN/\gt/r);
+
+# Scramble manually here for consistent order in both MC questions
+@hypolist = ($hypo{null}, $hypo{left}, $hypo{right}, $hypo{two})[NchooseK(4,4)];
+
+$mc_null = new_multiple_choice();
+$mc_null->qa('An appropriate Null Hypothesis is:',$hypo{null});
+$mc_null->makeLast(@hypolist);
+
+$mc_alt = new_multiple_choice();
+$mc_alt->qa('An appropriate Alternative Hypothesis is:',$hypo{$tails});
+$mc_alt->makeLast(@hypolist);
+
+$decision_correct = $decision{($reject) ? reject: fail};
+push(@decisions_wrong, $decision{($reject) ? fail : reject});
+$mc_decide = new_multiple_choice();
+$mc_decide->qa('', $decision_correct);
+$mc_decide->extra(@decisions_wrong);
+
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+  
+######################################
+#  Main text
+
+BEGIN_PGML
+Anecdotal evidence from the year 2019 suggests that the percentage of U.S. adults who owned a smartphone differs among "Millenials" (those born between 1980 and 1994, unless some angry person on the Internet claims otherwise) and "Generation Z" (those born 1995 and later). We can evaluate the accuracy of such a statement using a Hypothesis test; we'll use a significance level of [$alphap]%. 
+
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+BEGIN_PGML
+Let [`p_1`] be the proportion of Millenials who own a smartphone, and [`p_2`] be the proportion of Generation Z who own a smartphone. State appropriate Null and Alternative Hypothesis for the test.
+
+[@ $mc_null->print_q() @]*
+[@ $mc_null->print_a() @]*
+
+[@ $mc_alt->print_q() @]*
+[@ $mc_alt->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_null->correct_ans));
+ANS(radio_cmp($mc_alt->correct_ans));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Two indepdent Simple Random Samples produced the following results:
+* *Millenials:* [$x1] of [$n1] sampled owned a smartphone (about [@ int(100*$p1) @]%)
+* *Generation Z:* [$x2] of [$n2] sampled owned a smartphone (about [@ int(100*$p2) @]%)
+
+The difference in sample _proportions_ is [___________________].  
+(Give an exact answer, or round to at least four decimal places. Do not convert to percent).
+
+The pooled sample proportion is [___________________].  
+(Give an exact answer, or round to at least four decimal places. Do not convert to percent).
+
+END_PGML
+
+$sdiff = Real($p1 - $p2);
+ANS($sdiff->cmp()->withPostFilter(AnswerHints(
+   sub {
+      # Wrong direction for samples 1 and 2
+     ($correct, $student, $anshash) = @_;
+     return (abs($student + $sdiff) < 10*$abstol)
+     } => "You seem to have switched samples, or subtracted in the wrong order.",
+  $tolcheck => $tolerr,
+)));
+
+$pbar_ans = Compute("($x1+$x2)/($n1+$n2)");
+ANS($pbar_ans->cmp()->withPostFilter(AnswerHints(
+  $tolcheck => $tolerr,
+)));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Continuing to use the same sample data:
+* *Millenials:* [$x1] of [$n1] sampled owned a smartphone (about [@ int(100*$p1) @]%)
+* *Generation Z:* [$x2] of [$n2] sampled owned a smartphone (about [@ int(100*$p2) @]%)
+
+The standard error of the difference in proportions is [____________] 
+(round to at least four decimal places).
+
+The value of the test statistic is [`z = `] [____________] 
+(round to at least four decimal places).
+END_PGML
+
+ANS(Real($sd)->cmp()->withPostFilter(AnswerHints(
+  $tolcheck => $tolerr
+)));
+
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
+   sub {
+      # Wrong direction for samples 1 and 2
+     ($correct, $student, $anshash) = @_;
+     return (abs($student + $stat) < 10*$abstol)
+     } => "You seem to have switched samples, or subtracted in the wrong order.",
+  $tolcheck => $tolerr,
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The P-Value for the above sample data is: [____________]
+(round to at least four decimal places).
+END_PGML
+
+$pval_ans = Real($pval);
+ANS($pval_ans->cmp()->withPostFilter(AnswerHints(
+   # Wrong Alternative
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (
+        (abs($student*2 -$correct) < (10*$abstol)) ||
+        (abs(2*(1-$student) - $correct) < (10*$abstol))
+        )
+      } => "Are you using the correct Alternative Hypothesis?",
+   sub {
+      ($correct, $student, $hash) = @_;
+      return (abs($student - $pval*100)) < 201*$abstol
+      } => "Do not convert to percent.",
+  $tolcheck => $tolerr
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Is the difference in smartphone ownership between the two samples statistically significant (at the [$alphap]% level)?
+[@ $mc_decide->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_decide->correct_ans));
+
+Section::End();
+
+Scaffold::End();
+######################################
+#  Answers
+
+
+##############
+### Solutions
+
+$p1r = int(.5+100000*$p1)/100000;
+$p2r = int(.5+100000*$p2)/100000;
+$pdiffr = int(.5+($p1 - $p2)*100000)/100000;
+$pbarr = int(.5+100000*$pbar)/100000;
+$sdr = int(.5+1000000*$sd)/1000000;
+$pvalr = int(.5+$pval*100000)/100000;
+$statr = int(.5+10000*$stat)/10000;
+$critr = int(.5+10000*$cval)/10000;
+
+BEGIN_PGML_SOLUTION
+If you're having rounding issues on this problem, consider it a good case study in why technology is applicable for certain things.
+
+The difference in sample proportions is:  
+
+[``\hat{p}_1 - \hat{p}_2 = \frac{[$x1]}{[$n1]} - \frac{[$x2]}{[$n2]} = [$p1r] - [$p2r] = [$pdiffr]``]
+
+The pooled sample proportion is:  
+
+[``\bar{p} = \frac{x_1+x_2}{n_1+n_2} = \frac{[$x1]+[$x2]}{[$n1]+[$n2]} = [$pbarr]``]
+
+Use this to compute the standard error (approximate standard deviation) of the difference in sample proportions:  
+
+[``\sqrt{\bar{p}(1-\bar{p})\left(\frac{1}{n_1}+\frac{1}{n_2}\right)} =[$sdr]...``]
+
+The test statistic is:  
+
+[``z = \frac{[$pdiffr]}{[$sdr]} = [$statr]...``]
+
+### Critical region method
+
+This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% significance level) is [`[$crithash{region}]`]. The test statistic ([`z = [$statr]`]) is [@ $reject ? "in the critical region, so we reject the Null Hypothesis" : "NOT in the critical region, so we fail to reject the Null Hypothesis" @].
+
+---
+### P-Value method
+
+The [$tails]-sided P-value [@ ($pval_instructions) ? "($pval_instructions)" : '' @] is [@ $pvalr @] = [@ 100*$pvalr @]%. This is [@ $reject ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+COMMENT('Step-by-step version, using critical z-value method.');
+ENDDOCUMENT();

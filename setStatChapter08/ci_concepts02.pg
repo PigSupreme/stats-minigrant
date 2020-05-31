@@ -1,0 +1,86 @@
+#DESCRIPTION
+##  Confidence Intervals: Concepts
+##ENDDESCRIPTION
+
+##KEYWORDS('statistics', 'multiple choice', 'concepts', 'confidence interval')
+
+## DBsubject('Statistics')
+## DBchapter('Estimation')
+## DBsection('Confidence Intervals')
+## Level(2)
+## Date('10/05/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('No Text')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGML.pl"
+);
+
+TEXT(  beginproblem() );
+
+##############################################################
+#
+#  Setup
+#
+#
+$n = random(400,900,10);
+$cl = random(91,99,2)."%";
+$xbar = random (100.1,104.9,0.2);
+$moe = random(4.1,9.9,0.2);
+$cil = $mu - $moe;
+$cih = $mu + $moe;
+$scenario_string = "IQ score";
+$art = "an";
+
+# Question text here
+$qtext = "Based on a simple random sample of size $n, a $cl confidence interval for the mean $scenario_string in some large population is reported as \($xbar \pm $moe\). Which of the following is/are correct interpretation(s) of this confidence interval?";
+
+# List correct answer(s) here:
+@correct = (
+"There is a $cl chance that the true mean $scenario_string for the entire population is within $moe points of $xbar.",
+"There is a $cl chance that $xbar is within $moe points of the true mean $scenario_string for the entire population.",
+);
+
+# List wrong answer(s) here
+@wrong = (
+"$cl of all individuals have an $scenario_string within $moe points of $xbar.",
+"$cl of all samples of size $n would have a mean $scenario_string within $moe points of $xbar.",
+"There is a $cl chance that another sample of size $n would have a mean $scenario_string within $moe points of $xbar.",
+"$cl of the $n individuals in this sample have $art $scenario_string that is within $moe points of the population mean."
+);
+
+$mc_holder = new_checkbox_multiple_choice();
+
+$mc_holder->qa("There may be more than one correct answer; you must check all correct answers in order to get credit for this problem.",
+@correct
+);
+$mc_holder->extra(@wrong);
+
+
+#######
+
+BEGIN_PGML
+
+[$qtext]
+
+[@ $mc_holder->print_q() @]*  
+[@ $mc_holder->print_a() @]*
+
+END_PGML
+
+#######
+# All-or-nothing grader
+$showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
+ANS( checkbox_cmp($mc_holder->correct_ans) );
+
+ENDDOCUMENT();

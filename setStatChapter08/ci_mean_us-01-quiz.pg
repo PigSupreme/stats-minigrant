@@ -1,0 +1,80 @@
+##DESCRIPTION
+##  t-confidence interval for a single mean
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Mean')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('One sample mean - t')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+$abstol = .00051;
+Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+$n = random(37,48);
+$mean = random(101.1,299.9,.2);
+$ssd = random(30.01, 49.99,.02);
+
+@cl = (90, 95, 99);
+@zcrit = (1.6449, 1.960, 2.5758);
+$stderr = $ssd/sqrt($n);
+
+for my $i (0..2) {
+  $tcrit = tdistr($n-1, (1-$cl[$i]/100)/2);
+  $tsoln[$i] = $tcrit;
+  @ci_left[$i] = $mean - $tcrit*$stderr;
+  @ci_right[$i] = $mean + $tcrit*$stderr;
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+A large retail store wants to estimate the average amount of time ([`\mu`]) its customers wait in line during checkout. In a simple random sample of [$n] customers, the average wait time was [$mean] seconds. The wait times in the sample had a standard deviation of [$ssd] seconds.
+
+In each question below, give answers to at least three decimal places.
+
+a. Find a [$cl[0]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+b. Find a [$cl[1]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+c. Find a [$cl[2]]% confidence interval for [`\mu`], using the above sample data:  
+[__________] [`<\mu<`] [__________]
+
+END_PGML
+
+######################################
+#  Answers
+
+for my $i (0..2) {
+    ANS(Real($ci_left[$i])->cmp);
+    ANS(Real($ci_right[$i])->cmp);
+}
+
+COMMENT("Quiz version, no feedback.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

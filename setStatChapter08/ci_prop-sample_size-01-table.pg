@@ -1,0 +1,107 @@
+##DESCRIPTION
+##  Planned Sample Size
+##ENDDESRIPTION
+## DBsubject(Statistics)
+## DBchapter(Confidence intervals)
+## DBsection(One sample proportion)
+## Institution()
+## Author()
+## KEYWORDS('statistics', 'Inference', 'one proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+$m = random(0.03, 0.05, 0.01);
+$mp = $m*100;
+
+@level = (80, 90, 95, 98);
+@z = (1.282, 1.645, 1.960, 2.326);
+$choose = random(0,3,1);
+
+# Rounded answer is used only for feedback
+$nraw = round(1000*((0.5*$z[$choose] / $m) ** 2))/1000;
+$upperval = (100-$level[$choose])/2;
+
+$n = int($nraw);
+if ($nraw > $n) {$n = $n + 1;}
+
+######################################
+#  Main text
+
+BEGIN_PGML
+A major credit card company wants to estimate the percentage of its cardholders have chosen the Personal Identification Number (PIN) of 1234 \[which is a very bad idea, since it's easy for someone to guess if your card is lost or stolen\]. Specifically, the company will construct a [$level[$choose]]% confidence interval for the true percentage of its cardholders who use this PIN, using a Simple Random Sample.
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+
+BEGIN_PGML
+What is the critical value for such a confidence interval? Give your answer to exactly four decimal places.  
+[_________]
+END_PGML
+
+$anz = Compute($z[$choose])->with(tolType=>'absolute', tolerance=>'0.00001');
+ANS($anz->cmp->withPostFilter(AnswerHints(
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - int(.5+1000*$correct)/1000) < 0.001 ;
+      } => ["If you are using a table, it is not sufficiently accurate for this problem. If not, check your rounding"],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - $correct) < 0.001 ;
+      } => ["Make sure you are using the correct distribution, and check your rounding."],
+)));
+
+Section::End();
+## --- ##
+Section::Begin();
+
+BEGIN_PGML
+In order that the confidence interval has a margin of error of at most [$mp]%, what is the minimum sample size required?  
+[_________]
+
+END_PGML
+
+$ans = Compute("$n")->with(tolType=>'absolute', tolerance=>'0.0000001');  
+ANS($ans->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return int($student)-$student != 0 ;
+      } => ["Your answer must be a whole number."],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return $student == $correct -1;
+      } => ["Almost correct, but sample size cannot be smaller than $nraw...."]
+)));
+
+Section::End();
+Scaffold::End();
+
+### Solutions ###############################
+$zans = $z[$choose];
+BEGIN_PGML_SOLUTION
+*Part 1:* Use a z-score table to find the [$level[$choose]]% z-critical value: [$zans] (this is the cutoff score for the top [$upperval]%).
+
+*Part 2:* Use the formula for planned sample size, making sure to convert the [$mp]% maximum MoE to decimal form:
+
+[``n\geq\left( \frac{0.5 * \text{(Critical Value)}}{\text{Maximum MoE}}\right)^2=\left(\frac{0.5 * [$zans]}{[@ $mp/100 @]}\right)^2=[$nraw]...``]
+
+The smallest whole number that satisfies this is n = [$n].
+END_PGML_SOLUTION
+
+COMMENT("Uses critical values to three decimals places; table-friendly version.");
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

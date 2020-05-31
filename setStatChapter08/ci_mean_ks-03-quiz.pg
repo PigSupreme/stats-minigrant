@@ -1,0 +1,123 @@
+##DESCRIPTION
+##  z-confidence interval for a single mean
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Mean')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('One sample mean - z')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+
+$type = list_random("compact", "mid-size", "full-size");
+
+# We'll ask for MoE to the nearest whole dollar, so the sample mean
+# must be a whole number to avoid rounding issues in upper/lower CI.
+$mean1 = (18,25,27)[$randi];
+$mean2 = random(100,999,1);
+$mean = 1000*$mean1 + $mean2;
+
+$n = random(50,90,5);
+
+$dev1 = random(2,3,1);
+$dev2 = random(100,999,1);
+$dev = 1000*$dev1 + $dev2;
+
+$choice = random(0,2,1);
+$CLP = (80, 90, 98)[$choice];
+$CL = $CLP/100;
+$z = abs(udistr((1-$CL)/2));
+$article = ("an", "a", "a")[$choice];
+
+$moe = $z * $dev / sqrt($n);
+$moe_ans = int(.5+$moe);
+
+$moe_t = int(.5+tdistr($n-1, (1-$CL)/2)*$dev/sqrt($n));
+
+$mc = new_multiple_choice();
+
+$mc->qa("If prices for all new $type cars sold by this dealership did not follow a Normal Distribution, could we expect the above results to be accurate?","Yes, because the sample size is greater than 30.");
+$mc->extra(
+  "No, because the sample size is greater than 30.",
+  "Yes, because the sample size is less than 100.",
+  "No, because the sample size is less than 100.",
+  "Yes, because the population's standard deviation is known.",
+  "No, because the population's standard deviation is known."
+);
+
+######################################
+#  Main text
+BEGIN_PGML
+In 2018, the prices of new [$type] cars sold by a local dealership followed an approximately Normal distribution with a standard deviation of $[$dev1],[$dev2].
+---
+In a simple random sample of [$n] new [$type] cars sold in 2018 by this dealership, the average sale prices had a mean of $[$mean1],[$mean2].  
+
+a. Using this sample, [$article] [$CLP]% confidence interval for the mean price of new [$type] cars sold by this dealership has a Margin of Error of $[__________] (round to the nearest whole dollar).
+
+a. Using this sample, [$article] [$CLP]% confidence interval for the mean price of new [$type] cars sold by this dealership is $[__________] [`< \mu < `] $[__________]  
+(round each value to the nearest whole dollar)
+
+---
+
+[@ $mc->print_q() @]*  
+[@ $mc->print_a() @]*
+END_PGML
+
+######################################
+#  Answers
+$showPartialCorrectAnswers = 1;
+Context()->flags->set(tolType=>'absolute',tolerance=>.001);
+
+$moe = Real("$moe_ans");
+$moe_tol = abs($moe_ans - $moe_t)/2;  
+$cil = Real("$mean - $moe");
+$ciu = Real("$mean + $moe");
+
+# Student is correct, but didn't round as instructed
+$wholecheck = sub{
+  my ($correct, $student, $ans) = @_;
+  return ($student != round($student)) && abs($student - $correct)<.51;
+  };
+$wholeerr = "Round to the nearest whole dollar.";
+  
+ANS($moe->cmp);
+
+ANS($cil->cmp->withPostFilter(AnswerHints(
+     $wholecheck => $wholeerr
+)));
+
+ANS($ciu->cmp->withPostFilter(AnswerHints(
+     $wholecheck => $wholeerr
+)));
+
+ANS( radio_cmp($mc->correct_ans) );
+
+### Solutions #############################################
+COMMENT("Quiz version; warns only about rounding to nearest whole number.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
