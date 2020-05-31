@@ -101,10 +101,6 @@ ANS($moe_ans->cmp->withPostFilter(AnswerHints(
   $tolcheck=>$tolerr, $percheck=>$pererr
 )));
 
-
-
-ENDDOCUMENT();       # This should be the last executable line in the problem.
-
 ### Solutions ###########################################3
 $zcrit = int(5.+10000*$z)/10000;
 $phata = int(.5+100000*$phat)/100000;
@@ -128,6 +124,6 @@ If you like memorzing formulas; the one used in the computations above is:
 >>[``\hat{p}\pm z_{\alpha/2}\cdot\sqrt{\frac{\hat{p}(1-\hat{p})}{n}}``]<<
 
 END_PGML_SOLUTION
-
+COMMENT("No feedback for common errors, but solution is provided.");
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
