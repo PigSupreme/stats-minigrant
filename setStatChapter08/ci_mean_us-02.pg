@@ -98,7 +98,7 @@ ANS(Real($ans2)->cmp->withPostFilter(AnswerHints(
 
 ### Solutions ###########################################3
 BEGIN_PGML_SOLUTION
-To find the [$cl[0]]% confidence interval:
+To find the [$clperc]% confidence interval:
 
 1. The sample statistic (point estimate) is [$mean].  
 1. Since the population standard deviation [`\sigma`] is unknown, the critical value is a t-score, with df = [$n] - 1. Find it using technology or a table: [$tcrit].  
