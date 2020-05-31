@@ -32,8 +32,6 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
-$showPartialCorrectAnswers = 0;
-
 # Randomize flavour text
 $i = random(0,2);
 $scenario_string = ("age", "weight", "credit card balance")[$i];

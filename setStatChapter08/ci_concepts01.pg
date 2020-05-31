@@ -2,7 +2,7 @@
 ##  Statistics: Introduction
 ##ENDDESCRIPTION
 
-##KEYWORDS('statistics', 'multiple choice', 'concepts', 'GOAT')
+##KEYWORDS('statistics', 'multiple choice', 'concepts')
 
 ## DBsubject('Statistics')
 ## DBchapter('Estimation')
@@ -32,8 +32,6 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
-$showPartialCorrectAnswers = 0;
-
 $n = random(40,90,10);
 $cl = random(80,89,1)."%";
 $art = "an";

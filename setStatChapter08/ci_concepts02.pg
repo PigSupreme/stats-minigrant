@@ -32,8 +32,6 @@ TEXT(  beginproblem() );
 #  Setup
 #
 #
-$showPartialCorrectAnswers = 0;
-
 $n = random(400,900,10);
 $cl = random(91,99,2)."%";
 $xbar = random (100.1,104.9,0.2);
