@@ -1,0 +1,85 @@
+##DESCRIPTION
+##  Critical Values for t-confidence intervals
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Student t')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('Concepts')
+## Date('3/27/2018')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->flags->set(
+  tolerance => 0.00051,
+  tolType => "absolute");
+
+@nlist = ();
+$n = (random(31,39,1));
+$cl = random(82,88,2);
+
+@tcrit = (); # Correct Answers
+@twrongdf = (); # For feedback if students use df = sample size
+@zwrong = (); # Feedback for using z
+for my $i (0..4) {
+  push(@nlist, $n);
+  push(@tcrit, tdistr($n-1, (1-$cl/100)/2));
+  push(@twrongdf, tdistr($n, (1-$cl/100)/2));
+  push(@zwrong, udistr((1-$cl/100)/2));
+  $n = $n + random(10,19,1);
+  }
+
+@r = (0,1,2,3,4);
+
+@qtext = ();
+@a = ();
+for my $i (0..4) {
+  @qtext[$i] = "The t-critical value for a(n) $cl% confidence interval with sample size @nlist[$i] is: ";
+  @a[$i] = @tcrit[$i];
+  }
+
+######################################
+#  Main text
+
+BEGIN_PGML
+Find the following critical t-scores used in a(n) [$cl]% confidence interval for a population mean when the population's standard deviation ([`\sigma`]) is unknown. Give each answer to at least three decimal places.
+* [$qtext[0]][______]
+* [$qtext[1]][______]
+* [$qtext[2]][______]
+* [$qtext[3]][______]
+* [$qtext[4]][______]
+
+END_PGML
+######################################
+#  Answers
+
+$abstol = Context()->flags->get("tolerance");
+for my $i (0..4) {
+  $ans[$i] = Compute($a[$i])->with(tolerance=>$abstol, tolType=> 'absolute');
+  ANS($ans[$i]->cmp);
+  }
+
+COMMENT("Quiz version; no feedback.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
