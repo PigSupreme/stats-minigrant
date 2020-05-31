@@ -1,0 +1,90 @@
+##DESCRIPTION
+##  t-confidence interval for a single mean
+##ENDDESCRIPTION
+
+##KEYWORDS('Confidence Interval', 'Mean')
+
+## DBsubject('Statistics')
+## DBchapter('Confidence Intervals')
+## DBsection('One sample mean - t')
+## Date('10/5/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "PGstatisticsmacros.pl",
+  "answerHints.pl",
+  "PGML.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->flags->set(tolType=>'absolute',tolerance=>.0000000051);
+
+$n = random(11,15);
+$mean = random(2.51,2.99,2);
+$s = random(0.15,0.95,.1);
+$se = $s/sqrt($n);
+
+#@squest = ();
+
+$clperc = list_random(96, 98, 99);
+$cl = $clperc/100;
+$tcrit = tdistr($n-1, (1-$cl)/2);
+$zcrit = udistr((1-$cl)/2);
+$moer = 100*$tcrit*$se;
+$moe = int(.5+100*$tcrit*$se)/100;
+$moe_z = int(.5+100*$zcrit*$se)/100;
+$ans1 = int(.5+100*($mean-$tcrit*$se))/100;
+$ans2 = int(.5+100*($mean+$tcrit*$se))/100;
+
+######################################
+#  Main text
+
+BEGIN_PGML
+In a simple random sample of [$n] gas stations in the metropolitan area, the price per gallon of regular gasoline had a mean of $[$mean] and a (sample) standard deviation of $[$s]. Use this sample data to find a [$clperc]% confidence interval for the mean price per gallon of regular gasoline for all gas stations the metropolitan area.
+
+Round all answers to the nearest cent (two decimal places).
+
+a. The margin of error for this confidence interval is: $[______]
+
+b. The confidence interval is $[_______] [` < \mu < `] $[_______]
+
+END_PGML
+
+######################################
+#  Answers
+
+$centcheck = sub{
+  my ($correct, $student, $ans) = @_;
+  return (100*$student != round(100*$student)) && abs($student - $correct)<.0051;
+  };  
+
+ANS(Real($moe)->cmp->withPostFilter(AnswerHints(
+  $centcheck => "Round to the nearest cent.",
+)));
+
+ANS(Real($ans1)->cmp->withPostFilter(AnswerHints(
+  $centcheck => ["Round to the nearest cent."]
+  )));
+
+ANS(Real($ans2)->cmp->withPostFilter(AnswerHints(
+  $centcheck => ["Round to the nearest cent."]
+  )));
+
+COMMENT("Quiz version, no feedback.");
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.

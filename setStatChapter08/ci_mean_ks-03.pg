@@ -104,7 +104,17 @@ $wholecheck = sub{
   };
 $wholeerr = "Round to the nearest whole dollar.";
   
-ANS($moe->cmp);
+ANS($moe->cmp->withPostFilter(AnswerHints(
+  $wholecheck => $wholeerr,
+  sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $moe_ans) < $moe_tol;
+  } => "You are close. Check your rounding, and make sure you are using the correct distribution.",
+  sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $moe_t) < $moe_tol;
+  } => ["Are you using the correct distribution (z or t)?"]
+)));
 
 ANS($cil->cmp->withPostFilter(AnswerHints(
      $wholecheck => $wholeerr
@@ -117,7 +127,24 @@ ANS($ciu->cmp->withPostFilter(AnswerHints(
 ANS( radio_cmp($mc->correct_ans) );
 
 ### Solutions #############################################
-COMMENT("Quiz version; warns only about rounding to nearest whole number.");
+BEGIN_PGML_SOLUTION
+
+1. The sample statistic (point estimate) is [$mean].  
+1. Since the population standard deviation [`\sigma=[$dev]`] is known, the critical value is a z-score. Find it using technology or a table: [$z].  
+1. For all samples of size [$n], the standard deviation of [`\bar{x}`] is given by  
+[``\frac{\sigma}{\sqrt{n}}= [$dev]/\text{sqrt}([$n]) = [@ $dev/sqrt($n) @];``]  
+leave this unrounded if possible.  
+1. The Margin of Error (some call this EBM) is the product of the last two values. You can compute it directly as:  
+[``[$z] * [$dev]/\text{sqrt}([$n])=[$moe]``] (rounded).  
+1. The lower limit of the confidence interval is:  
+[``[$mean]  - [$moe]``].  
+1. The upper limit of the confidence interval is:  
+[``[$mean]  + [$moe]``].  
+
+If you like memorzing formulas; the one used in the computations above is:
+>>[``\bar{x}\pm z_{\alpha/2}\cdot\frac{\sigma}{\sqrt{n}}``]<<
+
+END_PGML_SOLUTION
 
 ENDDOCUMENT();       # This should be the last executable line in the problem.
 
