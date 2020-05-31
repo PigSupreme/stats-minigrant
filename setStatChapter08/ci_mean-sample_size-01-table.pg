@@ -1,0 +1,116 @@
+##DESCRIPTION
+##  Planned Sample Size
+##ENDDESRIPTION
+## DBsubject('Statistics')
+## DBchapter('Confidence intervals')
+## DBsection('One sample mean')
+## Institution('Clayton State University')
+## Author('Michael J. Dancs')
+## KEYWORDS('statistics', 'inference', 'mean')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+@name = ("Nahmin", "Liang", "Skylar", "Euniqua", "Bunty");
+$person = random(0,4,1);
+$pronoun = "her";
+if ($person==1) {$pronoun = "his";}
+
+$moe = list_random(1.5,2,2.5,3);
+$sdpop = 15;
+@level = (80, 90, 95, 98);
+@z = (1.282, 1.645, 1.960, 2.326);
+$choose = random(0,3,1);
+
+# Rounding here is for display purposes only
+$nraw = round(1000*(($sdpop*$z[$choose] / $moe) ** 2))/1000;
+$n = int($nraw);
+if ($nraw > $n) {$n = $n + 1;}
+
+# Used in feedback; some students round before squaring
+$n_early_sqrt = round(($sdpop*$z[$choose])/$moe);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+[$name[$person]] plans to find a(n) [$level[$choose]]% confidence interval 
+for the average IQ of students at [$pronoun] school, assuming the standard deviation of IQ scores for students at the school is [$sdpop] points.
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+What is the critical value for such a confidence interval? Give your answer to exactly four decimal places.  
+[__________]
+END_PGML
+
+$showPartialCorrectAnswers = 1;
+
+$anz = Compute($z[$choose])->with(tolType=>'absolute', tolerance=>'0.000051');
+ANS($anz->cmp->withPostFilter(AnswerHints(
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - int(.5+1000*$correct)/1000) < 0.001 ;
+      } => ["If you are using a table, it is not sufficiently accurate for this problem. If not, check your rounding."],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return abs($student - $correct) < 0.001 ;
+      } => ["Make sure you are using the correct distribution, and check your rounding."],
+)));
+
+Section::End();
+Section::Begin();
+BEGIN_PGML
+If [$name[$person]] uses a Simple Random Sample, what is the minimum sample size required to get a margin of error of at most [$moe] points?  
+[___]{width=>20}
+END_PGML
+
+$ans = Compute("$n")->with(tolType=>'absolute', tolerance=>'0.0000001');  
+ANS($ans->cmp->withPostFilter(AnswerHints( 
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return int($student)-$student != 0 ;
+      } => ["Your answer must be a whole number."],
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return $student == $correct -1;
+      } => ["Almost correct, but sample size cannot be smaller than $nraw...."],
+  # Early rounding (before squaring)
+  sub {
+      my ($correct,$student,$anshash) = @_;
+      return (sqrt($student) - $n_early_sqrt) < 2;
+      } => ["Do not round until the end of the calculation."],
+
+)));
+
+Section::End();
+Scaffold::End();
+
+## Solutions ###############################
+$zans = $z[$choose];
+BEGIN_PGML_SOLUTION
+*Part 1:* Use technology to find the [$level[$choose]]% z-critical value: [$zans]. Most tables will give this to three decimals places only, which may not be sufficiently accurate for the next part!
+
+*Part 2:* Use the formula for planned sample size:
+
+[``n\geq\left( \frac{\sigma * \text{(Critical Value)}}{\text{Maximum MoE}}\right)^2=\left(\frac{[$sdpop] * [$zans]}{[$moe]}\right)^2=[$nraw]...``]
+
+The smallest whole number that satisfies this is n = [$n].
+END_PGML_SOLUTION
+
+COMMENT("Uses critical z-values to three decimal places, for old school tables.");
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.
