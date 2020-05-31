@@ -1,0 +1,284 @@
+##DESCRIPTION
+##  Chi-Squared Test for Independence/Homogeneity
+##ENDDESCRIPTION
+
+## DBsubject('')
+## DBchapter('')
+## DBsection('')
+## Date('')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for independence)
+## KEYWORDS("Hypothesis Test", "Chi-Squared", "Homogeneity" )
+
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+);
+
+TEXT(beginproblem());
+COMMENT("Uses critical chi-squared values.");
+
+######################################
+#  Setup
+Context("Numeric");
+$abstol = 0.0051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+$alpha = .05;
+$alphap = 100*$alpha;
+# Choose critvalue or pvalue here
+$version = "critvalue";
+
+# Non-marginal Column and Row Labels
+@cfac = ('A','B','C','D','F'); # Columns
+@rfac = ('Dr. Kairphree','Dr. Phroogul'); # Rows
+
+# Row 1 Data (including marginal total)
+$a1 = random(10,20);
+$b1 = random($a1, 30);
+$c1 = $b1 + random(11,19);
+$d1 = random($a1, $b1);
+$f1 = random(7,$a1);
+$samp[0] = [$a1, $b1, $c1, $d1, $f1, $a1+$b1+$c1+$d1+$f1];
+
+# Row 2 Data (including marginal total)
+$a2 = int($a1/2);
+$b2 = $b1 - random(4,9);
+$c2 = $c1 + 2 + int($a1/2);
+$d2 = $d1 + random(2,3) + int($a1/2);
+$f2 = $f1 + random(7,9);
+$samp[1] = [$a2, $b2, $c2, $d2, $f2, $a2+$b2+$c2+$d2+$f2];
+
+# Number of rows and columns
+$ncol = scalar(@cfac);
+$nrow = scalar(@rfac);
+
+# Compute marginal totals for each Column
+foreach my $j (0..$ncol) {
+  $samp[$nrow][$j] = 0;
+  foreach my $i (0..$nrow-1) {
+    $samp[$nrow][$j] = $samp[$nrow][$j] + $samp[$i][$j]
+  }
+}
+$total = $samp[$nrow][$ncol];
+
+### Part 1 ###
+# Compute Chi-Squared Test Stat and expected counts
+# With tables for nice feedback
+$chisqstat = 0;
+$expected_counts_ok = 1;
+$exsamp = [[]]; # Expected counts for each cell (for solutions)
+$cssamp = [[]]; # Chi-Squared contribution for each cell (for solutions)
+foreach my $i (0..($nrow-1)) {
+  foreach my $j (0..($ncol-1)) {
+    my $exp = $samp[$i][$ncol]*$samp[$nrow][$j]/$total;
+    if ($exp < 5) {$expected_counts_ok = 0}
+    my $chisqcon = (($samp[$i][$j] - $exp)**2)/$exp;
+    $chisqstat += $chisqcon;
+    $exsamp[$i][$j] = int(.5 + 100*$exp)/100;
+    $cssamp[$i][$j] = int(.5 + 10000*$chisqcon)/10000;
+  }
+}
+
+# For solutions
+$exp_table = begintable(5) .
+row(" Expected ", @cfac ) .
+row($rfac[0], @{@exsamp[0]}) .
+row($rfac[1], @{@exsamp[1]}) .
+endtable();
+
+### Part 2 ###
+# The actual P-Value and critical value
+$df = 4;
+$pval = chisqrprob($df, $chisqstat);
+$cval = chisqrdistr($df, $alpha);
+
+# Those using critical value tables can still find a range of P-Values
+# Make sure these are in increasing order for multiple choice to work!
+@alphap_list = (1, 2, 5, 10);
+
+$mc = new_multiple_choice();
+
+## Set-up the chosen version
+if ($version eq "pvalue") {
+  # Approximate P-Value version
+  $numcats = scalar(@alphap_list)-1;
+  $mc_tag = 0;
+  @mc_choices = ("less than $alphap_list[0]%.");
+  foreach my $i (0..$numcats) {
+    push(@mc_choices, "between $alphap_list[$i]% and $alphap_list[$i+1]%.");
+    if (100*$pval > $alphap_list[$i]) {$mc_tag = $i + 1}
+    }
+  $mc_choices[$numcats+1] = "greater than $alphap_list[$numcats]%.";
+  $mc->qa('The P-Value for this sample is:', $mc_choices[$mc_tag]);
+  $mc->makeLast(@mc_choices);
+
+} elsif ($version eq "critvalue") {
+  # Critical Value version
+  @mc_choices = ();
+  foreach my $aperc (@alphap_list) {
+    $this_cval = int(.5+chisqrdistr($df, $aperc/100)*1000)/1000;
+    push(@mc_choices, $this_cval);
+    if ($alphap == $aperc) {$mc_ans = $this_cval}
+  }
+  $mc->qa("The $alphap% critical value is:", $mc_ans);
+  $mc->makeLast(@mc_choices);
+}
+
+
+### Part 3 ###
+$mcc = new_multiple_choice();
+
+%mcc_autoright = (
+  reject => "There is a statistically significant difference between the grade distributions of $rfac[0] and $rfac[1].",
+  fail => "The difference between the grade distributions of $rfac[0] and $rfac[1] is not statistically significant."
+);
+@cchoices = (
+   $mcc_autoright{reject}, $mcc_autoright{fail}, # These are required
+  "In the overall student population, the grade distributions of $rfac[0] and $rfac[1] are most likely identical.",
+  "In the overall student population, the grade distributions of $rfac[1] is more strict than that of $rfac[0].",
+  "In the overall student population, the grade distributions of $rfac[0] and $rfac[1] are definitely identical.",
+);
+$mcc->qa(
+  "Using a(n) $alphap% significance level, we can conclude that...",
+  $mcc_autoright{($pval < $alpha) ? "reject" : "fail"}
+);
+
+# Scramble choices manually because of how we populated cchoices above.
+$k = scalar(@cchoices);
+$mcc->makeLast(@cchoices[NchooseK($k,$k)]);
+
+# For Solutions/Feedback
+if ($version eq "pvalue") {
+%mc_soln = (
+  reject => "Since the P-Value is less than the $alphap% significance level, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the grade distributions.",
+  fail => "Since the P-Value is not less than the $alphap% significance level, we fail to reject the Null Hypothesis, and conclude that the differences between  grade distributions is not statisically significant."
+);
+} elsif ($version eq "critvalue") {
+%mc_soln = (
+  reject => "Since the \(\chi^2\) statistic is greater than the $alphap% critical value, we reject the Null Hypothesis, and conclude that there is a statistically significant difference between the grade distributions.",
+  fail => "Since the \(\chi^2\) statistic is not greater than the $alphap% critical value, we fail to reject the Null Hypothesis, and conclude that the differences between grade distributions is not statisically significant."
+);
+}
+
+
+######################################
+#  Main text
+BEGIN_PGML
+[$rfac[0]] and [$rfac[1]] both teach an introductory statistics course, but students belive that [$rfac[1]] is more harsh when assigning final letter grades.  
+
+A simple random sample of [$total] students from both instructors produced the following data:
+
+[@ begintable(5) .
+row(" ", @cfac, "TOTAL" ) .
+row($rfac[0], @{@samp[0]}) .
+row($rfac[1], @{@samp[1]}) .
+row("TOTAL", @{@samp[2]} ) .
+endtable() @]*
+
+END_PGML
+
+Scaffold::Begin();
+
+Section::Begin();
+BEGIN_PGML
+Compute the test statistic for the above sample data under the Null Hypothesis that the grade distribution (in the overall popuation) is the same for both instructors. Give your answer to at least two decimal places.
+
+[`\chi^2 =`] [___________].
+
+END_PGML
+
+ANS(Real("$chisqstat")->cmp->withPostFilter(AnswerHints(
+     sub {
+         my ($correct,$student,$anshash) = @_;
+         return abs($student-$correct) < 20*$abstol;
+         } => ["Your answer is close. Check your computations, and try rounding to more decimal places."]
+)));
+
+Section::End();
+Section::Begin();
+BEGIN_PGML
+The degrees of freedom for this test statistic is [________]{"($nrow-1)*($ncol-1)"}.
+
+[@ $mc->print_q() @]*
+[@ $mc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc->correct_ans()));
+Section::End();
+Section::Begin();
+BEGIN_PGML
+[@ $mcc->print_q() @]*
+[@ $mcc->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mcc->correct_ans()));
+
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solutions
+
+$chisqstatr = int(.5 + 10000*$chisqstat)/10000;
+
+BEGIN_PGML_SOLUTION
+#### Part 1
+
+You should probably be using technology, but here are the expected counts for each cell in the table:
+
+[$exp_table]*
+
+[@ $expected_counts_ok
+  ? "Each expected count is 5 or more, so it is reasonable to conduct the test."
+  : "Note that at least one expected count is less than 5, so the test may  be inaccurate."
+@]
+
+---
+
+The [`\chi^2`] contributions for each cell are [`\frac{(\text{Observed Count } - \text{ Expected Count})^2}{\text{Expected Count}}`], shown below:
+
+[@ begintable(5) .
+row('\(\chi^2\) Contribution ', @cfac ) .
+row($rfac[0], @{@cssamp[0]}) .
+row($rfac[1], @{@cssamp[1]}) .
+endtable()
+@]*
+
+Add these to get the value of the test statistic: [`\chi^2 = [$chisqstatr]`]
+
+### Part 2
+
+There are [$nrow] possible values of the row factor (instructor) and [$ncol] possible values of the column factor (grade), so df = ([$nrow]-1)x([$ncol]-1) = [$df].
+
+The Chi-Squared test of independence/homogeneity is always right-sided. Use technology to compute [`P(\chi^2\geq[$chisqstatr]) = [@ int(.5+$pval*10000)/100 @]%`], or find the critical [`\chi^2`] value ([$cval]) from a table.
+
+### Part 3
+
+[@ $mc_soln{($pval < $alpha) ? "reject" : "fail"} @]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

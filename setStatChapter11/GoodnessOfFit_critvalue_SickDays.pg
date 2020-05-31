@@ -5,7 +5,7 @@
 ## DBsubject('Statistics')
 ## DBchapter('Hypothesis tests')
 ## DBsection('Chi-squared test for goodness of fit')
-## Date('4/7/2019')
+## Date('4/7/2020')
 ## Author('Michael J. Dancs')
 ## Institution('Clayton State University')
 ## TitleText1('')
@@ -31,6 +31,7 @@ loadMacros(
 );
 
 TEXT(beginproblem());
+COMMENT("Critical Value version.");
 $showPartialCorrectAnswers = 1;
 
 Context('Numeric');
@@ -40,9 +41,11 @@ Context()->flags->set(tolType=>'absolute',tolerance=>.00051);
 $n = random(400,500,5);
 
 # Number of Categories and Expected Proportions
-$k = 5;
-@eprops = (.025, .135, .68, .135, .025);
-foreach my $i (0..4) { $epercs[$i] = 100*$eprops[$i] }
+$catname = "Grade";
+@catlabels = ($catname, "Sun", "Mon", "Tue", "Wed", "Thr", "Fri", "Sat");
+@eprops = (.23, .12, .10, .10, .10, .12, .23);
+$k = scalar(@eprops);
+foreach my $i (0..$k-1) { $epercs[$i] = 100*$eprops[$i] }
 
 # Number of Observations in each Category
 $count = 0;
@@ -84,6 +87,7 @@ for (my $i=0; $i<$k; $i++) {
 
 # Confidence Level
 $alpha = .05;
+$alphap = 100*$alpha;
 
 # Critical value and P-Value for Goodness-of-Fit
 $crit = chisqrdistr($k-1,$alpha);
@@ -91,29 +95,31 @@ $pval = chisqrprob($k-1,$stat);
 
 # Final Conclusions...
 $mc = new_multiple_choice();
-@ans = ('We can reject the claim that the actual grade distribution fits the suggested distribution.',
-	'It is not unreasonable to assume the actual grade distribution fits the suggested distribution.');
-
-if ($stat > $crit) { $tag = 0; } else { $tag = 1; }
+@ans = ('We can reject the claim that sick days follow the the given distribution.',
+	'The distribution of sick days in the sample appears to be consistent with the given distribution.');
+$tag = ($stat > $crit) ? 0 : 1;
 
 $mc -> qa('Based on the above results:', $ans[$tag]);
 $mc -> extra($ans[1-$tag]);
 
-BEGIN_PGML
-Some instructors (but not the author of this problem!) "grade on the bell curve" when assigning final letter grades. This means that a certain percentage of students are expected to receive each grade, and these percentages are consistent with a Normal Distribution. A suggested distribution might look like this:
-END_PGML
-BEGIN_TEXT
-$PAR
-\{begintable(5)\}
-\{row('Grade','A', 'B', 'C', 'D', 'F')\}
-\{row('Expected Percent', @epercs)\}
-\{endtable()\}$BR
-END_TEXT
+# For PGML_SOLUTIONS
+$statround = int(.5+$stat*10000)/10000;
+$pvalround = int(.5+$pval*10000)/100;
+%mc_soln = (
+  reject => "The Null Hypothesis says that the sample data come from the expected distribution. Since our P-Value ($pvalround%) is less than than the $alphap% significance level, we reject this claim. The sample data provide sufficient evidence that sick days do not follow the given distribution.",
+  fail => "The Null Hypothesis says that the sample come from the expected distribution. Since our P-Value ($pvalround%) is not less than than the $alphap% significance level, the sample data are consistent with the given distribution (but are not guaranteed to follow it).", 
+);
 
 BEGIN_PGML
-so that the top [@ $eprops[0]*100 @]% of students would receive an A, the next [@ $eprops[1]*100 @]% would receive a B, and so forth. A common criticism of this system is that even if all students perform well, some will still receive a letter grade of D or F.
+If a company is open seven days each week, are employees more likely to call in sick on or near the weekends? If so, we might expect the Day of the Week for sick days to follow a distribution such as:
 
-We can test whether an actual set of grades follows the suggested distribution, regardless of what system is used for grading. We will do this using a Goodness-of-Fit test at the [@ $alpha*100 @]% significance level.
+[@ begintable(5) .
+row(@catlabels) .
+row('Expected Percent', @epercs) .
+endtable()
+@]*
+
+We can evaluate this assumption using a Goodness-of-Fit test at the [@ $alpha*100 @]% significance level.
 
 END_PGML
 
@@ -123,17 +129,14 @@ Section::Begin();
 BEGIN_PGML
 Suppose we have actual grades for a set of [$n] students. Assuming this is a Simple Random Sample from a large population, find the Expected Count (number of students) for each letter grade.
 
-END_PGML
+[@ begintable(5) .
+row(@catlabels) .
+row('Expected Percent', @epercs) .
+row('Expected Count', @ecounts_ans) .
+endtable()
+@]*
 
-BEGIN_TEXT
-$PAR
-\{begintable(5)\}
-\{row('Grade','A', 'B', 'C', 'D', 'F')\}
-\{row('Expected Percent', @epercs)\}
-\{row('Expected Count', @ecounts_ans)\}
-\{endtable()\}$BR
-$PAR
-END_TEXT
+END_PGML
 foreach my $i (0..$k-1) {
   ANS(Real("$ecounts[$i]")->cmp);
   }
@@ -143,16 +146,16 @@ END_PGML
 Section::End();
 
 Section::Begin();
-BEGIN_TEXT
-Here are the Expected Counts (from above) and the Observed Counts (in a Simple Random Sample of $n students):$BR
-$PAR
-\{begintable(5)\}
-\{row('Grade','A', 'B', 'C', 'D', 'F')\}
-\{row('Observed Count', @obs)\}
-\{row('Expected Count', @ecounts)\}
-\{endtable()\}$BR
-END_TEXT
 BEGIN_PGML
+Here are the Expected Counts (from above) and the Observed Counts (in a Simple Random Sample of [$n] students):
+
+[@ begintable(5) .
+row(@catlabels) .
+row('Expected Count', @ecounts) .
+row('Observed Count', @obs) .
+endtable()
+@]*
+
 Using the above data, the value of the test statistic is [`\chi^2`] = [_______]{$stat}.
 
 The degrees of freedom for this test statistic is [_______]{$k-1}.
@@ -161,7 +164,7 @@ Section::End();
 
 Section::Begin();
 BEGIN_PGML
-The P-Value for this sample is [_______]{$pval} (do not convert to percent).
+The critical [`\chi^2`] value for the [$alphap]% significance level is [_______]{$crit}.
 END_PGML
 Section::End();
 
@@ -176,5 +179,27 @@ ANS(radio_cmp($mc->correct_ans));
 Section::End();
 Scaffold::End();
 
-ENDDOCUMENT();       # This should be the last executable line in the problem.
+$statround = int(.5+10000*$stat)/10000;
 
+BEGIN_PGML_SOLUTION
+#### Part 1:  
+
+Convert each expected percent to decimal, and multiply by the total sample size ([$n]). WeBWorK can handle the arithmetic automatically; for example you can enter [$eprops[0]]\*[$n] as the Expected Count for a [$catlabels[0]] of [$catlabels[1]].
+
+Remember that Expected Counts are not necessarily whole numbers!
+---
+#### Part 2:  
+
+Compute the [`\chi^2`] statistic using technology. There are [$k] results/categories/values, thus df = [$k] - 1.
+---
+#### Part 3:  
+
+A Goodness-of-Fit test is always right-sided. Compute [`P(\chi^2)\geq [$statround]`] using technology (with df = [@ $k -1 @]). If you are using Critical Value tables, a [$alphap]% significance level uses [@ int(.5+$crit*1000)/1000 @].
+---
+#### Part 4:  
+
+[@ $mc_soln{$stat > $crit ? "reject" : "fail"} @]
+
+END_PGML_SOLUTION
+
+ENDDOCUMENT();

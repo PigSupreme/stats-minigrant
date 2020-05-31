@@ -79,7 +79,7 @@ $kr = random(4,5);
 $kc = $kr + random(1,3);
 $n = random(101,199);
 $mc->qa(
-  "A Test for Independence, with $kr rows, $kc columns, and a sample size of $n.",
+  "A test for independent factors, with $kr rows, $kc columns, and a sample size of $n.",
   "Chi-Squared with df = ".($kr-1)*($kc-1)."."
 );
 $mc->extra(

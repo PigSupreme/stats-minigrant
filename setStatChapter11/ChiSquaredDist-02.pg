@@ -39,7 +39,7 @@ Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
 
 
 $df = random(3,9,1);
-$alpha = list_random(.01, .02, .05, .10);
+$alpha = list_random(.01, .02, .03, .06, .10);
 $alphap = 100*$alpha;
 
 # Critical value and P-Value

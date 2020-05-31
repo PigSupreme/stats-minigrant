@@ -1,0 +1,78 @@
+## DESCRIPTION
+##   Chi-Squared Goodness-of-Fit
+## ENDDESCRIPTION
+
+## DBsubject('Statistics')
+## DBchapter('Hypothesis tests')
+## DBsection('Chi-squared test for goodness of fit')
+## Date('4/7/2019')
+## Author('Michael J. Dancs')
+## Institution('Clayton State University')
+## TitleText1('')
+## EditionText1('')
+## AuthorText1('')
+## Section1('')
+## Problem1('')
+
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Chi-squared test for goodness of fit)
+##KEYWORDS('GOAT')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"PGML.pl",
+"answerHints.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+
+Context('Numeric');
+$abstol = .00051;
+Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
+
+
+$df = random(3,9,1);
+$alpha = .05;
+$alphap = 100*$alpha;
+
+# Critical value and P-Value
+$crit = chisqrdistr($df,$alpha);
+$chisq = int(100*$crit)/100 + random(1.01,1.99,.02);
+$pvalp = 100*chisqrprob($df,$chisq);
+
+BEGIN_PGML
+In a [`\chi^2`] distribution with df = [$df]:  
+
+a. [$alphap]% of all values are greater than [________]{"$crit"}  
+(give this answer to at least three decimal places).
+
+a. [________]% of all values are greater than [`\chi^2 = [$chisq]`]  
+(give this answer to at least two decimal places).
+
+END_PGML
+
+$pvalp_ans = Real("$pvalp")->with(toltype=>'absolute', tolerance => 10*$abstol);
+ANS($pvalp_ans->cmp->withPostFilter(AnswerHints(
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs(0.01*$correct-$student) <= $abstol;
+       } => ["Please convert your answer to percent.", score => 0],
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs((100-$correct)-$student) <= $abstol;
+       } => ["You've computed the percentage less than $chisq.", score => 0],
+    sub{
+        my ($correct,$student,$ans) = @_;
+        return abs($correct-$student) <= 200*$abstol;
+       } => ["Close! Try keeping more accuracy in your calculation.", score => 0]
+)));
+
+ENDDOCUMENT();       # This should be the last executable line in the problem.
+
