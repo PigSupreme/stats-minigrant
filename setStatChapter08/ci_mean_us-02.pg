@@ -33,7 +33,7 @@ TEXT(beginproblem());
 #  Setup
 Context("Numeric");
 $showPartialCorrectAnswers = 1;
-$abstol = .0000000051;
+$abstol = .0051;
 Context()->flags->set(tolType=>'absolute',tolerance=>$abstol);
 
 $n = random(11,15);
