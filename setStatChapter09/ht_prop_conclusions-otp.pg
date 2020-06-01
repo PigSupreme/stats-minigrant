@@ -21,7 +21,8 @@ loadMacros(
   "PGstandard.pl",
   "MathObjects.pl",
   "PGchoicemacros.pl",
-  "PGML.pl"
+  "PGML.pl",
+  "scaffold.pl"
   );
 
 TEXT(beginproblem());
@@ -47,7 +48,10 @@ $p = random(0.005,0.15,0.001);
 $pperc = 100*$p;
 if ($p<.05) {$inda = 1}
 if ($p<.10) {$indb = 1}
-@yn = ("No","Yes");
+@yn = ("No","Yes");     #(Fail to Reject H0, Reject H0)
+@pvsalpha = ("not less","less");
+@rejectfail = ("fail to reject", "reject");
+@suff = ("insufficient", "sufficient");
 
 $mc0 = new_multiple_choice();
 $mc0->qa("The Null Hypothesis for this test is:","\(p = $perc\)%");
@@ -67,9 +71,14 @@ $mcb->qa("At a 10% level of significance, does the sample provide sufficient evi
 $mcb->extra("$yn[1-$indb]");
 $mcb->makeLast("No");
 
+$showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
+
 ######################################
 #  Main text
 
+Scaffold::Begin();
+Section::Begin();
 BEGIN_PGML
 [$name] was told that [$perc]% of the employees at [$poss] company live Outside The Perimeter, but [$pronoun] suspects the true percentage is [$dtext] than this and plans to conduct a hypothesis test. Let _p_ be the true percentage of employees who live Outside The Perimeter.
 
@@ -78,6 +87,12 @@ BEGIN_PGML
 
 (b) [@ $mc1->print_q() @]*
 [@ $mc1->print_a() @]*
+END_PGML
+ANS(radio_cmp($mc0->correct_ans() ));
+ANS(radio_cmp($mc1->correct_ans() ));
+Section::End();
+Section::Begin();
+BEGIN_PGML
 
 From a simple random sample of [$n] employees, [$name] calculates a _P_-value of [$pperc]%.
 
@@ -88,15 +103,22 @@ From a simple random sample of [$n] employees, [$name] calculates a _P_-value of
 [@ $mcb->print_a() @]*
 
 END_PGML
-
-######################################
-#  Answers
-
-$showPartialCorrectAnswers = 0;
-
-ANS(radio_cmp($mc0->correct_ans() ));
-ANS(radio_cmp($mc1->correct_ans() ));
 ANS(radio_cmp($mca->correct_ans() ));
 ANS(radio_cmp($mcb->correct_ans() ));
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solution
+BEGIN_PGML_SOLUTION
+(a) The Null Hypothesis must contain the possibility that the true percentage is equal to some given value ([$perc]% in this case).
+
+(b) The Alternative  Hypothesis cannot contain the possibility that the true percentage is equal to [$perc]%. Since the true percentage is suspected to be less than the given value, use a left-sided alternative.
+
+(c) Since the P-Value is [$pvsalpha[$inda]] than 5%, [$rejectfail[$inda]] the Null Hypothesis at this significance level. The sample provides [$suff[$inda]] evidence that [$name]'s claim (the Alternative Hypothesis) is correct.
+
+(d) Since the P-Value is [$pvsalpha[$indb]] than 10%, [$rejectfail[$indb]] the Null Hypothesis at this significance level. The sample provides [$suff[$indb]] evidence that [$name]'s claim (the Alternative Hypothesis) is correct.
+END_PGML_SOLUTION
+
 
 ENDDOCUMENT();        # This should be the last executable line in the problem.
