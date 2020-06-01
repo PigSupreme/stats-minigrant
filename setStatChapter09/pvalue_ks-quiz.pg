@@ -31,7 +31,7 @@ $zscore = random(2.01, 2.99, 0.02) * list_random(-1,1);
 #  Main text
 
 BEGIN_PGML
-In a hypothesis test of a population proportion, sample data gives a test statistic of [` z = [$zscore] `]. In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
+In a hypothesis test of a population mean with known population standard deviation, sample data gives a test statistic of [$zscore]. In each case below, find the P-Value for the test, giving your answers to at least three decimal places.
 
 a. With a left-sided alternative hypothesis, the P-Value for this sample is [_______________].
 
