@@ -30,8 +30,10 @@ loadMacros(
 );
 
 TEXT(beginproblem());
-$showPartialCorrectAnswers = 1;
 
+######################################
+#  Setup
+$showPartialCorrectAnswers = 0;
 Context("Numeric");
 
 $mu = 6;
