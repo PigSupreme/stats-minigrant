@@ -14,7 +14,7 @@
 ## Section1()
 ## Problem1()
 ## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-Value')
-##ENDDESCRIPTION
+
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
@@ -92,8 +92,8 @@ Scaffold::Begin(
       is_open  => "first_incorrect"
     );
 Section::Begin("Part 1: Stating Hypotheses");
-
 ##########################
+
 BEGIN_PGML
 
 a. [@ $mc00 ->print_q() @]*
@@ -125,16 +125,7 @@ sub mycheck {
   my ($correct, $student, $ansHash) = @_;
   return ($student == $correct) || ($student == $tstatround);
 }
-ANS($ans_stat->cmp->withPostFilter(AnswerHints(
-sub{
-     my ($correct,$student,$ans)=@_;
-     return abs($student - $correct) <= .01;
-} => ["Close! Check your computations/rounding."],
-sub{
-     my ($correct,$student,$ans)=@_;
-     return abs($student + $correct) <= .01;
-} => ["Have you switched the hypothesized value with the sample value?"]
-)));
+ANS($ans_stat->cmp);
 
 #MC checker
 ANS(radio_cmp($mc1->correct_ans));
@@ -152,26 +143,11 @@ $ans_pval = Real($pval)->with(tolType=>'absolute', tolerance=>$pvaltol);
 
 # For catching various common errors
 ANS($ans_pval->cmp(tolType=>'absolute',tolerance=>$abstol)->withPostFilter(AnswerHints(
-## Used z instead of t
-sub{
-  my ($correct, $student, $ansHash) = @_;
-  return (($correct > 0) && (abs($student - $pvalz) < $pvaltol));
-} => ["Are use using the correct type of test (Z versus T)?"],
 ## Gave answer in percent
 sub{
   my ($correct, $student, $ansHash) = @_;
   return (($correct > 0) && (abs($student - 100*$correct) < (100*$abstol)));
 } => ["Do not convert to percent!"],
-## Rounding errors
-sub{
-     my ($correct,$student,$ans)=@_;
-     return abs($student - $correct) <= .01;
-} => ["Check your compuations/rounding, or try using $tstatround for the test statistic."],
-## Wrong direction/alternaritve
-sub{
-     my ($correct,$student,$ans)=@_;
-     return (abs($student - (1-$correct)) <= .01) || (abs($student - 2*$correct) <=.01);
-} => ["Check that you are using the correct direction for the Alternative Hypothesis and the P-Value."],
 )));
 
 Section::End();
@@ -192,40 +168,5 @@ Scaffold::End();
 #  Solutions
 $stderr_round = int(.5 + $stderr*1000)/1000;
 
-BEGIN_PGML_SOLUTION
-Note that you can (and should) use technology to check your results.
-
-*Part 1:*  
-
-The intended population consists of all bulbs made by the company, not just those in the sample. The Null Hypothesis must contain the possibility that the population mean is equal to [$mu] hours.
-
----
-*Part 2:*  
-
-The standard error of [`\bar{x}`] is [`[$sigma]/\sqrt{[$n]}`] = [$stderr_round]...  
-
-Keep this value to at least three decimal places, or you may get a rounding error when computing the test statistic.
-
-Assuming the Null Hypothesis is true, the values of [`\bar{x}`] (for all samples of size [$n]) have a mean of [$mu]. We do not know the population's standard deviation, so we must use a Student-T distribution with df = [$df].
-
-Compute the t-score as usual (like a z-score, but use Standard Error in the denominator):  
-
-[``t=\frac{[$xbar] - [$mu]}{[$stderr_round]} = [$tstatround]``]...
-
-If you're using a formula (ask yourself why), it's:
-
-[``t=\frac{\bar{x}-\mu_0}{s/\sqrt{n}}``]
-
----
-*Part 3:*
-
-The Alternative Hypothesis is right-sided. Use a Student-T distribution with df = [$df] to find the proportion with [`t > [$tstatround]`].
-
----
-*Part 4:*
-
-In percentage form, the P-value of [$pvalperc]% [$mc4_soln]
-END_PGML_SOLUTION
-
-COMMENT('Use a Student-T distribution to compute the exact P-value');
+COMMENT('Quiz version; minimal feedback.');
 ENDDOCUMENT();       # This should be the last executable line in the problem.
