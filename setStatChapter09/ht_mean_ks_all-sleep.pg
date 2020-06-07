@@ -4,7 +4,7 @@
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
 ## DBsection(One sample mean - z)
-## Date(04/08/2018)
+## Date(04/08/2020)
 ## Institution(Clayton State University)
 ## Author(Michael J. Dancs)
 ## Level(2)
@@ -31,27 +31,38 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
-$showPartialCorrectAnswers = 0;
 Context("Numeric");
 $abstol = 0.00051;
-$n = random(31, 40, 1);
-$mu = (12, 16, 24)[random(0,2,1)];
-$x = $mu - random(0.15, 0.23, 0.01);
-$sigma = random(0.09, 0.13, 0.01);
+
+$n = random(31,47,2);
+$mu = list_random(5.5, 6, 7, 8);
+$sigma = random(0.25, 0.79, .02);
+$zconst = random(-2.51, -1.51, .02);
+$xconst = $mu + $sigma*$zconst/sqrt($n);
+$x = int(.5+$xconst*100)/100;
+
 
 $mc0 = new_multiple_choice();
-$mc0->qa("Which of the following are appropriate null and alternative hypotheses for this scenario?", "\(H_0: \mu=$mu\) versus \(H_A: \mu<$mu\)");
-$mc0->extra(
-    "\(H_0: \mu<$mu\) versus \(H_A: \mu=$mu\)",
-    "\(H_0: \mu=$mu\) versus \(H_A: \mu\leq $mu\)",
-    "\(H_0: \mu=$mu\) versus \(H_A: \mu>$mu\)",
-    "\(H_0: \mu\leq $mu\) versus \(H_A: \mu<$mu\)"
-    );
+$mc0->qa("If `\mu` is the actual mean hours of sleep per night (among all college students), state appropriate hypotheses for this test.","Null: `\mu=` $mu; Alternative: `\mu>` $mu");
+$mc0->extra("Null: `\mu>` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu <` $mu",
+"Null: `\mu>` $mu; Alternative: `\mu\leq` $mu",
+"Null: `\mu<` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu<` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu\ne` $mu");
 
-$mc1 = new_multiple_choice();
-$mc1->qa("What type of test statistic must be used for this hypothesis test?", "A z-score");
-$mc1->extra("A t-score","An s-score","A q-score");
-$mc1->makeLast("none of the above");
+$mc = new_multiple_choice();
+@ans = (
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is insufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is at least $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is exactly $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is not equal to $mu hours.",
+);
+if ($pval < $alpha) {$tag = 0;} else {$tag = 1;}
+$mc -> qa("Based on this sample data and using a $alphap% significance level:", $ans[$tag]);
+$mc -> extra($ans[1-$tag],$ans[2],$ans[3]);
 
 $teststat = ($x - $mu)/$sigma*sqrt($n);
 $sdp_round = int(.5+100000*$sigma/sqrt($n))/100000;
@@ -71,15 +82,13 @@ if ($pleft<0.05) {$inda=1}
 push(@wrong,$yn[1-$inda]);
 
 $mc4 = new_multiple_choice();
-$mc4->qa("Does this sample, with a P-value of $pvalperc%, provide sufficient evidence (at the 5% significance level) that the mean fluid volume for this production run is less than $mu fluid ounces?",$yn[$inda]);
+$mc4->qa("Does this sample, with a P-value of $pvalperc%, provide sufficient evidence (at the 5% significance level) that the mean among all college students in more than $mu hours per night?",$yn[$inda]);
 $mc4->extra(@wrong);
 
 ######################################
 #  Main text
 BEGIN_PGML
-Canned beverages are sold by volume, so a "[$mu]-oz" can is expected to contain [$mu] fluid ounces of the beverage. In reality, not every can contains exactly this amount.
-
-Beverage companies might be subject to fines and/or lawsuits if their cans contain less beverage than advertised. Although it is impractical to test every can, a hypothesis test can used to determine if the mean volume of beverage is less than [$mu]-oz.
+A recent study claims that college students, on average, sleep an average of [$mu] hours or less per night. You suspect that the average is more than this, and plan to conduct a hypothesis test. Assume that among all college students, the amount of sleep per night has a standard deviation of [$sigma] hours.
 
 END_PGML
 
@@ -88,8 +97,8 @@ Section::Begin("Part 1: Stating Hypotheses");
 ##########################
 BEGIN_PGML
 
-[@$mc0->print_q() @]*
-[@$mc0->print_a() @]*
+[@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
 
 END_PGML
 
@@ -100,16 +109,10 @@ Section::End();
 Section::Begin("Part 2: Test Statistic");
 
 BEGIN_PGML
-In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$x]`] oz.  Assume this sample comes from a large production run of cans where the fluid volume has a known standard deviation of [`\sigma = [$sigma]`] oz.
+A simple random sample of [$n] college students has [`\overline{x}=[$x]`] hours per night.
 
-a. [@$mc1->print_q() @]*
-[@$mc1->print_a() @]*
-
-a. The value of the test statistic for this sample is [_______] (round to at least three decimal places).
+The value of the test statistic for this sample is [_______] (round to at least three decimal places).
 END_PGML
-
-# Multiple choice question
-ANS(radio_cmp($mc1->correct_ans() ));
 
 # Test statistic checker
 $ans_stat = Real($teststat)->with(tolType=>'absolute', tolerance=>$abstol);
@@ -179,6 +182,11 @@ Scaffold::End();
 #  Solutions
 BEGIN_PGML_SOLUTION
 Note that you can (and should) use technology to check your results.
+
+*Part 1:*
+
+The Null Hypothesis must always contain the possibility that the parameter in question is equal to some given number. The Altenrative Hypothesis cannot include this possibility.
+
 
 *Part 2:* 
 

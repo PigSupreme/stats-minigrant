@@ -1,0 +1,190 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - t)
+## Date(10/27/2019)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-Value')
+
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+$abstol = 0.00051;
+Context("Numeric");
+
+$mu = list_random(60, 90, 120);
+$n = random(31, 47, 2);
+$df = $n - 1;
+$s = random(int($mu/4), int($mu/3));   # Actually, this is sigma
+# This guarantees a P-value above 50%
+$xbar = $mu + int($s*random(0.51, 1.49, 0.02)/sqrt($n));
+
+$conf = 95;
+$alpha = 1-0.01*$conf;
+$alphap = 100 - $conf;
+
+$stderr = $s/sqrt($n);
+$tstat = ($xbar-$mu)/($s/sqrt($n));
+$tstatround = int(.5+10000*$tstat)/10000;
+$pval = 1 - uprob($tstat);  # Left-sided
+$pvalround = int(.5+100000*$pval)/100000;
+$pvalperc = 100*$pvalround;
+
+$setup = "A statistics instructor claims that a particular homework assignment will take an average of $mu minutes to complete (not including time needed to review material prior to starting the assignment). A student believes it will take less than $mu minutes to complete the assignment, and waits until the day that assigmnent is due before starting it.  
+
+We can evalutate whether the student made a wise decision by conducting a Hypothesis Test for the average time it takes to complete the assignment, using a simple random sample of $n students.
+
+Let [`\mu`] be the true average completion time for the assignment.
+
+";
+
+$mc00 = new_multiple_choice();
+$mc00->qa("The instructor is claiming that:","\(\mu = $mu\); this is the Null Hypothesis.");
+$mc00->extra(
+"\(\mu > $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Null Hypothesis.",
+"\(\mu \leq $mu\); this is the Null Hypothesis."
+);
+
+$mc0 = new_multiple_choice();
+$mc0->qa("The student is claiming that:","\(\mu < $mu\); this is the Alternative Hypothesis.");
+$mc0->extra(
+"\(\mu > $mu\); this is the Alternative Hypothesis.",
+"\(\mu < $mu\); this is the Null Hypothesis.",
+"\(\mu = $mu\); this is the Null Hypothesis.",
+"\(\mu \leq $mu\); this is the Alternative Hypothesis."
+);
+
+$mc1 = new_multiple_choice();
+$mc1->qa("The distribution of the test statistic is:", "Student t, with df = $df");
+$mc1->extra("Student t, with df = $n.","Standard Normal z.","Normal, with Mean = $mu and StdDev = $s.");
+$mc1->makeLast("None of the above.");
+
+$mc4 = new_multiple_choice();
+$mc4 -> qa("From a purely statistical point of view, would you suggest starting the assignment less than $mu minutes before the deadline?", "No. This sample does not suggest that the average completion time is less than $mu minutes.");
+$mc4 -> extra(
+"No. This sample suggests that the average completion time will be $mu minutes or more.",
+"No. This sample suggests that the average completion time will be more than $mu minutes.",
+"Yes. This sample suggests that the average completion time will be less than $mu minutes.",
+"Yes. Although sample does not suggest that the average completion time is less than $mu minutes, it is likely than an individual student could complete the assignment in a significantly shorter amount of time."
+);
+$mc4_soln = "Regardless what of significance level we use (you can assume 5%), the P-Value of $pvalperc% is larger. There is insufficient evidence to support the student's claim (or perhaps desperate hope) that \(\mu < $mu\).";
+
+
+######################################
+#  Main text
+BEGIN_PGML
+[$setup]**
+
+END_PGML
+
+##########################
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "first_incorrect"
+    );
+Section::Begin("Part 1: Stating Hypotheses");
+##########################
+
+BEGIN_PGML
+
+a. [@ $mc00 ->print_q() @]*
+[@ $mc00 ->print_a() @]*
+
+a. [@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc00->correct_ans));
+ANS(radio_cmp($mc0->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 2: Test Statistic");
+
+BEGIN_PGML
+a. For the [$n] students in the sample, completion times on this assignment had a mean of [$xbar] minutes and a standard deviation of [$s] minutes. The value of the test statistic for this sample is [_______] (give to at least three decimal places).
+
+a. [@$mc1->print_q() @]*
+[@$mc1->print_a() @]*
+
+END_PGML
+
+# Test statistic checker
+$ans_stat = Real($tstat)->with(tolType=>'absolute', tolerance=>$abstol);
+sub mycheck {
+  my ($correct, $student, $ansHash) = @_;
+  return ($student == $correct) || ($student == $tstatround);
+}
+ANS($ans_stat->cmp);
+
+#MC checker
+ANS(radio_cmp($mc1->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 3: P-Value");
+
+BEGIN_PGML
+The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
+END_PGML
+
+# P-Value checker
+$ans_pval = Real($pval)->with(tolType=>'absolute', tolerance=>$abstol);
+
+# For catching various common errors
+ANS($ans_pval->cmp(tolType=>'absolute',tolerance=>$abstol)->withPostFilter(AnswerHints(
+## Gave answer in percent
+sub{
+  my ($correct, $student, $ansHash) = @_;
+  return (($correct > 0) && (abs($student - 100*$correct) < (100*$abstol)));
+} => ["Do not convert to percent!"],
+)));
+
+Section::End();
+##########################
+Section::Begin("Part 4: Final Conclusions");
+
+BEGIN_PGML
+[@ $mc4 ->print_q() @]*  
+[@ $mc4 ->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc4->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solutions
+$stderr_round = int(.5 + $stderr*1000)/1000;
+BEGIN_PGML_SOLUTION
+Note that you can (and should) use technology to check your results.
+
+*Part 1:*  
+
+COMMENT('Quiz version; limited feedback.');
+ENDDOCUMENT();       # This should be the last executable line in the problem.

@@ -31,8 +31,8 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
-$showPartialCorrectAnswers = 0;
 Context("Numeric");
+
 $abstol = 0.00051;
 $n = random(31, 40, 1);
 $mu = (12, 16, 24)[random(0,2,1)];
@@ -54,7 +54,9 @@ $mc1->extra("A t-score","An s-score","A q-score");
 $mc1->makeLast("none of the above");
 
 $teststat = ($x - $mu)/$sigma*sqrt($n);
-$teststat_r3 = int(.5+1000*$teststat)/1000;
+$sdp_round = int(.5+100000*$sigma/sqrt($n))/100000;
+$teststat_r1 = int(-.5+100000*($x-$mu)/$sdp_round)/100000;
+$teststat_r3 = int(-.5+100000*$teststat)/100000;
 $pleft = Real(1 - uprob($teststat));
 $pleft_r3 = Real(1 - uprob($teststat_r3));
 $pvalperc = 100 * $pleft_r3;
@@ -74,18 +76,17 @@ $mc4->extra(@wrong);
 
 ######################################
 #  Main text
+BEGIN_PGML
+Canned beverages are sold by volume, so a "[$mu]-oz" can is expected to contain [$mu] fluid ounces of the beverage. In reality, not every can contains exactly this amount.
+
+Beverage companies might be subject to fines and/or lawsuits if their cans contain less beverage than advertised. Although it is impractical to test every can, a hypothesis test can used to determine if the mean volume of beverage is less than [$mu]-oz.
+
+END_PGML
 
 Scaffold::Begin();
 Section::Begin("Part 1: Stating Hypotheses");
 ##########################
 BEGIN_PGML
-### DELETE THIS PROBLEM
-* Superceded by problem 13.
-
-
-Canned beverages are sold by volume, so a [$mu]-oz can is expected to contain [$mu] fluid ounces of the beverage. In reality, not every can contains exactly this amount.
-
-Beverage companies might be subject to fines and/or lawsuits if their cans contain less beverage than advertised. Although it is impractical to test every can, a hypothesis test can used to determine if the mean volume of beverage is less than [$mu]-oz.
 
 [@$mc0->print_q() @]*
 [@$mc0->print_a() @]*
@@ -99,7 +100,7 @@ Section::End();
 Section::Begin("Part 2: Test Statistic");
 
 BEGIN_PGML
-In a Simple Random Sample of [$n] cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$x]`]-oz.  Assume this sample comes from a large production run of cans where the fluid volume has a known standard deviation of [`\sigma = [$sigma]`].
+In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$x]`] oz.  Assume this sample comes from a large production run of cans where the fluid volume has a known standard deviation of [`\sigma = [$sigma]`] oz.
 
 a. [@$mc1->print_q() @]*
 [@$mc1->print_a() @]*
@@ -112,7 +113,12 @@ ANS(radio_cmp($mc1->correct_ans() ));
 
 # Test statistic checker
 $ans_stat = Real($teststat)->with(tolType=>'absolute', tolerance=>$abstol);
-ANS($ans_stat->cmp->withPostFilter(AnswerHints(
+sub mycheckt {
+  my ($correct, $student, $ansHash) = @_;
+  Value->Error("Do not convert to percent!") if $student == $correct*100;
+  return ($student == $correct) || ($student == $teststat_r3) || ($student ==  $teststat_r1);
+}
+ANS($ans_stat->cmp(checker=>~~&mycheckt)->withPostFilter(AnswerHints(
 sub{
      my ($correct,$student,$ans)=@_;
      return abs($student - $correct) <= .01;
@@ -136,8 +142,8 @@ END_PGML
 $ans_pval = Real($pleft)->with(tolType=>'absolute', tolerance=>$abstol);
 sub mycheck {
   my ($correct, $student, $ansHash) = @_;
-  Value->Error("Do not convert to percent!") if $student == $correct*100;
-  return ($student == $correct) || ($student = $pleft_r3);
+  Value->Error("Do not convert to percent!") if ( $correct > 0 && $student == $correct*100);
+  return ($student == $correct) || ($student == $pleft_r3);
 }
 
 # For catching various common errors
@@ -168,6 +174,40 @@ ANS(radio_cmp($mc4->correct_ans() ));
 
 Section::End();
 Scaffold::End();
+
+######################################
+#  Solutions
+BEGIN_PGML_SOLUTION
+Note that you can (and should) use technology to check your results.
+
+*Part 1:*
+
+The Null Hypothesis must always contain the possibility that the parameter in question is equal to some given number. The Altenrative Hypothesis cannot include this possibility.
+
+
+*Part 2:* 
+
+The standard deviation of [`\bar{x}`] for all samples of size [$n] is [`[$sigma]/\sqrt{[$n]}`] = [$sdp_round]...  
+
+Keep this value to at least five decimal places, or you may get a rounding error when computing the test statistic.
+
+Assuming the Null Hypothesis is true, the sample mean of [$x] comes from a Normal distribution with mean = [$mu] and StdDev = [$sdp_round]. 
+
+Convert to a z-score as usual:  
+
+[``z=\frac{[$x] - [$mu]}{[$sdp_round]} = [$teststat_r1]``]...
+
+---
+*Part 3:*
+
+The Alternative Hypothesis is left-sided. Use the Standard Normal distribution to find the proportion with [`z < [$teststat_r1]`].
+
+---
+*Part 4:*
+
+In percentage form, the P-value of [@ int(.5+$pleft*10000)/100 @]% is less than the 5% significance level, so reject the Null Hypothesis. 
+END_PGML_SOLUTION
+
 
 COMMENT("Gives feedback for errors commonly made by students.");
 ENDDOCUMENT();

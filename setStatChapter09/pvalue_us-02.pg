@@ -36,6 +36,10 @@ $pright = Real(tprob($df, $tscore))->with(tolType=>'absolute', tolerance=>$absto
 $pright_wdf = tprob($n, $tscore); #Use wrong df
 $pright_wdf1 = tprob($n+1, $tscore); #Use wrong df
 
+$pleft = Real(1-$pright)->with(tolType=>'absolute', tolerance=>$abstol);
+$pleft_wdf = 1 - $pright_wdf;
+$pleft_wdf1 = 1 - $pright_wdf1;
+
 $ptwo = Real(2*$pright)->with(tolType=>'absolute', tolerance=>2*$abstol);
 $ptwo_wdf = 2*$pright_wdf;
 $ptwo_wdf1 = 2*$pright_wdf1;
@@ -46,6 +50,8 @@ $ptwo_wdf1 = 2*$pright_wdf1;
 BEGIN_PGML
 In a hypothesis test of a population mean, a Simple Random Sample of size [$n] has a test statistic of [`t = [$tscore]`].
 
+a. With a left-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
+
 a. With a right-sided alternative hypothesis, the _P_-Value for this sample is [_____] (round to at least four decimal places).
 
 a. With a two-sided alternative hypothesis, the _P_-Value for this sample is.
@@ -54,6 +60,22 @@ a. With a two-sided alternative hypothesis, the _P_-Value for this sample is.
 END_PGML
 ######################################
 #  Answers
+
+$ans_pleft = Real($pleft)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_pleft->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - (1 - $correct)) <= $abstol;
+} => ["Check the direction of your P-Value."],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return (abs($student - $pleft_wdf) <= 10*$abstol) || (abs($student - $pleft_wdf1) <= 10*$abstol);
+} => ["Are you using the correct df?"],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Close! Check your computations/rounding."]
+)));
 
 $ans_pright = Real($pright)->with(tolType=>'absolute', tolerance=>$abstol);
 ANS($ans_pright->cmp->withPostFilter(AnswerHints(
@@ -91,6 +113,9 @@ sub{
 ### Solutions
 BEGIN_PGML_SOLUTION
 When using Student t scores for a single population mean, use df = n - 1.
+
+a. The left-sided P-Value ([$ans_pleft]) is the proportion/area to the left of [`t = [$tscore]`]. Make sure you are using df = [$df].
+
 
 a. The right-sided P-Value ([$ans_pright]) is the proportion/area to the right of [`t = [$tscore]`]. Make sure you are using df = [$df].
 

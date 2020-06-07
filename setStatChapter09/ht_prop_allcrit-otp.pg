@@ -1,0 +1,257 @@
+##DESCRIPTION
+##  Hypothesis testing:  One proportion
+##ENDDESRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample proportion)
+## Institution(Clayton State Univeristy)
+## Author(Michael J. Dancs)
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'inference', 'one proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+
+Context("Numeric");
+Context()->strings->remove("infinity","inf");
+$abstol = .00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+$m = random(0,3,1); # M is for mindworms!
+$name = ("Nwabudike", "Deirdre", "Corazon", "Miriam")[$m];
+$pronoun = ($m == 0) ? "he" : "she";
+$poss = ($m == 0)? "his" : "her";
+$n = random(11,29,1);
+$perc = random(21.1,39.9,.2);
+
+# Alterntative hypothesis ("left", "two", "right):
+$tails = list_random("left", "right");
+$dir = ($tails eq "left") ? "less" : "greater";
+$wrongdir = ($tails eq "left") ? "greater" : "less";
+
+# Multiple choice text for Null and Alternative
+# SIGN will be replaced in the template by \lt, \neq, and \gt
+$hypo_template = "\(p SIGN $perc\%\)";
+$nullsign = '=';
+
+# Significance level
+$alpha = list_random(.1, .05, .02, .01);
+$alphap = 100*$alpha;
+
+###
+# Text for reject and fail to reject; correct answer chosen automatically
+%decision = (
+  qtext => "At the $alphap% significance level, is $name's suspicion correct?",
+  reject => "Yes, the test statistic for this sample is $dir than the critical value",
+  fail => "No, the test statistic for this sample is not $dir than the critical value"
+  );
+# Extra incorrect answers for reject/fail
+@decisions_wrong = (
+  "Yes, the test statistic for this sample is $wrongdir than the critical value",
+  "No, the test statistic for this sample is not $wrongdir than the critical value"
+  );  
+
+### Hypotheses and sample data (single proportion)
+$p0 = $perc/100;
+$q0 = 1 - $p0;
+$n = random(110,200, 10);
+
+# Generate a sample with abs(z) between 0.5 and 2.5
+$zgen = random(0.51, 2.49, .02) * (($tails eq "left") ? -1 : 1);
+$x = $n*$p0 + $zgen*sqrt($p0*(1-$p0)*$n);
+$x = int($x);
+
+### Sample statistics for single proportion
+$phat = $x/$n;
+$qhat = 1-$phat;
+$sd = sqrt($p0*$q0/$n);
+$stat = ($phat-$p0)/$sd;
+
+# Test stat with sample stats (for feedback)
+$stderr = sqrt($phat*(1-$phat)/$n);
+$stat_wrong = ($phat - $p0)/$stderr;
+
+# P-Values
+%pvalhash;
+$pvalhash{right} = uprob($stat);
+$pvalhash{left} = 1 - $pvalhash{right};
+$pvalhash{two} = 2*min($pvalhash{left}, $pvalhash{right});
+$pval = $pvalhash{$tails};
+
+# Critical values
+%crithash;
+$crithash{right} = udistr($alpha);
+$crithash{left} = -$crithash{right};
+$crithash{two} = udistr($alpha/2);
+$cval = $crithash{$tails};
+
+# Feeback for critical region
+$dvar = "z";
+$cvalr = int(.5+$cval*10000)/10000;
+if ($tails eq "left") {$crithash{region} = "$dvar\lt $cvalr"}
+if ($tails eq "right") {$crithash{region} = "$dvar\gt $cvalr"}
+if ($tails eq "two") {$crithash{region} = "\lvert $dvar\rvert\gt $cvalr"}
+
+######################################
+### Reject or fail to reject the Null?
+######################################
+# Use a P-Value if we computed it:
+if ($pval) {
+  $reject = ($pval < $alpha)
+# Otherwise, use the critical value:
+} else {
+  if ($tails eq "left") {$reject = ($stat < $cval)};
+  if ($tails eq "right") {$reject = ($stat > $cval)};
+  if ($tails eq "two") {$reject = (abs($stat) > abs($cval))};
+}
+
+%hypo = (null => ($hypo_template =~ s/SIGN/$nullsign/r));
+$hypo{left}  = ($hypo_template =~ s/SIGN/\lt/r);
+$hypo{two}  = ($hypo_template =~ s/SIGN/\neq/r);
+$hypo{right}  = ($hypo_template =~ s/SIGN/\gt/r);
+
+# Scramble manually here for consistent order in both MC questions
+@hypolist = ($hypo{null}, $hypo{left}, $hypo{right}, $hypo{two})[NchooseK(4,4)];
+
+$mc_null = new_multiple_choice();
+$mc_null->qa('An appropriate Null Hypothesis is:',$hypo{null});
+$mc_null->makeLast(@hypolist);
+
+$mc_alt = new_multiple_choice();
+$mc_alt->qa('An appropriate Alternative Hypothesis is:',$hypo{$tails});
+$mc_alt->makeLast(@hypolist);
+
+$decision_correct = $decision{($reject) ? reject: fail};
+push(@decisions_wrong, $decision{($reject) ? fail : reject});
+$mc_decide = new_multiple_choice();
+$mc_decide->qa('', $decision_correct);
+$mc_decide->extra(@decisions_wrong);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+
+[$name] works at a large company in Metro Atlanta, and was told that [$perc]% of the employees live Outside the Perimeter. However, [$pronoun] suspects the true percentage is [$dir] than this and plans to conduct a hypothesis test.
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc_null->print_q() @]*
+[@ $mc_null->print_a() @]*
+
+[@ $mc_alt->print_q() @]*
+[@ $mc_alt->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_null->correct_ans));
+ANS(radio_cmp($mc_alt->correct_ans));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+From a simple random sample of [$n] employees, [$x] live Outside the Perimeter. The value of the test statistic for this sample is:  
+
+[`[$dvar] = `] [____________] 
+(round to at least three decimal places).
+END_PGML
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
+   sub {
+     # Used p-hat instead of p0
+     ($correct, $student, $anshash) = @_;
+     return (abs($student - $stat_wrong) < 10*$abstol)
+     } => "Are you using the sample proportion rather than the hypothesized proportion?",
+  $tolcheck => $tolerr,
+)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
+
+[`[$dvar]^* = `] [____________]{Real(abs($cval))}  
+(enter a positive value, rounded to at least three decimal places).
+END_PGML
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+[@ %decision{qtext} @]
+[@ $mc_decide->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_decide->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+##############
+### Solutions
+
+$phatr = int(.5+100000*$p1)/100000;
+$sdr = int(.5+1000000*$sd)/1000000;
+$pvalr = int(.5+$pval*100000)/100000;
+$statr = int(.5+10000*$stat)/10000;
+$critr = int(.5+10000*$cval)/10000;
+
+BEGIN_PGML_SOLUTION
+
+Use the Hypothesized value of [`p_0 = [$p0]`] when computing the standard deviation of the sample proportion:
+
+[`` \sqrt{\frac{p_0(1-p_0)}{n}} =\sqrt{\frac{[$p0](1-[$p0])}{[$n]}} = [$sdr]...``]
+
+Keep this to as many digits as possible. The test statistic is:  
+
+[``[$dvar] = \frac{([$x]/[$n]) - [$p0]}{[$sdr]} = [$statr]...``]
+
+---
+
+### Critical region method
+
+This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% significance level) is [`[$crithash{region}]`]. The test statistic ([`z = [$statr]`]) is [@ $reject ? "in the critical region, so we reject the Null Hypothesis" : "NOT in the critical region, so we fail to reject the Null Hypothesis" @].
+
+---
+### P-Value method
+
+The [$tails]-sided P-value [@ ($pval_instructions) ? "($pval_instructions)" : '' @] is [@ $pvalr @] = [@ 100*$pvalr @]%. This is [@ $reject ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+COMMENT('Uses critical z-value method.');
+ENDDOCUMENT();

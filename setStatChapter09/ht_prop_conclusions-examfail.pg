@@ -65,8 +65,8 @@ $mcb->qa("At a 10% level of significance, does the sample provide sufficient evi
 $mcb->extra("$yn[1-$indb]");
 $mcb->makeLast("No");
 
-install_problem_grader(~~&std_problem_grader);
 $showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
 
 ######################################
 #  Main text

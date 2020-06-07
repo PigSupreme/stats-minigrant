@@ -1,89 +1,96 @@
 ##DESCRIPTION
-##  Step-by-step Hypothesis test, P-value method.
-##ENDDESCRIPTION
+##
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
 ## DBsection(One sample mean - t)
-## Date(04/08/2018)
-## Institution(Clayton State University)
-## Author(Michael J. Dancs)
-## Level(2)
+## Date(11/30/2019)
+## Institution('Clayton State Univeristy')
+## Author('Michael J. Dancs')
+## Level()
 ## TitleText1()
 ## AuthorText1()
 ## EditionText1()
 ## Section1()
 ## Problem1()
-## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-Value')
+## KEYWORDS('statistics','hypothesis testing')
 
+
+##ENDDESCRIPTION
 
 DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
-  "PGstandard.pl",
-  "MathObjects.pl",
-  "answerHints.pl",
-  "PGchoicemacros.pl",
-  "PGstatisticsmacros.pl",
-  "PGML.pl",
-  "scaffold.pl"
+"PGstandard.pl",
+"PGchoicemacros.pl",
+"PGanswermacros.pl",
+"PGnumericalmacros.pl",
+"PGstatisticsmacros.pl",
+"MathObjects.pl",
+"answerHints.pl",
+"PGML.pl",
+"scaffold.pl"
 );
 
 TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
-$abstol = 0.00051;
+
 Context("Numeric");
-$pvaltol = .000051;
+
+$mu = 6; #Hypothesized Mean
+$alpha = 0.05;
+$alphap = 100 * $alpha;
 
 do {
-$mu = random(4500,5500,100);
-$xbar = $mu+random(5,100,1);
-$n = random(90,110,1);
+# Generate our t-statistic so that
+# .01 < Right-sided P-value < .03
+$n = random(31,47,2);
+$t_lo = (int(10000*tdistr($n-1, .03))+1)/10000;
+$t_hi = (int(10000*tdistr($n-1, .01))-1)/10000;
+$tstat = random($t_lo, $t_hi, .0001);
+
+$sd = random(0.25, 0.89, 0.01);
+$xbar = int(100*($tstat*$sd/sqrt($n) + $mu))/100;
+$stderr = $sd/sqrt($n);
+
+$tstatans = int(.5+ 100000*($xbar - $mu)*sqrt($n)/$sd)/100000;
+$pval = tprob($n-1,$tstatans);
+$pvalans = int(.5+10000*$pval)/10000;
 $df = $n - 1;
-$sigma = random(300,500,10); # Actually, this is s
 
-$indx = random(0,4,1);
-$conf = 90 + 2*$indx;
-$alpha = 1-0.01*$conf;
-$alphap = 100 - $conf;
-
-$stderr = $sigma/sqrt($n);
-$tstat = ($xbar-$mu)/($sigma/sqrt($n));
-$tstatround = int(.5+10000*$tstat)/10000;
-$pval = tprob($df, $tstat);
-$pvalround = int(.5+100000*$pval)/100000;
-$pvalperc = 100*$pvalround;
-$pvalz = uprob($tstat);
-$pvalzround = int(.5+100000*$pvalz)/100000;
-} while (abs($pval - $pvalz) < $pvaltol);
-
-$mc00 = new_multiple_choice();
-$mc00->qa("An appropriate null hypothesis for this test would claim that:","The average lifetime of all CFL bulbs made by the Inconvenient Light Company is less than or equal to $mu hours.");
-$mc00->extra("The average lifetime of all CFL bulbs made by the Inconvenient Light Company is greater than $mu hours.", "Less than $alphap% of all CFL bulbs made by the Inconvenient Light Company have a lifespan of $mu hours or less.", "Less than $alphap% of the bulbs in the statistician's sample will have a lifespan of $mu hours or less.", "The average lifetime of the bulbs in the statistician's sample will be less than or equal to $mu hours.");
+# Be sure we can distinguish z vs. t at three decimal places
+$pvalwrong = int(.5+10000*uprob($tstatans))/10000;
+} while (abs($pvalans - $pvalwrong) < .00051);
 
 $mc0 = new_multiple_choice();
-$mc0->qa("The alternative hypothesis for this test is:","Right-sided"); $mc0->extra("Left-sided"); $mc0->makeLast("Two-sided");
+$mc0->qa("If `\mu` is the actual mean hours of sleep per night (among all college students), state appropriate hypotheses for this test.","Null: `\mu=` $mu; Alternative: `\mu>` $mu");
+$mc0->extra("Null: `\mu>` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu <` $mu",
+"Null: `\mu>` $mu; Alternative: `\mu\leq` $mu",
+"Null: `\mu<` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu=` $mu",
+"Null: `\mu\ne` $mu; Alternative: `\mu<` $mu",
+"Null: `\mu=` $mu; Alternative: `\mu\ne` $mu");
 
-$mc1 = new_multiple_choice();
-$mc1->qa("The distribution of the test statistic is:", "Student t, with df = $df");
-$mc1->extra("Student t, with df = $n.","Standard Normal z.","Normal, with Mean = $mu and StdDev = $sigma.");
-$mc1->makeLast("None of the above.");
-
-$mc4 = new_multiple_choice();
-@ans =("Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct.", "Fail to Reject \(H_0\); there is insufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct."
+$mc = new_multiple_choice();
+@ans = (
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is insufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is at least $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is exactly $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is not equal to $mu hours.",
 );
-
-if ($pvalround < $alpha) {$tag = 0;} else {$tag = 1;}
-$mc4 -> qa("Using the P-Value of $pvalperc% and \(\alpha\) = $alphap%, the statistician will:", $ans[$tag]);
-$mc4 -> extra($ans[1-$tag], "Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.","Accept \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.");
+$tag = ($pval < $alpha) ? 0 : 1;
+$mc -> qa("Based on this sample data and using a $alphap% significance level:", $ans[$tag]);
+$mc -> extra($ans[1-$tag],$ans[2],$ans[3],$ans[4]);
 $mc4_soln = (
-"is less than the $alphap$PERCENT significance level, so reject the Null Hypothesis. There is sufficient evidence to support the company's claim (the Alternative Hypothesis).",
-"is not less than the $alphap$PERCENT significance level, so fail to reject the Null Hypothesis. There is insufficient evidence to support the company's claim (the Alternative Hypothesis)."
+"is less than the $alphap$PERCENT significance level, so reject the Null Hypothesis",
+"is not less than the $alphap% significance level, so fail to reject the Null Hypothesis"
 )[$tag];
 
 ######################################
 #  Main text
 BEGIN_PGML
-The Inconvenient Light Company advertises that, on average, its CFL (Compact Fluorescent Light) bulbs last more than [$mu] hours.  To test this claim using a [$alphap]% significance level, a statistician plans to take a random sample of [$n] bulbs and  measure the amount of time until each bulb fails.
+A recent study claims that college students, on average, sleep an average of [$mu] hours or less per night. You suspect that the average is more than this, and plan to conduct a hypothesis test. 
 
 END_PGML
 ##########################
@@ -92,33 +99,26 @@ Scaffold::Begin(
       is_open  => "first_incorrect"
     );
 Section::Begin("Part 1: Stating Hypotheses");
+
 ##########################
-
 BEGIN_PGML
-
-a. [@ $mc00 ->print_q() @]*
-[@ $mc00 ->print_a() @]*
-
-a. [@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_q() @]*
 [@ $mc0 ->print_a() @]*
 
 END_PGML
 
-ANS(radio_cmp($mc00->correct_ans));
 ANS(radio_cmp($mc0->correct_ans));
 
 Section::End();
+
 ##########################
 Section::Begin("Part 2: Test Statistic");
-
 BEGIN_PGML
-a. The lifetimes of the [$n] bulbs in the sample had a mean of [$xbar] hours and a standard deviation of [$sigma] hours. The value of the test statistic for this sample is [_______] (give to at least three decimal places).
+In a simple random sample of [$n] college students, the mean amount of sleep (hours per night) is [$xbar]. The standard deviation of the sample is [$sd] (hours per night).
 
-a. [@$mc1->print_q() @]*
-[@$mc1->print_a() @]*
+The value of the test statistic for this sample (to at least three decmal places) is [__________].
 
 END_PGML
-
 # Test statistic checker
 $ans_stat = Real($tstat)->with(tolType=>'absolute', tolerance=>$abstol);
 sub mycheck {
@@ -136,15 +136,13 @@ sub{
 } => ["Have you switched the hypothesized value with the sample value?"]
 )));
 
-#MC checker
-ANS(radio_cmp($mc1->correct_ans));
-
 Section::End();
 ##########################
 Section::Begin("Part 3: P-Value");
 
 BEGIN_PGML
 The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
+
 END_PGML
 
 # P-Value checker
@@ -179,11 +177,12 @@ Section::End();
 Section::Begin("Part 4: Final Conclusions");
 
 BEGIN_PGML
-[@ $mc4 ->print_q() @]*
-[@ $mc4 ->print_a() @]*
+[@ $mc ->print_q() @]*
+[@ $mc ->print_a() @]*
+
 END_PGML
 
-ANS(radio_cmp($mc4->correct_ans));
+ANS(radio_cmp($mc->correct_ans));
 
 Section::End();
 Scaffold::End();
@@ -191,6 +190,9 @@ Scaffold::End();
 ######################################
 #  Solutions
 $stderr_round = int(.5 + $stderr*1000)/1000;
+$tstatround = int(.5 + $tstat*10000)/10000;
+$pvalp = int(.5 + $pval*10000)/100;
+
 BEGIN_PGML_SOLUTION
 Note that you can (and should) use technology to check your results.
 
@@ -201,7 +203,7 @@ The intended population consists of all bulbs made by the company, not just thos
 ---
 *Part 2:*  
 
-The standard error of [`\bar{x}`] is [`[$sigma]/\sqrt{[$n]}`] = [$stderr_round]...  
+The standard error of [`\bar{x}`] is [`[$sd]/\sqrt{[$n]}`] = [$stderr_round]...  
 
 Keep this value to at least three decimal places, or you may get a rounding error when computing the test statistic.
 
@@ -223,7 +225,7 @@ The Alternative Hypothesis is right-sided. Use a Student-T distribution with df 
 ---
 *Part 4:*
 
-In percentage form, the P-value of [$pvalperc]% [$mc4_soln]
+In percentage form, the P-value of [$pvalp]% [$mc4_soln].
 END_PGML_SOLUTION
 
 COMMENT('Use a Student-T distribution to compute the exact P-value');

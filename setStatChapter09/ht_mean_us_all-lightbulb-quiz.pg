@@ -1,0 +1,172 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, P-value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample mean - t)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'P-Value')
+
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+);
+
+TEXT(beginproblem());
+$showPartialCorrectAnswers = 1;
+$abstol = 0.00051;
+Context("Numeric");
+$pvaltol = .000051;
+
+do {
+$mu = random(4500,5500,100);
+$xbar = $mu+random(5,100,1);
+$n = random(90,110,1);
+$df = $n - 1;
+$sigma = random(300,500,10); # Actually, this is s
+
+$indx = random(0,4,1);
+$conf = 90 + 2*$indx;
+$alpha = 1-0.01*$conf;
+$alphap = 100 - $conf;
+
+$stderr = $sigma/sqrt($n);
+$tstat = ($xbar-$mu)/($sigma/sqrt($n));
+$tstatround = int(.5+10000*$tstat)/10000;
+$pval = tprob($df, $tstat);
+$pvalround = int(.5+100000*$pval)/100000;
+$pvalperc = 100*$pvalround;
+$pvalz = uprob($tstat);
+$pvalzround = int(.5+100000*$pvalz)/100000;
+} while (abs($pval - $pvalz) < $pvaltol);
+
+$mc00 = new_multiple_choice();
+$mc00->qa("An appropriate null hypothesis for this test would claim that:","The average lifetime of all CFL bulbs made by the Inconvenient Light Company is less than or equal to $mu hours.");
+$mc00->extra("The average lifetime of all CFL bulbs made by the Inconvenient Light Company is greater than $mu hours.", "Less than $alphap% of all CFL bulbs made by the Inconvenient Light Company have a lifespan of $mu hours or less.", "Less than $alphap% of the bulbs in the statistician's sample will have a lifespan of $mu hours or less.", "The average lifetime of the bulbs in the statistician's sample will be less than or equal to $mu hours.");
+
+$mc0 = new_multiple_choice();
+$mc0->qa("The alternative hypothesis for this test is:","Right-sided"); $mc0->extra("Left-sided"); $mc0->makeLast("Two-sided");
+
+$mc1 = new_multiple_choice();
+$mc1->qa("The distribution of the test statistic is:", "Student t, with df = $df");
+$mc1->extra("Student t, with df = $n.","Standard Normal z.","Normal, with Mean = $mu and StdDev = $sigma.");
+$mc1->makeLast("None of the above.");
+
+$mc4 = new_multiple_choice();
+@ans =("Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct.", "Fail to Reject \(H_0\); there is insufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is correct."
+);
+
+if ($pvalround < $alpha) {$tag = 0;} else {$tag = 1;}
+$mc4 -> qa("Using the P-Value of $pvalperc% and \(\alpha\) = $alphap%, the statistician will:", $ans[$tag]);
+$mc4 -> extra($ans[1-$tag], "Reject \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.","Accept \(H_0\); there is sufficient evidence to conclude that the Inconvenient Light Company's advertised claim about bulb life is incorrect.");
+$mc4_soln = (
+"is less than the $alphap$PERCENT significance level, so reject the Null Hypothesis. There is sufficient evidence to support the company's claim (the Alternative Hypothesis).",
+"is not less than the $alphap$PERCENT significance level, so fail to reject the Null Hypothesis. There is insufficient evidence to support the company's claim (the Alternative Hypothesis)."
+)[$tag];
+
+######################################
+#  Main text
+BEGIN_PGML
+The Inconvenient Light Company advertises that, on average, its CFL (Compact Fluorescent Light) bulbs last more than [$mu] hours.  To test this claim using a [$alphap]% significance level, a statistician plans to take a random sample of [$n] bulbs and  measure the amount of time until each bulb fails.
+
+END_PGML
+##########################
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "first_incorrect"
+    );
+Section::Begin("Part 1: Stating Hypotheses");
+##########################
+
+BEGIN_PGML
+
+a. [@ $mc00 ->print_q() @]*
+[@ $mc00 ->print_a() @]*
+
+a. [@ $mc0 ->print_q() @]*
+[@ $mc0 ->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc00->correct_ans));
+ANS(radio_cmp($mc0->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 2: Test Statistic");
+
+BEGIN_PGML
+a. The lifetimes of the [$n] bulbs in the sample had a mean of [$xbar] hours and a standard deviation of [$sigma] hours. The value of the test statistic for this sample is [_______] (give to at least three decimal places).
+
+a. [@$mc1->print_q() @]*
+[@$mc1->print_a() @]*
+
+END_PGML
+
+# Test statistic checker
+$ans_stat = Real($tstat)->with(tolType=>'absolute', tolerance=>$abstol);
+sub mycheck {
+  my ($correct, $student, $ansHash) = @_;
+  return ($student == $correct) || ($student == $tstatround);
+}
+ANS($ans_stat->cmp);
+
+#MC checker
+ANS(radio_cmp($mc1->correct_ans));
+
+Section::End();
+##########################
+Section::Begin("Part 3: P-Value");
+
+BEGIN_PGML
+The P-value for this sample is [_______] (give to at least three decimal places; do not convert to percent).
+END_PGML
+
+# P-Value checker
+$ans_pval = Real($pval)->with(tolType=>'absolute', tolerance=>$pvaltol);
+
+# For catching various common errors
+ANS($ans_pval->cmp(tolType=>'absolute',tolerance=>$abstol)->withPostFilter(AnswerHints(
+## Gave answer in percent
+sub{
+  my ($correct, $student, $ansHash) = @_;
+  return (($correct > 0) && (abs($student - 100*$correct) < (100*$abstol)));
+} => ["Do not convert to percent!"],
+)));
+
+Section::End();
+##########################
+Section::Begin("Part 4: Final Conclusions");
+
+BEGIN_PGML
+[@ $mc4 ->print_q() @]*
+[@ $mc4 ->print_a() @]*
+END_PGML
+
+ANS(radio_cmp($mc4->correct_ans));
+
+Section::End();
+Scaffold::End();
+
+######################################
+#  Solutions
+$stderr_round = int(.5 + $stderr*1000)/1000;
+
+COMMENT('Quiz version; minimal feedback.');
+ENDDOCUMENT();       # This should be the last executable line in the problem.

@@ -29,33 +29,30 @@ TEXT(beginproblem());
 ######################################
 #  Setup
 $m= random(0,3,1);
-$name = ("Nwabudike", "Deirdre", "Corazon", "Miriam")[$m];
+$name = ("Liang", "Nahmin", "Skylar", "Euniqua")[$m];
 $pronoun = "she";
 if ($m==0) {$pronoun = "he";}
 $poss = "her";
 if ($m==0) {$poss = "his";}
-$n = random(201,499,1);
+$n = random(11,29,1);
 $perc = random(21.1,39.9,.2);
-
-$dir = random(0,1);
-$d = ("<",">")[$dir];
-$dtext =  ("less","more")[$dir];
-$dw = (">","<")[$dir];
-
 
 $p = random(0.005,0.15,0.001);
 $pperc = 100*$p;
 if ($p<.05) {$inda = 1}
 if ($p<.10) {$indb = 1}
-@yn = ("No","Yes");
+@yn = ("No","Yes");     #(Fail to Reject H0, Reject H0)
+@pvsalpha = ("not less","less");
+@rejectfail = ("fail to reject", "reject");
+@suff = ("insufficient", "sufficient");
 
 $mc0 = new_multiple_choice();
 $mc0->qa("The Null Hypothesis for this test is:","\(p = $perc\)%");
 $mc0->extra("\(p < $perc\)%", "\(p > $perc\)%", "\(p \neq $perc\)%");
 
 $mc1 = new_multiple_choice();
-$mc1->qa("The Alternative Hypothesis for this test is:","\(p $d $perc\)%");
-$mc1->extra("\(p $dw $perc\)%", "\(p = $perc\)%", "\(p \neq $perc\)%");
+$mc1->qa("The Alternative Hypothesis for this test is:","\(p < $perc\)%");
+$mc1->extra("\(p > $perc\)%", "\(p = $perc\)%", "\(p \neq $perc\)%");
 
 $mca = new_multiple_choice();
 $mca->qa("At a 5% level of significance, does the sample provide sufficient evidence that $name is correct?", "$yn[$inda]");
@@ -71,7 +68,7 @@ $mcb->makeLast("No");
 #  Main text
 
 BEGIN_PGML
-[$name] was told that [$perc]% of the employees at [$poss] company live Outside The Perimeter, but [$pronoun] suspects the true percentage is [$dtext] than this and plans to conduct a hypothesis test. Let _p_ be the true percentage of employees who live Outside The Perimeter.
+[$name] was told that [$perc]% of the students in [$poss] class failed a recent exam, but [$pronoun] suspects the true percentage is less than this and plans to conduct a hypothesis test. Let _p_ be the true percentage of students who failed.
 
 (a) [@ $mc0->print_q() @]*
 [@ $mc0->print_a() @]*
@@ -79,7 +76,7 @@ BEGIN_PGML
 (b) [@ $mc1->print_q() @]*
 [@ $mc1->print_a() @]*
 
-From a simple random sample of [$n] employees, [$name] calculates a _P_-value of [$pperc]%.
+From a simple random sample of [$n] students, [$name] calculates a _P_-value of [$pperc]%.
 
 (c) [@ $mca->print_q() @]*
 [@ $mca->print_a() @]*
@@ -91,8 +88,8 @@ END_PGML
 
 ######################################
 #  Answers
-
 $showPartialCorrectAnswers = 0;
+install_problem_grader(~~&std_problem_grader);
 
 ANS(radio_cmp($mc0->correct_ans() ));
 ANS(radio_cmp($mc1->correct_ans() ));

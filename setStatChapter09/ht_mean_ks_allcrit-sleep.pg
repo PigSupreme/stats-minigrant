@@ -1,0 +1,240 @@
+##DESCRIPTION
+##  Hypothesis test for single mean, template.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(Two sample proportion)
+## Date(05/08/2020)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'hypothesis testing', 'mean')
+
+DOCUMENT(); 
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+Context("Numeric");
+Context()->strings->remove("infinity","inf");
+$abstol = .00051;
+Context()->flags->set(
+  tolerance => $abstol,
+  tolType => "absolute",
+);
+
+# Alterntative hypothesis ("left", "two", "right):
+$tails = "right";
+
+# Significance level
+$alpha = list_random(.1, .05, .02, .01);
+$alphap = 100*$alpha;
+
+$mu = list_random(5.5, 6, 7, 8);
+
+# Text for reject and fail to reject; correct answer chosen automatically
+%decision = (
+  reject => "There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours.",
+  fail => "There is insufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is more than $mu hours."
+);
+# Extra incorrect answers for reject/fail
+@decisions_wrong = (
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is at least $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is exactly $mu hours.",
+"There is sufficient evidence to conclude that the actual mean hours of sleep per night (among all college students) is not equal to $mu hours.",
+);  
+
+# Sample data and statistic (single mean)
+$n = random(31,47,2);
+### $mu = list_random(5.5, 6, 7, 8); ### set above
+$s = random(0.25, 0.79, .02);
+$zconst = random(1.51, 2.51, .02);
+$xconst = $mu + $s*$zconst/sqrt($n);
+$xbar = int(.5+$xconst*100)/100;
+
+$sd = $s/sqrt($n);
+$stat = ($xbar-$mu)/$sd;
+
+# Multiple choice text for Null and Alternative
+# SIGN will be replaced in the template by \lt, \neq, and \gt
+$hypo_template = "\(\mu SIGN $mu\)";
+$nullsign = '=';
+
+# P-Values
+%pvalhash;
+$pvalhash{right} = uprob($stat);
+$pvalhash{left} = 1 - $pvalhash{right};
+$pvalhash{two} = 2*min($pvalhash{left}, $pvalhash{right});
+$pval = $pvalhash{$tails};
+
+# Critical values
+%crithash;
+$crithash{right} = udistr($alpha);
+$crithash{left} = -$crithash{right};
+$crithash{two} = udistr($alpha/2);
+$cval = $crithash{$tails};
+
+# Feeback for critical region
+$dvar = "z";
+$cvalr = int(.5+$cval*10000)/10000;
+if ($tails eq "left") {$crithash{region} = "$dvar\lt $cvalr"}
+if ($tails eq "right") {$crithash{region} = "$dvar\gt $cvalr"}
+if ($tails eq "two") {$crithash{region} = "\lvert $dvar\rvert\gt $cvalr"}
+
+######################################
+### Reject or fail to reject the Null?
+######################################
+# Use a P-Value if we computed it:
+if ($pval) {
+  $reject = ($pval < $alpha)
+# Otherwise, use the critical value:
+} else {
+  if ($tails eq "left") {$reject = ($stat < $cval)};
+  if ($tails eq "right") {$reject = ($stat > $cval)};
+  if ($tails eq "two") {$reject = (abs($stat) > abs($cval))};
+}
+
+%hypo = (null => ($hypo_template =~ s/SIGN/$nullsign/r));
+$hypo{left}  = ($hypo_template =~ s/SIGN/\lt/r);
+$hypo{two}  = ($hypo_template =~ s/SIGN/\neq/r);
+$hypo{right}  = ($hypo_template =~ s/SIGN/\gt/r);
+
+# Scramble manually here for consistent order in both MC questions
+@hypolist = ($hypo{null}, $hypo{left}, $hypo{right}, $hypo{two})[NchooseK(4,4)];
+
+$mc_null = new_multiple_choice();
+$mc_null->qa('An appropriate Null Hypothesis is:',$hypo{null});
+$mc_null->makeLast(@hypolist);
+
+$mc_alt = new_multiple_choice();
+$mc_alt->qa('An appropriate Alternative Hypothesis is:',$hypo{$tails});
+$mc_alt->makeLast(@hypolist);
+
+$decision_correct = $decision{($reject) ? reject: fail};
+push(@decisions_wrong, $decision{($reject) ? fail : reject});
+$mc_decide = new_multiple_choice();
+$mc_decide->qa('', $decision_correct);
+$mc_decide->extra(@decisions_wrong);
+
+######################################
+#  Main text
+
+BEGIN_PGML
+
+A recent study claims that college students, on average, sleep an average of [$mu] hours or less per night. You suspect that the average is more than this, and plan to conduct a hypothesis test. Assume that among all college students, the amount of sleep per night has a standard deviation of [$s] hours. 
+
+END_PGML
+
+Scaffold::Begin(
+      can_open => "when_previous_correct",
+      is_open  => "correct_or_first_incorrect"
+    );
+Section::Begin();
+BEGIN_PGML
+
+[@ $mc_null->print_q() @]*
+[@ $mc_null->print_a() @]*
+
+[@ $mc_alt->print_q() @]*
+[@ $mc_alt->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_null->correct_ans));
+ANS(radio_cmp($mc_alt->correct_ans));
+
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+The value of the test statistic for the above sample data is:  
+
+[`[$dvar] = `] [____________] 
+(round to at least three decimal places).
+END_PGML
+##################
+# Generic check for answers that are almost within tolerance
+if ($abstol<=0) {$abstol = Context()->flags->get('tolerance')};
+$tolerr = "You are close. Try using an exact answer, or rounding to more decimal places.";
+$tolcheck = sub{
+  ($correct, $student, $anshash) = @_;
+  return (abs($student - $correct) < 20*$abstol)
+  };
+
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints($tolcheck => $tolerr)));
+Section::End();
+
+Section::Begin();
+BEGIN_PGML
+Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
+
+[`[$dvar]^* = `] [____________]{abs($cval)}  
+(enter a positive value, rounded to at least three decimal places).
+END_PGML
+Section::End();
+
+### ANS($cval->cmp()
+
+Section::Begin();
+BEGIN_PGML
+Using a significance level of [$alphap]%:
+[@ $mc_decide->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc_decide->correct_ans));
+
+Section::End();
+
+Scaffold::End();
+######################################
+#  Answers
+
+
+##############
+### Solutions
+
+$sdr = int(.5+1000000*$sd)/1000000;
+$statr = int(.5+10000*$stat)/10000;
+$critr = int(.5+10000*$cval)/10000;
+$pvalr = int(.5+10000*$pval)/10000;
+
+BEGIN_PGML_SOLUTION
+
+For all samples of size [$n], the standard deviation of [`\bar{x}`] is
+
+[`` \frac{\sigma}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
+
+Keep this to as many digits as possible. The test statistic is:  
+
+[``[$dvar] = \frac{[$xbar]-[$mu]}{[$sdr]} = [$statr]...``]
+
+---
+
+### Critical region method
+
+This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% significance level) is [`[$crithash{region}]`]. The test statistic ([`z = [$statr]`]) is [@ $reject ? "in the critical region, so we reject the Null Hypothesis" : "NOT in the critical region, so we fail to reject the Null Hypothesis" @].
+
+---
+### P-Value method
+
+The [$tails]-sided P-value [@ ($pval_instructions) ? "($pval_instructions)" : '' @] is [@ $pvalr @] = [@ 100*$pvalr @]%. This is [@ $reject ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
+END_PGML_SOLUTION
+
+COMMENT('Uses critical z-value method.');
+ENDDOCUMENT();
