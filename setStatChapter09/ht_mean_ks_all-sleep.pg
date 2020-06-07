@@ -31,7 +31,6 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
-$showPartialCorrectAnswers = 0;
 Context("Numeric");
 $abstol = 0.00051;
 
@@ -83,7 +82,7 @@ if ($pleft<0.05) {$inda=1}
 push(@wrong,$yn[1-$inda]);
 
 $mc4 = new_multiple_choice();
-$mc4->qa("Does this sample, with a P-value of $pvalperc%, provide sufficient evidence (at the 5% significance level) that the mean fluid volume for this production run is less than $mu fluid ounces?",$yn[$inda]);
+$mc4->qa("Does this sample, with a P-value of $pvalperc%, provide sufficient evidence (at the 5% significance level) that the mean among all college students in more than $mu hours per night?",$yn[$inda]);
 $mc4->extra(@wrong);
 
 ######################################
