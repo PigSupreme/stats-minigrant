@@ -1,0 +1,259 @@
+##DESCRIPTION
+##  Step-by-step Hypothesis test, Critical value method.
+##ENDDESCRIPTION
+## DBsubject(Statistics)
+## DBchapter(Hypothesis tests)
+## DBsection(One sample proportion)
+## Date(04/08/2018)
+## Institution(Clayton State University)
+## Author(Michael J. Dancs)
+## Level(2)
+## TitleText1()
+## AuthorText1()
+## EditionText1()
+## Section1()
+## Problem1()
+## KEYWORDS('statistics', 'inference', 'hypothesis testing', 'proportion')
+
+DOCUMENT();        # This should be the first executable line in the problem.
+
+loadMacros(
+  "PGstandard.pl",
+  "MathObjects.pl",
+  "answerHints.pl",
+  "PGchoicemacros.pl",
+  "PGstatisticsmacros.pl",
+  "PGML.pl",
+  "scaffold.pl"
+  );
+
+TEXT(beginproblem());
+
+######################################
+#  Setup
+$showPartialCorrectAnswers = 1;
+
+Context("Numeric");
+$abstol = 0.00051;
+
+$n = list_random(180,200,220,240,260);
+$alpha = list_random(0.20, 0.10, 0.05, 0.01);
+$alphap = 100*$alpha;
+$zcrit = udistr($alpha);
+$p0 = 0.20; #Hypothesized population proportion
+$cval = Real("$zcrit");
+
+# This makes sure that we fail to reject the null of p = 0.20
+$x = random(1 + ($p0 * $n), ($n + $zcrit * 2 * sqrt($n))/5, 1);
+$phat = $x/$n;
+$qhat = 1- $phat;
+$phatr3 = int(.5+1000*$phat)/1000;
+
+$stdev = sqrt($p0*(1-$p0))/sqrt($n);
+$stdev_r5 = int(.5+100000*$stdev)/100000;
+$stdev_wrong = sqrt($phat*(1-$phat))/sqrt($n);
+
+$zstat = ($phat - $p0)/sqrt($p0*(1-$p0))*sqrt($n);
+$zstatr3 = int(.5+10000*($phatr3 -$p0)/$stdev_r5)/10000;
+$zstat_r5 = int(.5+10000*($phat -$p0)/$stdev_r5)/10000;
+$zstat_wrong = ($phat-$p0)/$stdev_wrong;
+
+$pval = uprob($zstat);
+$pval_r5 = uprob($zstat_r5);
+
+$mc0 = new_multiple_choice();
+$mc0->qa("Which of the following are appropriate null and alternative hypotheses for this scenario?", "\(H_0: p=$p0\) versus \(H_A: p>$p0\)");
+$mc0->extra(
+    "\(H_0: p>$p0\) versus \(H_A: p=$p0\)",
+    "\(H_0: p=$p0\) versus \(H_A: p\leq $p0\)",
+    "\(H_0: p=$p0\) versus \(H_A: p<$p0\)",
+    "\(H_0: p>$p0\) versus \(H_A: p\leq $p0\)"
+    );
+
+$mc1 = new_multiple_choice();
+$mc1->qa("What type of test statistic must be used for this hypothesis test?", "A z-score");
+$mc1->extra("A t-score","An s-score","A P-Value");
+$mc1->makeLast("none of the above");
+
+# Note: Numbers above ensure that we fail to reject the null.
+$mc4 = new_multiple_choice();
+$mc4->qa("Using the above results with a $alphap% significance level:","Fail to reject the Null Hypothesis; there is insufficient evidence that the psychic will be correct more than 20% of the time.");
+$mc4->extra(
+    "Reject the Null Hypothesis; there is sufficient evidence that the psychic will be correct more than 20% of the time.",
+    "Fail to reject the Null Hypothesis; there is sufficient evidence that the psychic will be correct more than 20% of the time.",
+    "Reject the Null Hypothesis; there is insufficient evidence that the psychic will be correct more than 20% of the time.",
+    "Fail to reject the Null Hypothesis; there is sufficient evidence that the psychic will be correct exactly 20% of the time.",
+    "Reject the Null Hypothesis; there is sufficient evidence that the psychic will be correct exactly 20% of the time."
+    );
+
+$pronoun = list_random("he","she");
+
+######################################
+#  Main text
+BEGIN_PGML
+A noted psychic was tested for Extrasensory Perception (ESP).  The psychic was presented with a series of face-down cards and was asked to identify the correct symbol on each card (out of five possible choices). Let [`p`] be the probability that the psychic will correctly identify the symbol on any given card.
+
+If the psychic truly has ESP, then [$pronoun] should be correct more than 20% of the time, meaning [`p>0.20`]. This hypothesis was tested using a significance level of [`\alpha =[$alphap]`]%.
+
+END_PGML
+
+Scaffold::Begin();
+Section::Begin("Part 1: Set-up");
+##########################
+BEGIN_PGML
+a. [@$mc0->print_q() @]*
+[@$mc0->print_a() @]*
+
+a. [@$mc1->print_q() @]*
+[@$mc1->print_a() @]*
+
+END_PGML
+
+ANS(radio_cmp($mc0->correct_ans() ));
+ANS(radio_cmp($mc1->correct_ans() ));
+
+Section::End();
+##########################
+Section::Begin("Part 2: Sample Data and Test Statistic");
+
+BEGIN_PGML
+The psychic was shown [$n] cards, and identified the correct symbol [$x] times. Assume this can be treated as a Simple Random Sample.
+
+a. The value of the sample statistic is [`\hat{p}`] = [__________].  
+(Round to at least three decimal places; do not convert to percent).
+
+a. For all samples of size [$n], the sample proportions [`\hat{p}`] have a Standard Deviation of [___________________________].  
+(Give this answer to at least five decimal places).
+
+a. The value test statistic for this sample is _z_ = [__________].  
+(Round to at least three decimal places).
+
+END_PGML
+
+# Sample statistic checker
+$ans_stat = Real($phat)->with(tolType=>'absolute', tolerance=>$abstol);
+ANS($ans_stat->cmp->withPostFilter(AnswerHints(
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - 100*$correct) <= 1;
+} => ["Do not convert to percent!"],
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .01;
+} => ["Close! Check your computations/rounding."],
+)));
+
+# StdDev checker
+$ans_sd = Real($stdev)->with(tolType=>'absolute', tolerance=>$abstol/100);
+sub mycheckp {
+  my ($correct, $student, $ansHash) = @_;
+  return ($student == $correct) || ($student == $stdev_r5);
+}
+# For catching various common errors
+ANS($ans_sd->cmp( checker=>~~&mycheckp ) ->withPostFilter(AnswerHints(
+## Used p-hat instead of hypothesized value/alternaritve
+sub{
+     my ($correct,$student,$ans)=@_;
+     $phaterror = abs($student - $stdev_wrong);
+     $trueerror = abs($student - $correct);
+     return ($trueerror <= .01) && ($phaterror < $trueerror);
+} => ["Are you using the sample proportion instead of the hypothesized value?"],
+## Rounding errors
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .001;
+} => ["Check your compuations/rounding"]
+)));
+
+
+# Test statistic checker
+$ans_stat = Real($zstat)->with(tolType=>'absolute', tolerance=>$abstol);
+sub mycheckt {
+  my ($correct, $student, $ansHash) = @_;
+  return ($student == $correct) || ($student == $zstat_r5) || ($student == $zstatr3);
+}
+ANS($ans_stat->cmp(checker=>~~&mycheckt)->withPostFilter(AnswerHints(
+## Used p-hat instead of p-naught
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $zstat_wrong) < .001;
+} => ["Are you using the sample proportion instead of the hypothesized value?"],
+## Subtraction in the wrong direction
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student + $correct) <= .01;
+} => ["Have you switched the hypothesized value with the sample value?"],
+## Rounding?
+sub{
+     my ($correct,$student,$ans)=@_;
+     return abs($student - $correct) <= .001;
+} => ["Close! Check your computations/rounding."]
+)));
+
+
+Section::End();
+##########################
+Section::Begin("Part 3: Critical Value");
+
+BEGIN_PGML
+At the [$alphap]% significance level, the critical value is:
+
+[`z^*`] =  [__________]{abs($cval)}  
+(enter a positive number, rounded to at least three decimal places).
+
+END_PGML
+
+
+
+Section::End();
+##########################
+Section::Begin("Part 4: Final Conclusions");
+
+BEGIN_PGML
+[@$mc4->print_q()@]*  
+[@$mc4->print_a()@]*
+
+END_PGML
+
+ANS(radio_cmp($mc4->correct_ans() ));
+
+Section::End();
+Scaffold::End();
+
+#########################################
+### Partial Solutions
+BEGIN_PGML_SOLUTION
+Note that you can (and should) use technology to check your results.
+
+*Part 2:*
+
+a. When computing the sample statistic, remember that you can enter the exact fraction [$x]/[$n] and let WebWorK do the arithmetic.
+
+b. To compute the Standard Deviation of [`\hat{p}`], remember to use the hypothesized value (from the Null Hypothesis) and not the sample proportion. The formula is  
+[``\sqrt{\frac{p(1-p)}{n}} = \sqrt{\frac{[$p0] * [@ 1-$p0 @] }{[$n]}}``]
+Keep this value to at least five decimal places, or you may get a rounding error when computing the test statistic.
+
+Assuming the Null Hypothesis is true, the sample statistic comes from a Normal distribution with mean = [$p0] and StdDev = [$stdev_r5]....  
+Convert to a z-score as usual:  
+[``z=\frac{([$x]/[$n]) - [$p0]}{[$stdev_r5]}``]
+
+Or if you like memorizing formulas, the one you'd need here is:  
+[``z = \frac{(x/n) - p_0}{\sqrt{\frac{p_0(1-p_0)}{n}}}``]  
+Good luck getting that one to work correctly on a calculator!
+
+---
+*Part 3:*
+
+The Alternative Hypothesis is right-sided. Use the Standard Normal distribution to find the cut-off score for the top [$alphap]%, or look up the value in a table.
+
+---
+*Part 4:*
+[% Note: Problem is rigged to always fail to reject %]
+The test statistic (z = [@ int(.5+10000*$zstat)/10000 @]) is not in the critical region (z > [@ int(.5+10000*$zcrit)/10000 @]), so fail to reject the Null Hypothesis (at the [$alphap]% significance level).
+
+The sample fails to provide sufficient evidence that the psychic is doing better than random guessing.
+END_PGML_SOLUTION
+
+
+
+ENDDOCUMENT();        # This should be the last executable line in the problem.

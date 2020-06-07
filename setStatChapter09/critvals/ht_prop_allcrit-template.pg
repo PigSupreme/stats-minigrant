@@ -30,6 +30,7 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
+
 Context("Numeric");
 Context()->strings->remove("infinity","inf");
 $abstol = .00051;
@@ -47,6 +48,7 @@ $alphap = 100*$alpha;
 
 # Text for reject and fail to reject; correct answer chosen automatically
 %decision = (
+  qtext => "At the $alphap% significance level:",
   reject => 'Yes, because the test statistic is in the critical region.',
   fail => 'No, because the test statistic is not in the the critical region.'
   );
@@ -56,7 +58,7 @@ $alphap = 100*$alpha;
   'Yes, because the test statistic is greater than the significance level.'
   );  
 
-# Sample data and statistic (single proportion)
+### Hypotheses and sample data (single proportion)
 $p0 = 0.50;
 $q0 = 1 - $p0;
 $x = 0; ### Fixed below
@@ -72,15 +74,13 @@ $x = int(.5+ $phatgen*$n);
 $hypo_template = "\(p SIGN $p0\)";
 $nullsign = '=';
 
-# Sample statistics for single proportion
-
+### Sample statistics for single proportion
 $phat = $x/$n;
 $qhat = 1-$phat;
 $sd = sqrt($p0*$q0/$n);
 $stat = ($phat-$p0)/$sd;
 
 # Test stat with sample stats (for feedback)
-#$stderr = sqrt($phat*$qhat/$n);
 $stderr = sqrt($phat*(1-$phat)/$n);
 $stat_wrong = ($phat - $p0)/$stderr;
 
@@ -193,7 +193,7 @@ $tolcheck = sub{
 
 ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
    sub {
-      # Wrong direction for samples 1 and 2
+     # Used p-hat instead of p0
      ($correct, $student, $anshash) = @_;
      return (abs($student - $stat_wrong) < 10*$abstol)
      } => "Are you using the sample proportion rather than the hypothesized proportion?",
@@ -205,16 +205,17 @@ Section::Begin();
 BEGIN_PGML
 Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
 
-[`z^* = `] [____________]{abs($cval)}  
+[`[$dvar]^* = `] [____________]{Real(abs($cval))}  
 (enter a positive value, rounded to at least three decimal places).
 END_PGML
-Section::End();
 
-### ANS($cval->cmp()
+ANS($cval->cmp())
+
+Section::End();
 
 Section::Begin();
 BEGIN_PGML
-Are the above results statistically significant (at the [$alphap]% level)?
+[@ %decision{qtext} @]
 [@ $mc_decide->print_a() @]*
 
 END_PGML
@@ -224,9 +225,6 @@ ANS(radio_cmp($mc_decide->correct_ans));
 Section::End();
 
 Scaffold::End();
-######################################
-#  Answers
-
 
 ##############
 ### Solutions

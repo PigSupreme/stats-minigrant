@@ -1,20 +1,19 @@
 ##DESCRIPTION
-##  Hypothesis test for single mean, template.
-##ENDDESCRIPTION
+##  Hypothesis testing:  One proportion
+##ENDDESRIPTION
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
-## DBsection(Two sample proportion)
-## Date(05/08/2020)
-## Institution(Clayton State University)
+## DBsection(One sample proportion)
+## Institution(Clayton State Univeristy)
 ## Author(Michael J. Dancs)
-## TitleText1()
-## AuthorText1()
-## EditionText1()
-## Section1()
-## Problem1()
-## KEYWORDS('statistics', 'hypothesis testing', 'mean')
+## TitleText1('')
+## AuthorText1('')
+## EditionText1('')
+## Section1('')
+## Problem1('')
+## KEYWORDS('statistics', 'inference', 'one proportion')
 
-DOCUMENT(); 
+DOCUMENT();        # This should be the first executable line in the problem.
 
 loadMacros(
   "PGstandard.pl",
@@ -30,6 +29,7 @@ TEXT(beginproblem());
 
 ######################################
 #  Setup
+
 Context("Numeric");
 Context()->strings->remove("infinity","inf");
 $abstol = .00051;
@@ -38,37 +38,57 @@ Context()->flags->set(
   tolType => "absolute",
 );
 
+$m= random(0,3,1);
+$name = ("Shen-Ji", "Nahmin", "Skylar", "Euniqua")[$m];
+$pronoun = ($m == 0) ? "he" : "she";
+$poss = ($m == 0)? "his" : "her";
+$n = random(11,29,1);
+$perc = random(21,39,1);
+
 # Alterntative hypothesis ("left", "two", "right):
 $tails = "left";
+
+# Multiple choice text for Null and Alternative
+# SIGN will be replaced in the template by \lt, \neq, and \gt
+$hypo_template = "\(p SIGN $perc\%\)";
+$nullsign = '=';
 
 # Significance level
 $alpha = list_random(.1, .05, .02, .01);
 $alphap = 100*$alpha;
 
+###
 # Text for reject and fail to reject; correct answer chosen automatically
 %decision = (
-  reject => 'Yes, because the test statistic is in the critical region.',
-  fail => 'No, because the test statistic is not in the the critical region.'
+  qtext => "At the $alphap% significance level, does the sample provide sufficient evidence that $name is correct?",
+  reject => "Yes, the test statistic for this sample is less than the critical value",
+  fail => "No, the test statistic for this sample is not more than the critical value"
   );
 # Extra incorrect answers for reject/fail
 @decisions_wrong = (
-  'No, because the test statistic is less than the significance level.',
-  'Yes, because the test statistic is greater than the significance level.'
+  "Yes, the test statistic for this sample is less than the critical value",
+  "No, the test statistic for this sample is not more than the critical value"
   );  
 
-# Sample data and statistic (single mean)
-$n = random(31, 40, 1);
-$mu = (12, 16, 24)[random(0,2,1)];
-$xbar = $mu - random(0.15, 0.23, 0.01);
-$s = random(0.09, 0.13, 0.01);
+### Hypotheses and sample data (single proportion)
+$p0 = $perc/100;
+$q0 = 1 - $p0;
+$n = random(110,200, 10);
 
-$sd = $s/sqrt($n);
-$stat = ($xbar-$mu)/$sd;
+# Generate a sample with abs(z) between 0.5 and 2.5
+$zgen = (-1)*random(0.51, 2.49, .02);
+$x = $n*$p0 + $zgen*sqrt($p0*(1-$p0)*$n);
+$x = int($x);
 
-# Multiple choice text for Null and Alternative
-# SIGN will be replaced in the template by \lt, \neq, and \gt
-$hypo_template = "\(\mu SIGN $mu\)";
-$nullsign = '=';
+### Sample statistics for single proportion
+$phat = $x/$n;
+$qhat = 1-$phat;
+$sd = sqrt($p0*$q0/$n);
+$stat = ($phat-$p0)/$sd;
+
+# Test stat with sample stats (for feedback)
+$stderr = sqrt($phat*(1-$phat)/$n);
+$stat_wrong = ($phat - $p0)/$stderr;
 
 # P-Values
 %pvalhash;
@@ -130,19 +150,14 @@ $mc_decide->extra(@decisions_wrong);
 #  Main text
 
 BEGIN_PGML
-Canned beverages are sold by volume, so a "[$mu]-oz" can is expected to contain [$mu] fluid ounces of the beverage. In reality, not every can contains exactly this amount.
 
-Beverage companies might be subject to fines and/or lawsuits if their cans contain less beverage than advertised. Although it is impractical to test every can, a hypothesis test can used to determine if the mean volume of beverage is less than [$mu]-oz.
+[$name] was told that [$perc]% of the students in [$poss] class fail the final exam, but [$pronoun] suspects the true percentage is less than this and plans to conduct a hypothesis test.
 
 END_PGML
 
-Scaffold::Begin(
-      can_open => "when_previous_correct",
-      is_open  => "correct_or_first_incorrect"
-    );
+Scaffold::Begin();
 Section::Begin();
 BEGIN_PGML
-An inspector at Cadre Cola will take a simple random from a large production run of [$mu] oz cans where the fluid volume has a known standard deviation of [`\sigma = [$s]`] oz. In order to test the situation described above:
 
 [@ $mc_null->print_q() @]*
 [@ $mc_null->print_a() @]*
@@ -159,7 +174,7 @@ Section::End();
 
 Section::Begin();
 BEGIN_PGML
-In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$xbar]`] oz. Find the value of the test statistic.
+From a simple random sample of [$n] students, [$name] finds that [$x] have failed the exam. The value of the test statistic for [$name]'s sample is:
 
 [`[$dvar] = `] [____________] 
 (round to at least three decimal places).
@@ -173,23 +188,29 @@ $tolcheck = sub{
   return (abs($student - $correct) < 20*$abstol)
   };
 
-ANS(Real($stat)->cmp()->withPostFilter(AnswerHints($tolcheck => $tolerr)));
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
+   sub {
+     # Used p-hat instead of p0
+     ($correct, $student, $anshash) = @_;
+     return (abs($student - $stat_wrong) < 10*$abstol)
+     } => "Are you using the sample proportion rather than the hypothesized proportion?",
+  $tolcheck => $tolerr,
+)));
 Section::End();
 
 Section::Begin();
 BEGIN_PGML
 Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
 
-[`[$dvar]^* = `] [____________]{abs($cval)}  
+[`[$dvar]^* = `] [____________]{Real(abs($cval))}  
 (enter a positive value, rounded to at least three decimal places).
 END_PGML
-Section::End();
 
-### ANS($cval->cmp()
+Section::End();
 
 Section::Begin();
 BEGIN_PGML
-Can we conclude from this sample data that the mean fluid volume for this production run is less than [$mu] oz?  
+[@ %decision{qtext} @]
 [@ $mc_decide->print_a() @]*
 
 END_PGML
@@ -197,29 +218,28 @@ END_PGML
 ANS(radio_cmp($mc_decide->correct_ans));
 
 Section::End();
-
 Scaffold::End();
-######################################
-#  Answers
-
 
 ##############
 ### Solutions
 
+$phatr = int(.5+100000*$p1)/100000;
 $sdr = int(.5+1000000*$sd)/1000000;
+$pvalr = int(.5+$pval*100000)/100000;
 $statr = int(.5+10000*$stat)/10000;
 $critr = int(.5+10000*$cval)/10000;
-$pvalr = int(.5+10000*$pval)/10000;
 
 BEGIN_PGML_SOLUTION
+The Null Hypothesis must contain the possibility that the true percentage is equal to some given value ([$perc]% in this case).
+The Alternative Hypothesis cannot contain the possibility of equality.
 
-For all samples of size [$n], the standard deviation of [`\bar{x}`] is
+Use the Hypothesized value of [`p_0 = [$p0]`] when computing the standard deviation of the sample proportion:
 
-[`` \frac{\sigma}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
+[`` \sqrt{\frac{p_0(1-p_0)}{n}} =\sqrt{\frac{[$p0](1-[$p0])}{[$n]}} = [$sdr]...``]
 
 Keep this to as many digits as possible. The test statistic is:  
 
-[``[$dvar] = \frac{[$xbar]-[$mu]}{[$sdr]} = [$statr]...``]
+[``[$dvar] = \frac{([$x]/[$n]) - [$p0]}{[$sdr]} = [$statr]...``]
 
 ---
 
