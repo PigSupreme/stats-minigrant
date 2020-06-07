@@ -159,7 +159,8 @@ Section::End();
 
 Section::Begin();
 BEGIN_PGML
-In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$xbar]`] oz.  
+In a Simple Random Sample of [$n] "[$mu]-oz" cans of Cadre Cola, the mean fluid volume is found to be [`\bar{x} = [$xbar]`] oz. Find the value of the test statistic.
+
 [`[$dvar] = `] [____________] 
 (round to at least three decimal places).
 END_PGML
@@ -179,7 +180,7 @@ Section::Begin();
 BEGIN_PGML
 Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
 
-[`z^* = `] [____________]{abs($cval)}  
+[`[$dvar]^* = `] [____________]{abs($cval)}  
 (enter a positive value, rounded to at least three decimal places).
 END_PGML
 Section::End();
@@ -214,7 +215,7 @@ BEGIN_PGML_SOLUTION
 
 For all samples of size [$n], the standard deviation of [`\bar{x}`] is
 
-[`` \frac{s}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
+[`` \frac{\sigma}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
 
 Keep this to as many digits as possible. The test statistic is:  
 

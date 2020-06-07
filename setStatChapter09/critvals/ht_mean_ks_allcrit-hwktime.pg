@@ -186,7 +186,7 @@ Section::Begin();
 BEGIN_PGML
 Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
 
-[`z^* = `] [____________]{abs($cval)}  
+[`[$dvar]^* = `] [____________]{abs($cval)}  
 (enter a positive value, rounded to at least three decimal places).
 END_PGML
 Section::End();
@@ -196,7 +196,6 @@ Section::End();
 Section::Begin();
 BEGIN_PGML
 From a purely statistical point of view, would you suggest starting the assignment less than [$mu] minutes before the deadline?  
-
 [@ $mc_decide->print_a() @]*
 
 END_PGML
@@ -222,7 +221,7 @@ BEGIN_PGML_SOLUTION
 
 For all samples of size [$n], the standard deviation of [`\bar{x}`] is
 
-[`` \frac{s}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
+[`` \frac{\sigma}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
 
 Keep this to as many digits as possible. The test statistic is:  
 
