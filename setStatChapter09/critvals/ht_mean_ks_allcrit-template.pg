@@ -183,14 +183,7 @@ $tolcheck = sub{
   return (abs($student - $correct) < 20*$abstol)
   };
 
-ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
-   sub {
-      # Wrong direction for samples 1 and 2
-     ($correct, $student, $anshash) = @_;
-     return (abs($student - $stat_wrong) < 10*$abstol)
-     } => "Are you using the sample proportion rather than the hypothesized proportion?",
-  $tolcheck => $tolerr,
-)));
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints($tolcheck => $tolerr)));
 Section::End();
 
 Section::Begin();
