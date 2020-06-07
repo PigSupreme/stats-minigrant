@@ -1,5 +1,5 @@
 ##DESCRIPTION
-##  Hypothesis test for two proportions, two-sided, critical value.
+##  Hypothesis test for single mean, template.
 ##ENDDESCRIPTION
 ## DBsubject(Statistics)
 ## DBchapter(Hypothesis tests)
@@ -12,7 +12,7 @@
 ## EditionText1()
 ## Section1()
 ## Problem1()
-## KEYWORDS('statistics', 'hypothesis testing', 'proportion')
+## KEYWORDS('statistics', 'hypothesis testing', 'mean')
 
 DOCUMENT(); 
 
@@ -57,49 +57,41 @@ $alphap = 100*$alpha;
   );  
 
 # Sample data and statistic (single proportion)
-$p0 = 0.50;
-$q0 = 1 - $p0;
-$x = 0; ### Fixed below
-$n = random(801,999,2);
+$mu = random(65.1, 84.9, 0.2);
+$n = random(31, 47, 2);
+$sgen = random(.05, .15, .01)*abs($mu);
+$s = int(.5 + $sgen*1000)/1000;
+$df = $n - 1;
 
-# rigged so that smallest possible 1.07 < z < 2.57 (approx)
-$zgen = random(1.07, 2.57, 0.02);
-$phatgen = $p0 + $zgen*sqrt($p0*$q0/$n);
-$x = int(.5+ $phatgen*$n);
+# rigged so that 1.07 < z < 2.57 (approx)
+$statgen = random(1.07, 2.57, 0.02);
+$xbargen = $mu + $statgen*$s/sqrt($n);
+$xbar = int(.5 + $xbargen*10)/10;
+
+$sd = $s/sqrt($n);
+$stat = ($xbar-$mu)/$sd;
 
 # Multiple choice text for Null and Alternative
 # SIGN will be replaced in the template by \lt, \neq, and \gt
-$hypo_template = "\(p SIGN $p0\)";
+$hypo_template = "\(\mu SIGN $mu\)";
 $nullsign = '=';
-
-# Sample statistics for single proportion
-
-$phat = $x/$n;
-$qhat = 1-$phat;
-$sd = sqrt($p0*$q0/$n);
-$stat = ($phat-$p0)/$sd;
-
-# Test stat with sample stats (for feedback)
-#$stderr = sqrt($phat*$qhat/$n);
-$stderr = sqrt($phat*(1-$phat)/$n);
-$stat_wrong = ($phat - $p0)/$stderr;
 
 # P-Values
 %pvalhash;
-$pvalhash{right} = uprob($stat);
+$pvalhash{right} = tprob($df, $stat);
 $pvalhash{left} = 1 - $pvalhash{right};
 $pvalhash{two} = 2*min($pvalhash{left}, $pvalhash{right});
 $pval = $pvalhash{$tails};
 
 # Critical values
 %crithash;
-$crithash{right} = udistr($alpha);
+$crithash{right} = tdistr($df, $alpha);
 $crithash{left} = -$crithash{right};
-$crithash{two} = udistr($alpha/2);
+$crithash{two} = tdistr($df, $alpha/2);
 $cval = $crithash{$tails};
 
 # Feeback for critical region
-$dvar = "z";
+$dvar = "t";
 $cvalr = int(.5+$cval*10000)/10000;
 if ($tails eq "left") {$crithash{region} = "$dvar\lt $cvalr"}
 if ($tails eq "right") {$crithash{region} = "$dvar\gt $cvalr"}
@@ -146,10 +138,11 @@ $mc_decide->extra(@decisions_wrong);
 BEGIN_PGML
 
 For a [$tails]-sided test at the [$alphap]% significance level:
-* [`p_0`] = [$p0]
-* x = [$x]
+* [`\mu`] = [$mu]
+* [`\bar{x}`] = [$xbar]
 * n = [$n]
-* z = [@ int(.5 +$stat*10000)/10000 @]
+* s = [$s]
+* [$dvar] = [@ int(.5 +$stat*10000)/10000 @]
 * P-Value [$tails]-sided: [@ int(.5 +$pval*10000)/100 @]% 
 * Critical Value ([$tails]-sided): [$cval]
 
@@ -179,8 +172,9 @@ Section::Begin();
 BEGIN_PGML
 The value of the test statistic for the above sample data is:  
 
-[`[$dvar] = `] [____________] 
-(round to at least three decimal places).
+[`[$dvar] = `] [____________] (round to at least three decimal places).
+
+This test statistic comes from a Student distribution with df = [________].
 END_PGML
 ##################
 # Generic check for answers that are almost within tolerance
@@ -191,21 +185,16 @@ $tolcheck = sub{
   return (abs($student - $correct) < 20*$abstol)
   };
 
-ANS(Real($stat)->cmp()->withPostFilter(AnswerHints(
-   sub {
-      # Wrong direction for samples 1 and 2
-     ($correct, $student, $anshash) = @_;
-     return (abs($student - $stat_wrong) < 10*$abstol)
-     } => "Are you using the sample proportion rather than the hypothesized proportion?",
-  $tolcheck => $tolerr,
-)));
+ANS(Real($stat)->cmp()->withPostFilter(AnswerHints($tolcheck => $tolerr)));
 Section::End();
+
+ANS(Real($df)->cmp);
 
 Section::Begin();
 BEGIN_PGML
 Using a(n) [$alphap]% significance level, the critical value of the test statistic is:  
 
-[`z^* = `] [____________]{abs($cval)}  
+[`[$dvar]^* = `] [____________]{abs($cval)}  
 (enter a positive value, rounded to at least three decimal places).
 END_PGML
 Section::End();
@@ -231,27 +220,28 @@ Scaffold::End();
 ##############
 ### Solutions
 
-$phatr = int(.5+100000*$p1)/100000;
 $sdr = int(.5+1000000*$sd)/1000000;
-$pvalr = int(.5+$pval*100000)/100000;
 $statr = int(.5+10000*$stat)/10000;
 $critr = int(.5+10000*$cval)/10000;
+$pvalr = int(.5+10000*$pval)/10000;
 
 BEGIN_PGML_SOLUTION
 
-Use the Hypothesized value of [`p_0 = [$p0]`] when computing the standard deviation of the sample proportion:
+For all samples of size [$n], the standard error of [`\bar{x}`] is
 
-[`` \sqrt{\frac{p_0(1-p_0)}{n}} =\sqrt{\frac{[$p0](1-[$p0])}{[$n]}} = [$sdr]...``]
+[`` \frac{s}{\sqrt{n}} = \frac{[$s]}{\sqrt{[$n]}} = [$sdr]...``]
 
 Keep this to as many digits as possible. The test statistic is:  
 
-[``[$dvar] = \frac{([$x]/[$n]) - [$p0]}{[$sdr]} = [$statr]...``]
+[``[$dvar] = \frac{[$xbar]-[$mu]}{[$sdr]} = [$statr]...``]
+
+When computing the critical value or P-value, use a Student T distribution with df = [$df] (sample size minus 1).
 
 ---
 
 ### Critical region method
 
-This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% significance level) is [`[$crithash{region}]`]. The test statistic ([`z = [$statr]`]) is [@ $reject ? "in the critical region, so we reject the Null Hypothesis" : "NOT in the critical region, so we fail to reject the Null Hypothesis" @].
+This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% significance level) is [`[$crithash{region}]`]. The test statistic ([`[$dvar] = [$statr]`]) is [@ $reject ? "in the critical region, so we reject the Null Hypothesis" : "NOT in the critical region, so we fail to reject the Null Hypothesis" @].
 
 ---
 ### P-Value method
@@ -259,5 +249,5 @@ This is a [$tails]-sided test; the critical rejection region (at the [$alphap]% 
 The [$tails]-sided P-value [@ ($pval_instructions) ? "($pval_instructions)" : '' @] is [@ $pvalr @] = [@ 100*$pvalr @]%. This is [@ $reject ? "less than the $alphap% significance level, so we" : "not less than the $alphap% significance level, so we fail to" @] reject the Null Hypothesis.
 END_PGML_SOLUTION
 
-COMMENT('Uses critical z-value method.');
+COMMENT('Uses critical value method.');
 ENDDOCUMENT();
