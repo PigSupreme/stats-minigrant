@@ -35,6 +35,8 @@ TEXT(beginproblem());
 $showPartialCorrectAnswers = 1;
 
 Context("Numeric");
+$abstol = .00051;
+$pvaltol = .00051;
 
 $mu = 6; #Hypothesized Mean
 $alpha = 0.05;
@@ -54,6 +56,7 @@ $stderr = $sd/sqrt($n);
 
 $tstatans = int(.5+ 100000*($xbar - $mu)*sqrt($n)/$sd)/100000;
 $pval = tprob($n-1,$tstatans);
+$pvalz = uprob($tstatans);
 $pvalans = int(.5+10000*$pval)/10000;
 $df = $n - 1;
 
