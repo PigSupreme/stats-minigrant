@@ -198,7 +198,7 @@ Assuming the data is from a Simple Random Sample, compute the [`\chi^2`] test st
 
 [`\chi^2 =`] [___________].
 
-The degrees of freedom for this test statistic is [________]{"($nrow-1)*($ncol-1)"}.
+The degrees of freedom for this test statistic is [________]
 
 END_PGML
 
@@ -208,6 +208,8 @@ ANS(Real("$chisqstat")->cmp->withPostFilter(AnswerHints(
          return abs($student-$correct) < 20*$abstol;
          } => ["Your answer is close. Check your computations, and try rounding to more decimal places."]
 )));
+ANS(Real("($nrow-1)*($ncol-1)")->cmp);
+
 
 Section::End();
 Section::Begin();
