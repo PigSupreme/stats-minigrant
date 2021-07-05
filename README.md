@@ -32,6 +32,12 @@ If you are unfamilar with creating/editing problem sets in WeBWorK, see [Creatin
 * Many of these problems have Hints and/or Solutions, make sure these are checked if you want to see them.
 * Problems meant to be used with a particular technology ([Geogebra](https://www.geogebra.org/classic), for example) have comments to this effect.
 
+### Reporting errors
+
+* Open a new issue; see [#105](https://github.com/PigSupreme/stats-minigrant/issues/105) for an example.
+* If you are able to receive email from your WeBWorK course via the "Email Instructor" button, use that and copypaste the ````***** Data about the problem: *****```` section from the automated email.
+* If not, please include the source file and random seed (assuming you're able to find the latter).
+
 ----
 ![Creative Commons Attribution 4.0 International License](https://resources.bepress.com/assets/cc-by-4.0-88x31.png)
 
