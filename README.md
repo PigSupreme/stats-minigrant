@@ -10,7 +10,7 @@ We assume you have a functional WeBWorK site and have created a WeBWorK course w
 
 ### Uploading the problem sets to your WeBWorK course
 
-***IMPORTANT***: Do not "Download ZIP" directly from this repository. WeBWorK uses tarball (.tgz) as its archive format and will do nothing if you upload a .zip file. You can download the latest TGZ version here.
+***IMPORTANT***: Do not "Download ZIP" directly from this repository. WeBWorK uses tarball (.tgz) as its archive format and will do nothing if you upload a .zip file. You can [download the latest stable .tgz version](stats-minigrant-06_05_2021.tgz) (which contains only the portion of the repository that is needed by WeBWorK); the md5sum is `59e12bc198a2a4ea2e55e729665a462b`. Once you have the .tgz:
 
 1. Log into your WeBWorK course.
 2. In the MAIN MENU (usually on the left sidebar), select "File Manager."
