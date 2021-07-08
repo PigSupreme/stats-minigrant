@@ -38,6 +38,16 @@ If you are unfamilar with creating/editing problem sets in WeBWorK, see [Creatin
 * If you are able to receive email from your WeBWorK course via the "Email Instructor" button, use that and copypaste the ````***** Data about the problem: *****```` section from the automated email.
 * If not, please include the source file and random seed (assuming you're able to find the latter).
 
+## Screenshots
+
+#### Two-Sample T-Test for Means, Exact Degrees of Freedom (Aspin-Welch) with auto-generated solutions/feedback:
+
+![Two-Sample Hypothesis Test Example](info/TwoSampleTAspinWelch.png)
+
+#### Hypothesis Test for Correlation with Dynamically-Generated Graph and auto-generated solutions/feedback:
+
+![Regression Example](info/RegressionExample.png)
+
 ----
 ![Creative Commons Attribution 4.0 International License](https://resources.bepress.com/assets/cc-by-4.0-88x31.png)
 
